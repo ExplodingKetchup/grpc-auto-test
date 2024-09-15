@@ -14,7 +14,16 @@ public class Config {
     @Value("${core.log.dir}")
     private String logDir;
 
-    /* Proto descriptor file */
+    /** Proto descriptor file (classpath) */
     @Value("${core.proto.descriptor.path}")
     private String protoDescriptorPath;
+
+    /** Test case location */
+    @Value("${core.tests.path}")
+    private String testsClasspath;
+
+    // Dev option
+    /** Enable debug mode */
+    @Value("${core.dev.debug.enabled:false}")
+    private boolean debugEnabled;
 }

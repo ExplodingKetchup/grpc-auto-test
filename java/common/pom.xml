@@ -36,7 +36,7 @@
                     <pluginArtifact>io.grpc:protoc-gen-grpc-java:1.66.0:exe:${os.detected.classifier}</pluginArtifact>
                     <writeDescriptorSet>true</writeDescriptorSet>
                     <includeDependenciesInDescriptorSet>true</includeDependenciesInDescriptorSet>
-                    <descriptorSetOutputDirectory>target/generated-proto-descriptors</descriptorSetOutputDirectory>
+                    <descriptorSetOutputDirectory>src/main/resources/proto</descriptorSetOutputDirectory>
                     <descriptorSetFileName>common.protobin</descriptorSetFileName>
                 </configuration>
                 <executions>

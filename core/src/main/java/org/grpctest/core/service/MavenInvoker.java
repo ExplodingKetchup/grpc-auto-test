@@ -1,4 +1,4 @@
-package org.grpctest.core.service.java;
+package org.grpctest.core.service;
 
 import io.micrometer.common.util.StringUtils;
 import lombok.AllArgsConstructor;

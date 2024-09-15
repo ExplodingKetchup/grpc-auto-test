@@ -7,9 +7,10 @@
         <groupId>org.grpctest</groupId>
         <artifactId>parent</artifactId>
         <version>1.0-SNAPSHOT</version>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
-    <artifactId>core</artifactId>
+    <artifactId>java-client</artifactId>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
@@ -21,12 +22,6 @@
         <dependency>
             <groupId>org.grpctest</groupId>
             <artifactId>common</artifactId>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/org.freemarker/freemarker -->
-        <dependency>
-            <groupId>org.freemarker</groupId>
-            <artifactId>freemarker</artifactId>
-            <version>2.3.31</version>
         </dependency>
     </dependencies>
 
