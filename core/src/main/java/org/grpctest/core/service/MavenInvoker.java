@@ -1,8 +1,9 @@
 package org.grpctest.core.service;
 
-import io.micrometer.common.util.StringUtils;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.grpctest.core.config.Config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -17,18 +18,24 @@ import java.util.concurrent.ExecutorService;
 /**
  * This class invokes maven operations.
  */
+@Slf4j
 @Component
 @Getter
 @AllArgsConstructor
 public class MavenInvoker {
 
-    private static final String COMMON_PATH = "/java/common";
+    // Some known locations to run maven
+    private static final String JAVA_COMMON = "/java/common";
+    private static final String JAVA_CLIENT = "/java/java-client";
+    private static final String JAVA_SERVER = "/java/java-server";
 
     private static final String LOG_FILE_PREFIX = "mvn_";
 
     private final Config config;
 
     private final ExecutorService executorService;
+
+    private String workingDir;
 
     private List<MavenGoal> mavenGoals = new ArrayList<>();
 
@@ -43,6 +50,17 @@ public class MavenInvoker {
 
     public MavenInvoker addMvnGoal(MavenGoal mavenGoal) {
         mavenGoals.add(mavenGoal);
+        return this;
+    }
+
+    /**
+     * Set working dir to run mvn in, relative to the base directory (grpc-auto-test/).
+     * If not set, run mvn at base directory.
+     * @param workingDir
+     * @return
+     */
+    public MavenInvoker setWorkingDir(String workingDir) {
+        this.workingDir = workingDir;
         return this;
     }
 
@@ -61,15 +79,21 @@ public class MavenInvoker {
         return this;
     }
 
-    public void execute() throws Exception {
+    /**
+     * Executes the mvn command.
+     * @param name  name given to this execution. Used to name log file for easy navigation
+     * @throws Exception
+     */
+    public void execute(String name) throws Exception {
         // Get command
         String cmd = toCmd();
 
         // Create log files
         String filename =
                 LOG_FILE_PREFIX
-                + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyMMdd_HHmmss"))
-                + ".log";
+                        + (StringUtils.isNotBlank(name) ? (name + "_") : "")
+                        + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyMMdd_HHmmss"))
+                        + ".log";
         String filepath;
         if (config.getLogDir().endsWith("/")) {
             filepath = config.getLogDir() + filename;
@@ -82,12 +106,48 @@ public class MavenInvoker {
         // Create process
         ProcessBuilder processBuilder = new ProcessBuilder();
         processBuilder.command("sh", "-c", cmd);
-        processBuilder.directory(new File(System.getProperty("user.dir") + COMMON_PATH));
+        processBuilder.directory(new File(System.getProperty("user.dir") + workingDir));
         processBuilder.redirectErrorStream(true);
         processBuilder.redirectOutput(ProcessBuilder.Redirect.appendTo(logfile));
 
         // Launch process
         processBuilder.start();
+    }
+
+    /**
+     * Execute the default build, including 3 steps:
+     * 1. java/common --> mvn clean install -DskipTests
+     * 2. java/java-client --> mvn clean package -DskipTests
+     * 3. java/java-server --> mvn clean package -DskipTests
+     */
+    public void defaultBuild() {
+        try {
+            // 1.
+            this
+                    .setWorkingDir(JAVA_COMMON)
+                    .addMvnGoal(MavenGoal.CLEAN)
+                    .addMvnGoal(MavenGoal.INSTALL)
+                    .addParam("DskipTests", "")
+                    .execute("common");
+
+            // 2.
+            this.
+                    setWorkingDir(JAVA_CLIENT)
+                    .addMvnGoal(MavenGoal.CLEAN)
+                    .addMvnGoal(MavenGoal.PACKAGE)
+                    .addParam("DskipTests", "")
+                    .execute("client");
+
+            // 3.
+            this.
+                    setWorkingDir(JAVA_SERVER)
+                    .addMvnGoal(MavenGoal.CLEAN)
+                    .addMvnGoal(MavenGoal.PACKAGE)
+                    .addParam("DskipTests", "")
+                    .execute("server");
+        } catch (Exception e) {
+            log.error("[defaultBuild] An error occurred", e);
+        }
     }
 
     private String toCmd() {

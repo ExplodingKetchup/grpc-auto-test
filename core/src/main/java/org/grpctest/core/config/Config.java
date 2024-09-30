@@ -19,8 +19,12 @@ public class Config {
     private String protoDescriptorPath;
 
     /** Test case location */
-    @Value("${core.tests.path}")
+    @Value("${core.tests.path:tests}")
     private String testsClasspath;
+
+    /** Proto file location */
+    @Value("${core.proto.path:proto}")
+    private String protoClasspath;
 
     // Dev option
     /** Enable debug mode */
