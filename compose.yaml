@@ -1,0 +1,29 @@
+name: "grpc-auto-test"
+
+services:
+  java-client:
+    build:
+      context: .
+      dockerfile: ./java/java-client/Dockerfile
+    container_name: java-client-container
+    volumes:
+      - ./log:/app/log
+    ports:
+      - "8080:8080"
+    networks:
+      - grpc-network
+  java-server:
+    build:
+      context: .
+      dockerfile: ./java/java-server/Dockerfile
+    container_name: java-server-container
+    volumes:
+      - ./log:/app/log
+    ports:
+      - "50051:50051"
+    networks:
+      - grpc-network
+
+networks:
+  grpc-network:
+    driver: bridge
