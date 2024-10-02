@@ -4,8 +4,10 @@ import com.google.protobuf.util.JsonFormat;
 import io.grpc.stub.StreamObserver;
 import lombok.extern.slf4j.Slf4j;
 import org.grpctest.common.define.*;
+import org.springframework.stereotype.Component;
 
 @Slf4j
+@Component
 public class ${service.name} extends ${service.name}Grpc.${service.name}ImplBase {
 
 <#list service.methods as method>

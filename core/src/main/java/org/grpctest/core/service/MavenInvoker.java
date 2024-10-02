@@ -25,15 +25,15 @@ import java.util.concurrent.ExecutorService;
 public class MavenInvoker {
 
     // Some known locations to run maven
-    private static final String JAVA_COMMON = "/java/common";
-    private static final String JAVA_CLIENT = "/java/java-client";
-    private static final String JAVA_SERVER = "/java/java-server";
+    private static final String JAVA_COMMON = "./java/common";
+    private static final String JAVA_CLIENT = "./java/java-client";
+    private static final String JAVA_SERVER = "./java/java-server";
 
     private static final String LOG_FILE_PREFIX = "mvn_";
 
     private final Config config;
 
-    private final ExecutorService executorService;
+    private final ExternalProcessUtilService externalProcessUtilService;
 
     private String workingDir;
 
@@ -42,10 +42,9 @@ public class MavenInvoker {
     private Map<String, String> params = new HashMap<>();
 
     @Autowired
-    public MavenInvoker(Config config,
-                        @Qualifier("singleThread") ExecutorService executorService) {
+    public MavenInvoker(Config config, ExternalProcessUtilService externalProcessUtilService) {
         this.config = config;
-        this.executorService = executorService;
+        this.externalProcessUtilService = externalProcessUtilService;
     }
 
     public MavenInvoker addMvnGoal(MavenGoal mavenGoal) {
@@ -89,29 +88,10 @@ public class MavenInvoker {
         String cmd = toCmd();
 
         // Create log files
-        String filename =
-                LOG_FILE_PREFIX
-                        + (StringUtils.isNotBlank(name) ? (name + "_") : "")
-                        + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyMMdd_HHmmss"))
-                        + ".log";
-        String filepath;
-        if (config.getLogDir().endsWith("/")) {
-            filepath = config.getLogDir() + filename;
-        } else {
-            filepath = config.getLogDir() + "/" + filename;
-        }
-        File logfile = new File(filepath);
-        logfile.createNewFile();
-
-        // Create process
-        ProcessBuilder processBuilder = new ProcessBuilder();
-        processBuilder.command("sh", "-c", cmd);
-        processBuilder.directory(new File(System.getProperty("user.dir") + workingDir));
-        processBuilder.redirectErrorStream(true);
-        processBuilder.redirectOutput(ProcessBuilder.Redirect.appendTo(logfile));
+        String logFilePrefix = LOG_FILE_PREFIX + (StringUtils.isNotBlank(name) ? (name + "_") : "");
 
         // Launch process
-        processBuilder.start();
+        externalProcessUtilService.execute(workingDir, cmd, logFilePrefix);
     }
 
     /**

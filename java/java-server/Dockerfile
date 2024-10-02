@@ -1,8 +1,8 @@
 FROM eclipse-temurin:21-jre-jammy
 
 ENV HOME=/app
+ENV JAR_FILE=java-server-1.0-SNAPSHOT.jar
 ARG JAR_FILE_HOST_DIR=./java/java-server/target
-ARG JAR_FILE=java-server-1.0-SNAPSHOT.jar
 
 # Create a non-privileged user that the app will run under.
 # See https://docs.docker.com/go/dockerfile-user-best-practices/
@@ -18,11 +18,11 @@ RUN adduser \
 
 RUN mkdir -p $HOME
 WORKDIR $HOME
-COPY "$JAR_FILE_HOST_DIR/$JAR_FILE" .
+COPY --chown=$UID --chmod=770 "$JAR_FILE_HOST_DIR/$JAR_FILE" .
 RUN chown appuser $HOME
 RUN chmod 770 $HOME
 
 USER appuser
 
 EXPOSE 50051
-ENTRYPOINT ["java", "-jar", "$JAR_FILE"]
+ENTRYPOINT ["sh", "-c", "java -jar $JAR_FILE"]

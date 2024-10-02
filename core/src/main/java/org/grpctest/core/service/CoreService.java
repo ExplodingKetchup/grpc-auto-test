@@ -27,38 +27,43 @@ public class CoreService implements InitializingBean {
     private final TestCaseReader testCaseReader;    // Although not used, we need the reader to run its init code before core service
 
     private final RpcTestRegistry registry;
-
-    private Map<String, ServiceImplDataModel> dataModels;
+    
+    private  final DockerService dockerService;
 
     @Override
     public void afterPropertiesSet() throws Exception {
 
         // Copy predefined files to destination
         fileCopier.copyProtos();
-        log.info("[Step 1 of 6] Finished copy predefined files for Java");
+        log.info("[Step 1 of 7] Finished copy predefined files for Java");
 
         // Compile .proto files for Java
         mavenInvoker.defaultBuild();
-        log.info("[Step 2 of 6] Finished compiling .proto file for Java");
+        log.info("[Step 2 of 7] Finished compiling .proto file for Java");
 
         // Read content of .proto files
         ProtoContent protoContent = protobufReader.loadProtoContent();
-        log.info("[Step 3 of 6] Finished reading content of .proto files");
+        log.info("[Step 3 of 7] Finished reading content of .proto files");
 
         // Load tests case
         testCaseReader.loadTestCasesToRegistry();
-        log.info("[Step 4 of 6] Finished loading test cases");
+        log.info("[Step 4 of 7] Finished loading test cases");
 
-        // Generate Java Service implementations
+        // Generate Java server
         for (RpcService service : registry.getAllServices()) {
             // Generate source codes
             javaCodeGenService.generateJavaService(service);
         }
-        log.info("[Step 5 of 6] Finished generating Java service implementations");
+        javaCodeGenService.generateJavaServer();
+        log.info("[Step 5 of 7] Finished generating Java server");
 
         // Generate Java client
         javaCodeGenService.generateJavaClient();
-        log.info("[Step 6 of 6] Finished generating Java client");
+        log.info("[Step 6 of 7] Finished generating Java client");
+        
+        // Build Docker containers and Docker compose project
+        dockerService.dockerComposeUp();
+        log.info("[Step 7 of 7] Finished building and launched test containers");
 
         log.info("Finished setting up test");
     }

@@ -1,9 +1,10 @@
-package org.grpctest.java.server;
+package org.grpctest.java.server.generated;
 
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.grpctest.java.server.config.Config;
+import org.grpctest.java.server.generated.service.*;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,9 +20,18 @@ public class JavaServer implements InitializingBean {
     private final Server server;
 
     @Autowired
-    public JavaServer(Config config) {
+    public JavaServer(Config config,
+<#list rpcServices as service>
+                      ${service.name} ${service.name?uncap_first}<#sep>,
+</#list>
+    ) {
         this.config = config;
-        this.server = ServerBuilder.forPort(config.getServerPort()).build();
+        this.server = ServerBuilder
+                .forPort(config.getServerPort())
+<#list rpcServices as service>
+                .addService(${service.name?uncap_first})
+</#list>
+                .build();
     }
 
     @Override

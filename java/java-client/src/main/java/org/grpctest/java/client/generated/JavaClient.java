@@ -16,33 +16,25 @@ import java.util.function.Function;
 @Slf4j
 public class JavaClient implements InitializingBean {
 
-<#list registry.getAllServices() as service>
-    private final ${service.name}Grpc.${service.name}BlockingStub ${service.name?uncap_first}BlockingStub;
+    private final PeopleServiceGrpc.PeopleServiceBlockingStub peopleServiceBlockingStub;
 
-    private final ${service.name}Grpc.${service.name}Stub ${service.name?uncap_first}AsyncStub;
-</#list>
+    private final PeopleServiceGrpc.PeopleServiceStub peopleServiceAsyncStub;
 
     public JavaClient(Config config) {
         Channel channel = ManagedChannelBuilder.forAddress(config.getServiceHost(), config.getServicePort()).usePlaintext().build();
-<#list registry.getAllServices() as service>
-        this.${service.name?uncap_first}BlockingStub = ${service.name}Grpc.newBlockingStub(channel);
-        this.${service.name?uncap_first}AsyncStub = ${service.name}Grpc.newStub(channel);
-</#list>
+        this.peopleServiceBlockingStub = PeopleServiceGrpc.newBlockingStub(channel);
+        this.peopleServiceAsyncStub = PeopleServiceGrpc.newStub(channel);
         log.info("Connected to server at {}:{}", config.getServiceHost(), config.getServicePort());
     }
 
     @Override
     public void afterPropertiesSet() throws Exception {
-<#list registry.getAllMethods() as method>
-    <#list registry.getMethodTestCases(method) as test>
 
-        // Invoke test case: ${test.name}
-        String param${method.name?cap_first}${test_index}Json = "${test.paramValueJson}";
-        ${method.name?cap_first}Request param${method.name?cap_first}${test_index} = (${method.name?cap_first}Request) parseJson(param${method.name?cap_first}${test_index}Json, ${method.name?cap_first}Request.newBuilder());
-        invokeRpcMethod(${method.ownerServiceName?uncap_first}BlockingStub::${method.name}, param${method.name?cap_first}${test_index}, "${method.ownerServiceName}", "${method.name}");
+        // Invoke test case: Test case 1
+        String paramGetPerson0Json = "{\"personId\":{\"id\":1}}";
+        GetPersonRequest paramGetPerson0 = (GetPersonRequest) parseJson(paramGetPerson0Json, GetPersonRequest.newBuilder());
+        invokeRpcMethod(peopleServiceBlockingStub::getPerson, paramGetPerson0, "PeopleService", "getPerson");
 
-    </#list>
-</#list>
     }
 
     private <T, R> void invokeRpcMethod(Function<T, R> method, T parameter, String serviceName, String methodName) {
