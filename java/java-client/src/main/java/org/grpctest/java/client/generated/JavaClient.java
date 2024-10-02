@@ -30,8 +30,8 @@ public class JavaClient implements InitializingBean {
     @Override
     public void afterPropertiesSet() throws Exception {
 
-        // Invoke test case: Test case 1
-        String paramGetPerson0Json = "{\"personId\":{\"id\":1}}";
+        // Invoke test case: PeopleService.getPerson_random
+        String paramGetPerson0Json = "{\"personId\":{\"id\":-365930172}}";
         GetPersonRequest paramGetPerson0 = (GetPersonRequest) parseJson(paramGetPerson0Json, GetPersonRequest.newBuilder());
         invokeRpcMethod(peopleServiceBlockingStub::getPerson, paramGetPerson0, "PeopleService", "getPerson");
 

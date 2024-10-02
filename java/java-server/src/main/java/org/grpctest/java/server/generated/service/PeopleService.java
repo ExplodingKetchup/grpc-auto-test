@@ -18,7 +18,7 @@ public class PeopleService extends PeopleServiceGrpc.PeopleServiceImplBase {
 
     private GetPersonResponse getPersonImpl(GetPersonRequest request) {
         log.info("[getPersonImpl] Received request {}", request);
-        String returnJson = "{\"person\":{\"id\":1,\"name\":\"John\",\"age\":20,\"occupation\":\"student\",\"gender\":\"MALE\",\"emails\":[\"john.doe@example.com\"]}}";
+        String returnJson = "{\"person\":{\"id\":-927237482,\"name\":\"W7j1X\",\"age\":1181559083,\"occupation\":\"mgOj577\",\"gender\":\"MALE\",\"emails\":[\"KeW6x3zsR47Hy56\",\"5uPnJQTh1\",\"7Up06712\",\"A7dA3\",\"lI\"]}}";
         GetPersonResponse.Builder builder = GetPersonResponse.newBuilder();
         try {
             JsonFormat.parser().merge(returnJson, builder);

@@ -1,3 +1,7 @@
 TODO:
 
 - Add maven invoker check for maven error and throw
+- Auto generate test cases based on data types
+- Auto read log files and verify
+- (Optional) multiple test cases per service
+- (Optional) Streaming RPC

@@ -1,6 +1,7 @@
 package org.grpctest.core.service;
 
 import com.google.protobuf.DescriptorProtos;
+import com.google.protobuf.Descriptors;
 import io.grpc.MethodDescriptor;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,9 +44,14 @@ public class ProtobufReader {
             for (DescriptorProtos.FileDescriptorProto fileDescriptorProto : descriptorSet.getFileList()) {
                 log.info("[loadProtoContent] Reading content of [{}]", fileDescriptorProto.getName());
 
+                // Build Descriptor
+                Descriptors.FileDescriptor fileDescriptor = Descriptors.FileDescriptor.buildFrom(fileDescriptorProto, new Descriptors.FileDescriptor[]{});
+
                 // Loop through message types
                 for (DescriptorProtos.DescriptorProto message : fileDescriptorProto.getMessageTypeList()) {
-                    protoContent.getMessages().add(new RpcMessage(message.getName()));
+                    RpcMessage rpcMessage = new RpcMessage(message.getName(), fileDescriptor.findMessageTypeByName(message.getName()));
+                    protoContent.getMessages().add(rpcMessage);
+                    rpcTestRegistry.addMessageToLookupTable(rpcMessage);
                 }
 
                 // Loop through service declarations
