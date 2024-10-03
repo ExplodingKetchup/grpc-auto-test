@@ -4,7 +4,8 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.grpctest.core.data.RpcTestRegistry;
+import org.grpctest.core.config.Config;
+import org.grpctest.core.data.Registry;
 import org.grpctest.core.pojo.RpcService;
 import org.grpctest.core.pojo.freemarker.ClientDataModel;
 import org.grpctest.core.pojo.freemarker.JavaServerDataModel;
@@ -13,8 +14,6 @@ import org.springframework.stereotype.Service;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 @Slf4j
@@ -28,10 +27,12 @@ public class JavaCodeGenService {
 
     private Configuration freemarkerConfig;
 
-    private final RpcTestRegistry registry;
+    private final Config config;
+
+    private final Registry registry;
 
     public void generateJavaService(RpcService service) throws Exception {
-        ServiceImplDataModel dataModel = new ServiceImplDataModel(service, registry);
+        ServiceImplDataModel dataModel = new ServiceImplDataModel(service, registry, config.getTestsDir());
         // Get Java service template
         Template template = freemarkerConfig.getTemplate("java-service-impl.ftl");
         String filepath = JAVA_SVC_DIR + dataModel.getService().getName() + JAVA_FILE_EXT;
@@ -41,7 +42,7 @@ public class JavaCodeGenService {
     }
 
     public void generateJavaClient() throws Exception {
-        ClientDataModel dataModel = new ClientDataModel(registry);
+        ClientDataModel dataModel = new ClientDataModel(registry, config.getTestsDir());
         // Get JavaClient template
         Template template = freemarkerConfig.getTemplate("java-client.ftl");
         try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(JAVA_CLIENT_FILE))) {

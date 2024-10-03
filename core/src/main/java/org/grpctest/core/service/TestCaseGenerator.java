@@ -7,7 +7,7 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.util.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.grpctest.core.data.RpcTestRegistry;
+import org.grpctest.core.data.Registry;
 import org.grpctest.core.pojo.RpcMessage;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +20,7 @@ import java.util.Random;
 public class TestCaseGenerator {
     private final Random random = new Random(System.currentTimeMillis());
 
-    private final RpcTestRegistry registry;
+    private final Registry registry;
 
     public String generateRandomMessageJson(RpcMessage message) {
         try {
@@ -31,7 +31,7 @@ public class TestCaseGenerator {
         }
     }
 
-    private DynamicMessage generateRandomMessage(RpcMessage message) {
+    public DynamicMessage generateRandomMessage(RpcMessage message) {
         DynamicMessage.Builder messageBuilder = DynamicMessage.newBuilder(message.getMessageDescriptor());
         for (Descriptors.FieldDescriptor field : message.getMessageDescriptor().getFields()) {
             if (field.isRepeated()) {

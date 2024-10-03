@@ -2,6 +2,7 @@ package org.grpctest.core.service;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.grpctest.core.service.util.ExternalProcessUtilService;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -17,7 +18,7 @@ public class DockerService {
 
     public void dockerComposeUp() {
         try {
-            externalProcessUtilService.execute(WORKING_DIR, CMD_DOCKER_COMPOSE_UP, LOG_FILE_PREFIX);
+            externalProcessUtilService.execute(WORKING_DIR, CMD_DOCKER_COMPOSE_UP, LOG_FILE_PREFIX, true);
         } catch (Exception e) {
             log.error("[dockerComposeUp] Failed to run \"docker compose up\" at dir {}", WORKING_DIR);
         }

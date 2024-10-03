@@ -5,15 +5,11 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.grpctest.core.config.Config;
+import org.grpctest.core.service.util.ExternalProcessUtilService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import java.io.File;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
 
 /**
  * This class invokes maven operations.
@@ -91,26 +87,27 @@ public class MavenInvoker {
         String logFilePrefix = LOG_FILE_PREFIX + (StringUtils.isNotBlank(name) ? (name + "_") : "");
 
         // Launch process
-        externalProcessUtilService.execute(workingDir, cmd, logFilePrefix);
+        externalProcessUtilService.execute(workingDir, cmd, logFilePrefix, true);
+
+        // Clear data
+        clear();
     }
 
-    /**
-     * Execute the default build, including 3 steps:
-     * 1. java/common --> mvn clean install -DskipTests
-     * 2. java/java-client --> mvn clean package -DskipTests
-     * 3. java/java-server --> mvn clean package -DskipTests
-     */
-    public void defaultBuild() {
+    public void buildCommon() {
         try {
-            // 1.
             this
                     .setWorkingDir(JAVA_COMMON)
                     .addMvnGoal(MavenGoal.CLEAN)
                     .addMvnGoal(MavenGoal.INSTALL)
                     .addParam("DskipTests", "")
                     .execute("common");
+        } catch (Exception e) {
+            log.error("[defaultBuild] An error occurred", e);
+        }
+    }
 
-            // 2.
+    public void buildClientServer() {
+        try {
             this.
                     setWorkingDir(JAVA_CLIENT)
                     .addMvnGoal(MavenGoal.CLEAN)
@@ -118,7 +115,6 @@ public class MavenInvoker {
                     .addParam("DskipTests", "")
                     .execute("client");
 
-            // 3.
             this.
                     setWorkingDir(JAVA_SERVER)
                     .addMvnGoal(MavenGoal.CLEAN)
@@ -126,8 +122,14 @@ public class MavenInvoker {
                     .addParam("DskipTests", "")
                     .execute("server");
         } catch (Exception e) {
-            log.error("[defaultBuild] An error occurred", e);
+            log.error("[buildClientServer] An error occurred", e);
         }
+    }
+
+    private void clear() {
+        workingDir = "";
+        mavenGoals.clear();
+        params.clear();
     }
 
     private String toCmd() {

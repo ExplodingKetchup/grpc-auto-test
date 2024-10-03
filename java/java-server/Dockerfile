@@ -18,7 +18,7 @@ RUN adduser \
 
 RUN mkdir -p $HOME
 WORKDIR $HOME
-COPY --chown=$UID --chmod=770 "$JAR_FILE_HOST_DIR/$JAR_FILE" .
+COPY --chown=$UID --chmod=770 "$JAR_FILE_HOST_DIR/$JAR_FILE" "$HOME/"
 RUN chown appuser $HOME
 RUN chmod 770 $HOME
 

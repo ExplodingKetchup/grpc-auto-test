@@ -9,10 +9,7 @@
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <modules>
-        <module>java/java-server</module>
-        <module>java/common</module>
         <module>core</module>
-        <module>java/java-client</module>
     </modules>
 
     <!-- Inherit defaults from Spring Boot -->
@@ -27,7 +24,6 @@
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <core.version>1.0-SNAPSHOT</core.version>
-        <common.version>1.0-SNAPSHOT</common.version>
     </properties>
 
     <dependencyManagement>
@@ -36,11 +32,6 @@
                 <groupId>org.grpctest</groupId>
                 <artifactId>core</artifactId>
                 <version>${core.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.grpctest</groupId>
-                <artifactId>common</artifactId>
-                <version>${common.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -109,6 +100,14 @@
             <artifactId>lombok</artifactId>
             <version>1.18.30</version>
             <scope>provided</scope>
+        </dependency>
+
+        <!-- test -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>5.9.1</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

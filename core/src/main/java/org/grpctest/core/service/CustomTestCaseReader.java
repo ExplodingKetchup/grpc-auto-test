@@ -3,8 +3,9 @@ package org.grpctest.core.service;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.grpctest.core.config.Config;
-import org.grpctest.core.data.RpcTestRegistry;
+import org.grpctest.core.data.Registry;
 import org.grpctest.core.pojo.TestCase;
+import org.grpctest.core.service.util.DynamicMessageUtilService;
 import org.grpctest.core.util.JsonUtil;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -22,17 +23,19 @@ import java.util.stream.Collectors;
 @Component
 @Slf4j
 @AllArgsConstructor
-public class TestCaseReader {
+public class CustomTestCaseReader {
 
     private final Config config;
     private final ResourceLoader resourceLoader;
 
-    private final RpcTestRegistry rpcTestRegistry;
+    private final Registry registry;
+
+    private final DynamicMessageUtilService dynamicMessageUtilService;
 
     private List<TestCase> loadTestCases() {
         List<TestCase> testCases = new ArrayList<>();
         ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver(resourceLoader);
-        String classpath = "classpath:" + config.getTestsClasspath() + "/*";
+        String classpath = "classpath:" + config.getCustomTestsClasspath() + "/*";
         try {
             for (Resource resource : resourcePatternResolver.getResources(classpath)) {
                 try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8))) {
@@ -52,8 +55,24 @@ public class TestCaseReader {
         List<TestCase> testCases = loadTestCases();
         for (TestCase testCase : testCases) {
             testCase.setParamValueJson(generateParamValueJson(testCase));
+            testCase.setParamValueDynMsg(
+                    dynamicMessageUtilService.objectToDynamicMessage(
+                            testCase.getParamValue(),
+                            registry.lookupMessage(
+                                    registry.lookupMethod(testCase.getServiceName(), testCase.getMethodName()).getInType()
+                            )
+                    )
+            );
             testCase.setReturnValueJson(generateReturnValueJson(testCase));
-            rpcTestRegistry.addTestCase(testCase);
+            testCase.setReturnValueDynMsg(
+                    dynamicMessageUtilService.objectToDynamicMessage(
+                            testCase.getReturnValue(),
+                            registry.lookupMessage(
+                                    registry.lookupMethod(testCase.getServiceName(), testCase.getMethodName()).getOutType()
+                            )
+                    )
+            );
+            registry.addTestCase(testCase);
         }
         log.info("[loadTestCasesToRegistry] Finished loading test cases");
     }

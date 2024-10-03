@@ -6,17 +6,14 @@ import org.grpctest.core.pojo.RpcService;
 import org.grpctest.core.pojo.TestCase;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * A registry to store all rpc methods under test and their respective test cases.<br>
  */
 @Component
 @Slf4j
-public class RpcTestRegistry {
+public class Registry {
 
     /** Methods without test cases will be stored with an empty list */
     private final Map<RpcService.RpcMethod, List<TestCase>> methodTestCaseMap = new HashMap<>();
@@ -64,6 +61,10 @@ public class RpcTestRegistry {
 
     public List<TestCase> getMethodTestCases(RpcService.RpcMethod method) {
         return methodTestCaseMap.get(method);
+    }
+
+    public List<TestCase> getAllTestCases() {
+        return methodTestCaseMap.values().stream().flatMap(Collection::stream).toList();
     }
 
     public void addServiceToLookupTable(RpcService service) {

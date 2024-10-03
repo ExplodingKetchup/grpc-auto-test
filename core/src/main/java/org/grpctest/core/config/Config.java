@@ -18,13 +18,17 @@ public class Config {
     @Value("${core.proto.descriptor.path}")
     private String protoDescriptorPath;
 
-    /** Test case location */
-    @Value("${core.tests.path:tests}")
-    private String testsClasspath;
+    /** Custom test case location */
+    @Value("${core.custom-tests.classpath:tests}")
+    private String customTestsClasspath;
 
     /** Proto file location */
     @Value("${core.proto.path:proto}")
     private String protoClasspath;
+
+    /** Test case directory (In binary form, for client and server to access) */
+    @Value("${core.tests.dir:test-cases}")
+    private String testsDir;
 
     // Dev option
     /** Enable debug mode */

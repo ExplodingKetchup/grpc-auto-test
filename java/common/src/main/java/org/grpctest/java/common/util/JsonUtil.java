@@ -1,4 +1,4 @@
-package org.grpctest.common.util;
+package org.grpctest.java.common.util;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;

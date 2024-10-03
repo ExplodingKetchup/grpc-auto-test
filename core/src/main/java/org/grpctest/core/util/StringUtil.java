@@ -17,6 +17,31 @@ public class StringUtil {
         return camelCase;
     }
 
+    public static String camelCaseToSnakeCase(String camelCase) {
+        StringBuilder sb = new StringBuilder();
+        for (char ch : camelCase.toCharArray()) {
+            if ((ch >= 'A') && (ch <= 'Z')) {
+                if (!sb.isEmpty()) {
+                    sb.append('_');
+                }
+                sb.append((char)(ch + ('a' - 'A')));
+            } else {
+                sb.append(ch);
+            }
+        }
+        return sb.toString();
+    }
+
+    /** This check is NOT thorough, only checks if any letter in word is captalized */
+    public static boolean isSnakeCase(String str) {
+        for (char ch : str.toCharArray()) {
+            if ((ch >= 'A') && (ch <= 'Z')) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public static String uncapitalizeFirstLetter(String str) {
         return StringUtils.uncapitalize(str.substring(0, 1)) + str.substring(1);
     }

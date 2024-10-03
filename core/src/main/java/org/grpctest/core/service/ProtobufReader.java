@@ -6,7 +6,7 @@ import io.grpc.MethodDescriptor;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.grpctest.core.config.Config;
-import org.grpctest.core.data.RpcTestRegistry;
+import org.grpctest.core.data.Registry;
 import org.grpctest.core.pojo.ProtoContent;
 import org.grpctest.core.pojo.RpcMessage;
 import org.grpctest.core.pojo.RpcService;
@@ -15,10 +15,9 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Component;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
 
 @Component
 @Slf4j
@@ -27,14 +26,10 @@ public class ProtobufReader {
 
     private final Config config;
 
-    private final ResourceLoader resourceLoader;
-
-    private final RpcTestRegistry rpcTestRegistry;
+    private final Registry registry;
 
     public ProtoContent loadProtoContent() {
-        String classPath = "classpath:" + config.getProtoDescriptorPath();
-        Resource protobinResource = resourceLoader.getResource(classPath);
-        try (InputStream inputStream = protobinResource.getInputStream()) {
+        try (FileInputStream inputStream = new FileInputStream(config.getProtoDescriptorPath())) {
 
             // Get content of descriptor set
             DescriptorProtos.FileDescriptorSet descriptorSet = DescriptorProtos.FileDescriptorSet.parseFrom(inputStream);
@@ -51,7 +46,7 @@ public class ProtobufReader {
                 for (DescriptorProtos.DescriptorProto message : fileDescriptorProto.getMessageTypeList()) {
                     RpcMessage rpcMessage = new RpcMessage(message.getName(), fileDescriptor.findMessageTypeByName(message.getName()));
                     protoContent.getMessages().add(rpcMessage);
-                    rpcTestRegistry.addMessageToLookupTable(rpcMessage);
+                    registry.addMessageToLookupTable(rpcMessage);
                 }
 
                 // Loop through service declarations
@@ -67,15 +62,15 @@ public class ProtobufReader {
                                 .outType(StringUtil.getShortenedClassName(method.getOutputType()))
                                 .build();
                         rpcService.getMethods().add(rpcMethod);
-                        rpcTestRegistry.addMethod(rpcMethod);
+                        registry.addMethod(rpcMethod);
                     }
                     protoContent.getServices().add(rpcService);
-                    rpcTestRegistry.addServiceAndMethodsToLookupTable(rpcService);
+                    registry.addServiceAndMethodsToLookupTable(rpcService);
                 }
             }
             return protoContent;
         } catch (IOException ioe) {
-            log.error("[loadProtoContent] Fail to open resource at {}", classPath, ioe);
+            log.error("[loadProtoContent] Fail to open resource at {}", config.getProtoDescriptorPath(), ioe);
             return null;
         } catch (Throwable t) {
             log.error("[loadProtoContent] An error occurred", t);

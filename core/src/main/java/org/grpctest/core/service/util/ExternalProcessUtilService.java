@@ -1,4 +1,4 @@
-package org.grpctest.core.service;
+package org.grpctest.core.service.util;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import java.io.File;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.concurrent.ExecutionException;
 
 @Slf4j
 @Component
@@ -23,9 +24,10 @@ public class ExternalProcessUtilService {
      * @param workingDir    If relative to grpc-auto-test, supply the value starting with {@literal ./}
      *                      If absolute path, workingDir can start with {@literal /}
      * @param cmd
+     * @param wait
      * @param logFilePrefix
      */
-    public void execute(String workingDir, String cmd, String logFilePrefix) throws Exception {
+    public void execute(String workingDir, String cmd, String logFilePrefix, boolean wait) throws Exception {
         // Get working directory
         String resolvedWorkingDir = StringUtils.startsWith(workingDir, "./") ? (System.getProperty("user.dir") + workingDir.substring(1)) : workingDir;
 
@@ -51,6 +53,12 @@ public class ExternalProcessUtilService {
         processBuilder.redirectOutput(ProcessBuilder.Redirect.appendTo(logfile));
 
         // Launch process
-        processBuilder.start();
+        Process process = processBuilder.start();
+        if (wait) {
+            int exitCode = process.waitFor();
+            if (exitCode != 0) {
+                throw new Exception("External process [" + cmd + "] failed with exit code " + exitCode);
+            }
+        }
     }
 }
