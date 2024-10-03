@@ -3,6 +3,7 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 log/
+test-cases/
 TODO
 
 ### IntelliJ IDEA ###
