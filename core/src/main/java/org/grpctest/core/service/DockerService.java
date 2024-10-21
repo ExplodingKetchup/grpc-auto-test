@@ -16,11 +16,12 @@ public class DockerService {
 
     private final ExternalProcessUtilService externalProcessUtilService;
 
-    public void dockerComposeUp() {
+    public void dockerComposeUp() throws Throwable {
         try {
             externalProcessUtilService.execute(WORKING_DIR, CMD_DOCKER_COMPOSE_UP, LOG_FILE_PREFIX, true);
         } catch (Exception e) {
             log.error("[dockerComposeUp] Failed to run \"docker compose up\" at dir {}", WORKING_DIR);
+            throw e;
         }
     }
 }

@@ -32,7 +32,7 @@ public class CustomTestCaseReader {
 
     private final DynamicMessageUtilService dynamicMessageUtilService;
 
-    private List<TestCase> loadTestCases() {
+    private List<TestCase> loadTestCases() throws Throwable {
         List<TestCase> testCases = new ArrayList<>();
         ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver(resourceLoader);
         String classpath = "classpath:" + config.getCustomTestsClasspath() + "/*";
@@ -43,15 +43,17 @@ public class CustomTestCaseReader {
                     testCases.add(JsonUtil.fromJson(json, TestCase.class));
                 }
             }
+            return testCases;
         } catch (IOException ioe) {
             log.error("[loadTestCases] Failed to read test cases at {}", classpath, ioe);
+            throw ioe;
         } catch (Throwable t) {
             log.error("[loadTestCases] An error occurred", t);
+            throw t;
         }
-        return testCases;
     }
 
-    public void loadTestCasesToRegistry() {
+    public void loadTestCasesToRegistry() throws Throwable {
         List<TestCase> testCases = loadTestCases();
         for (TestCase testCase : testCases) {
             testCase.setParamValueJson(generateParamValueJson(testCase));

@@ -28,7 +28,7 @@ public class ProtobufReader {
 
     private final Registry registry;
 
-    public ProtoContent loadProtoContent() {
+    public ProtoContent loadProtoContent() throws Throwable {
         try (FileInputStream inputStream = new FileInputStream(config.getProtoDescriptorPath())) {
 
             // Get content of descriptor set
@@ -71,10 +71,10 @@ public class ProtobufReader {
             return protoContent;
         } catch (IOException ioe) {
             log.error("[loadProtoContent] Fail to open resource at {}", config.getProtoDescriptorPath(), ioe);
-            return null;
+            throw ioe;
         } catch (Throwable t) {
             log.error("[loadProtoContent] An error occurred", t);
-            return null;
+            throw t;
         }
     }
 

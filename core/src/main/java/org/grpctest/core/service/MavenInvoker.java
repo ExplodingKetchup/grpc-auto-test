@@ -93,7 +93,7 @@ public class MavenInvoker {
         clear();
     }
 
-    public void buildCommon() {
+    public void buildCommon() throws Exception {
         try {
             this
                     .setWorkingDir(JAVA_COMMON)
@@ -103,10 +103,11 @@ public class MavenInvoker {
                     .execute("common");
         } catch (Exception e) {
             log.error("[defaultBuild] An error occurred", e);
+            throw e;
         }
     }
 
-    public void buildClientServer() {
+    public void buildClientServer() throws Throwable {
         try {
             this.
                     setWorkingDir(JAVA_CLIENT)
@@ -123,6 +124,7 @@ public class MavenInvoker {
                     .execute("server");
         } catch (Exception e) {
             log.error("[buildClientServer] An error occurred", e);
+            throw e;
         }
     }
 

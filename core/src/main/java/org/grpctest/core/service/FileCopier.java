@@ -27,14 +27,14 @@ public class FileCopier {
     private final Config config;
     private final ResourceLoader resourceLoader;
 
-    public void copyProtos() {
+    public void copyProtos() throws Throwable {
         copyResourceFiles(config.getProtoClasspath(), PROTO_TARGET_JAVA);
     }
 
     /**
      * Copy all files in a resource directory to a specified filesystem directory
      */
-    private void copyResourceFiles(String src, String dest) {
+    private void copyResourceFiles(String src, String dest) throws Throwable {
         ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver(resourceLoader);
         String classpath = "classpath:" + src + "/*";
         try {
@@ -47,8 +47,10 @@ public class FileCopier {
             }
         } catch (IOException ioe) {
             log.error("[copyResourceFiles] Failed to copy file from {} to {}", classpath, dest, ioe);
+            throw ioe;
         } catch (Throwable t) {
             log.error("[copyResourceFiles] An error occurred", t);
+            throw t;
         }
     }
 }

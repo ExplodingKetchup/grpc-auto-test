@@ -36,61 +36,65 @@ public class CoreService implements InitializingBean {
     @Override
     public void afterPropertiesSet() throws Exception {
 
-        // Copy predefined files to destination
-        fileCopier.copyProtos();
-        log.info("[Step 1 of 8] Finished copy predefined files for Java");
+        try {
+            // Copy predefined files to destination
+            fileCopier.copyProtos();
+            log.info("[Step 1 of 8] Finished copy predefined files for Java");
 
-        // Compile .proto files for Java
-        mavenInvoker.buildCommon();
-        log.info("[Step 2 of 8] Finished compiling .proto file for Java");
+            // Compile .proto files for Java
+            mavenInvoker.buildCommon();
+            log.info("[Step 2 of 8] Finished compiling .proto file for Java");
 
-        // Read content of .proto files
-        ProtoContent protoContent = protobufReader.loadProtoContent();
-        log.info("[Step 3 of 8] Finished reading content of .proto files");
+            // Read content of .proto files
+            ProtoContent protoContent = protobufReader.loadProtoContent();
+            log.info("[Step 3 of 8] Finished reading content of .proto files");
 
-        // Load test cases
-//        customTestCaseReader.loadTestCasesToRegistry();
+            // Load test cases
+            customTestCaseReader.loadTestCasesToRegistry();
 
-        // Generate random test cases for services without custom test cases
-        for (RpcService.RpcMethod method : registry.getAllMethodsWithoutTestCases()) {
-            DynamicMessage paramDynMsg = testCaseGenerator.generateRandomMessage(registry.lookupMessage(method.getInType()));
-            DynamicMessage returnDynMsg = testCaseGenerator.generateRandomMessage(registry.lookupMessage(method.getOutType()));
-            TestCase testCase = new TestCase(method.getOwnerServiceName() + "." + method.getName() + "_random",
-                    method.getOwnerServiceName(),
-                    method.getName(),
-                    null,
-                    null,
-                    paramDynMsg,
-                    null,
-                    null,
-                    returnDynMsg
-            );
-            log.info("Added test case {}", testCase);
-            registry.addTestCase(method, testCase);
+            // Generate random test cases for services without custom test cases
+            for (RpcService.RpcMethod method : registry.getAllMethodsWithoutTestCases()) {
+                DynamicMessage paramDynMsg = testCaseGenerator.generateRandomMessage(registry.lookupMessage(method.getInType()));
+                DynamicMessage returnDynMsg = testCaseGenerator.generateRandomMessage(registry.lookupMessage(method.getOutType()));
+                TestCase testCase = new TestCase(method.getOwnerServiceName() + "." + method.getName() + "_random",
+                        method.getOwnerServiceName(),
+                        method.getName(),
+                        null,
+                        null,
+                        paramDynMsg,
+                        null,
+                        null,
+                        returnDynMsg
+                );
+                log.info("Added test case {}", testCase);
+                registry.addTestCase(method, testCase);
+            }
+            log.info("[Step 4 of 8] Finished loading test cases");
+
+            // Write all test cases to binary file
+            testCaseWriter.writeAllTestCases();
+            log.info("[Step 5 of 8] Finished writing test cases to file");
+
+            // Generate Java server
+            for (RpcService service : registry.getAllServices()) {
+                // Generate source codes
+                javaCodeGenService.generateJavaService(service);
+            }
+            javaCodeGenService.generateJavaServer();
+            log.info("[Step 6 of 8] Finished generating Java server");
+
+            // Generate Java client
+            javaCodeGenService.generateJavaClient();
+            log.info("[Step 7 of 8] Finished generating Java client");
+
+            // Build Docker containers and Docker compose project
+            mavenInvoker.buildClientServer();
+            dockerService.dockerComposeUp();
+            log.info("[Step 8 of 8] Finished building and launched test containers");
+
+            log.info("Finished setting up test");
+        } catch (Throwable t) {
+            log.error("An error occurred, terminating test", t);
         }
-        log.info("[Step 4 of 8] Finished loading test cases");
-
-        // Write all test cases to binary file
-        testCaseWriter.writeAllTestCases();
-        log.info("[Step 5 of 8] Finished writing test cases to file");
-
-        // Generate Java server
-        for (RpcService service : registry.getAllServices()) {
-            // Generate source codes
-            javaCodeGenService.generateJavaService(service);
-        }
-        javaCodeGenService.generateJavaServer();
-        log.info("[Step 6 of 8] Finished generating Java server");
-
-        // Generate Java client
-        javaCodeGenService.generateJavaClient();
-        log.info("[Step 7 of 8] Finished generating Java client");
-
-        // Build Docker containers and Docker compose project
-        mavenInvoker.buildClientServer();
-        dockerService.dockerComposeUp();
-        log.info("[Step 8 of 8] Finished building and launched test containers");
-
-        log.info("Finished setting up test");
     }
 }

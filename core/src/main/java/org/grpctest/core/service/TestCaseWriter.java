@@ -18,20 +18,20 @@ public class TestCaseWriter {
     private final Config config;
     private final Registry registry;
 
-    public void writeAllTestCases() {
+    public void writeAllTestCases() throws Throwable {
         for (TestCase testCase : registry.getAllTestCases()) {
             writeTestCaseToFile(testCase);
         }
     }
 
-    private void writeTestCaseToFile(TestCase testCase) {
+    private void writeTestCaseToFile(TestCase testCase) throws Throwable {
         String paramFileName = testCase.getServiceName() + "_" + testCase.getMethodName() + "_param.bin";
         String returnFileName = testCase.getServiceName() + "_" + testCase.getMethodName() + "_return.bin";
         writeDynMsgToFile(testCase.getParamValueDynMsg(), paramFileName);
         writeDynMsgToFile(testCase.getReturnValueDynMsg(), returnFileName);
     }
 
-    private void writeDynMsgToFile(DynamicMessage dynamicMessage, String filename) {
+    private void writeDynMsgToFile(DynamicMessage dynamicMessage, String filename) throws Throwable {
         try {
             String filepath = config.getTestsDir();
             if (filepath.endsWith("/")) {
@@ -47,10 +47,13 @@ public class TestCaseWriter {
             }
         } catch (FileNotFoundException fnfe) {
             log.error("[writeDynMsgToFile] Output file not created", fnfe);
+            throw fnfe;
         } catch (IOException ioe) {
             log.error("[writeDynMsgToFile] Error in file I/O", ioe);
+            throw ioe;
         } catch (Throwable t) {
             log.error("[writeDynMsgToFile] An error occurred", t);
+            throw t;
         }
     }
 }

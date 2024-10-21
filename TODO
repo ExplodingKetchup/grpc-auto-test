@@ -1,7 +1,7 @@
 TODO:
 
-- Store generated values in protobuf binary in separate files instead of
-- Add maven invoker check for maven error and throw
+- Add maven invoker check for maven error and throw (50%, not thrown)
 - Auto read log files and verify
+- Containerize core service
 - (Optional) multiple test cases per service
 - (Optional) Streaming RPC

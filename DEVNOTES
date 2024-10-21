@@ -1,0 +1,5 @@
+Error handling:
+- At source of error, log the error, then rethrow the Exception
+- When rethrow, wrap the exception only when necessary (e.g. adding new info). Otherwise rethrow the original error
+- Intermediate functions just rethrow error
+- Topmost function use try catch
