@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.grpctest.core.config.Config;
 import org.grpctest.core.data.Registry;
 import org.grpctest.core.pojo.TestCase;
+import org.grpctest.core.service.util.DynamicMessageUtilService;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
@@ -17,6 +18,7 @@ import java.io.*;
 public class TestCaseWriter {
     private final Config config;
     private final Registry registry;
+    private final DynamicMessageUtilService dynamicMessageUtilService;
 
     public void writeAllTestCases() throws Throwable {
         for (TestCase testCase : registry.getAllTestCases()) {
@@ -32,28 +34,12 @@ public class TestCaseWriter {
     }
 
     private void writeDynMsgToFile(DynamicMessage dynamicMessage, String filename) throws Throwable {
-        try {
-            String filepath = config.getTestsDir();
-            if (filepath.endsWith("/")) {
-                filepath = filepath + filename;
-            } else {
-                filepath = filepath + "/" + filename;
-            }
-            File file = new File(filepath);
-            file.createNewFile();
-
-            try (FileOutputStream fileOutputStream = new FileOutputStream(file)) {
-                dynamicMessage.writeTo(fileOutputStream);
-            }
-        } catch (FileNotFoundException fnfe) {
-            log.error("[writeDynMsgToFile] Output file not created", fnfe);
-            throw fnfe;
-        } catch (IOException ioe) {
-            log.error("[writeDynMsgToFile] Error in file I/O", ioe);
-            throw ioe;
-        } catch (Throwable t) {
-            log.error("[writeDynMsgToFile] An error occurred", t);
-            throw t;
+        String filepath = config.getTestsDir();
+        if (filepath.endsWith("/")) {
+            filepath = filepath + filename;
+        } else {
+            filepath = filepath + "/" + filename;
         }
+        dynamicMessageUtilService.dynMsgToFile(dynamicMessage, filepath);
     }
 }

@@ -1,7 +1,6 @@
 package org.grpctest.java.client.generated;
 
-import com.google.protobuf.Message.Builder;
-import com.google.protobuf.util.JsonFormat;
+import com.google.protobuf.GeneratedMessageV3;
 import io.grpc.Channel;
 import io.grpc.ManagedChannelBuilder;
 import lombok.extern.slf4j.Slf4j;
@@ -48,18 +47,13 @@ public class JavaClient implements InitializingBean {
         try {
             R result = method.apply(parameter);
             log.info("[invokeRpcMethod] Method {}.{} returns {}", serviceName, methodName, result);
+            if (result instanceof GeneratedMessageV3) {
+                MessageUtil.messageToFile((GeneratedMessageV3) result, false, serviceName + "_" + methodName + "_return.bin");
+            } else {
+                log.error("[invokeRpcMethod] Method {}.{} returns message of type [{}], incompatible with protobuf", serviceName, methodName, result.getClass());
+            }
         } catch (Throwable t) {
             log.error("[invokeRpcMethod] Method {}.{} throws error", serviceName, methodName, t);
-        }
-    }
-
-    private Object parseJson(String json, Builder builder) {
-        try {
-            JsonFormat.parser().merge(json, builder);
-            return builder.build();
-        } catch (Exception e) {
-            log.error("[parseJson] Fail to parse return value from test case: [{}]", json, e);
-            return builder.build();
         }
     }
 }

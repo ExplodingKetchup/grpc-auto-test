@@ -9,6 +9,7 @@ services:
     volumes:
       - ./log:/app/log
       - ./test-cases:/app/test-cases
+      - ./out/client:/app/out/client
     ports:
       - "8080:8080"
     networks:
@@ -21,6 +22,7 @@ services:
     volumes:
       - ./log:/app/log
       - ./test-cases:/app/test-cases
+      - ./out/server:/app/out/server
     ports:
       - "50051:50051"
     networks:

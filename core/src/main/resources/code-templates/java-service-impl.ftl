@@ -14,8 +14,13 @@ public class ${service.name} extends ${service.name}Grpc.${service.name}ImplBase
     @Override
     <#if method.type == "UNARY">
     public void ${method.name}(${method.inType} request, StreamObserver<${method.outType}> responseObserver) {
-        responseObserver.onNext(${method.name}Impl(request));
-        responseObserver.onCompleted();
+        try {
+            MessageUtil.messageToFile(request, true, "${service.name}_${method.name}_param.bin");
+            responseObserver.onNext(${method.name}Impl(request));
+            responseObserver.onCompleted();
+        } catch (Throwable t) {
+            log.error("[${method.name}] An error occurred", t);
+        }
     }
     </#if>
 

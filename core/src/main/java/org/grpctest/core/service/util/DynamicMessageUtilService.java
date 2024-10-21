@@ -10,6 +10,8 @@ import org.grpctest.core.pojo.RpcMessage;
 import org.grpctest.core.util.StringUtil;
 import org.springframework.stereotype.Component;
 
+import java.io.*;
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 
@@ -18,7 +20,47 @@ import java.util.Map;
 @AllArgsConstructor
 public class DynamicMessageUtilService {
 
+    public static final String DIR_SERVER_OUT = "out/server/";
+    public static final String DIR_CLIENT_OUT = "out/client/";
+
     private final Registry registry;
+
+    public void dynMsgToFile(DynamicMessage dynamicMessage, String filepath) throws Throwable {
+        try {
+            File file = new File(filepath);
+            file.createNewFile();
+
+            try (FileOutputStream fileOutputStream = new FileOutputStream(file)) {
+                dynamicMessage.writeTo(fileOutputStream);
+            }
+        } catch (FileNotFoundException fnfe) {
+            log.error("[dynMsgToFile] Output file not created", fnfe);
+            throw fnfe;
+        } catch (IOException ioe) {
+            log.error("[dynMsgToFile] Error in file I/O", ioe);
+            throw ioe;
+        } catch (Throwable t) {
+            log.error("[dynMsgToFile] An error occurred", t);
+            throw t;
+        }
+    }
+
+    public DynamicMessage dynMsgFromFile(String filepath, Descriptors.Descriptor descriptor) throws Throwable {
+        try {
+            try (FileInputStream fileInputStream = new FileInputStream(filepath)) {
+                return DynamicMessage.parseFrom(descriptor, fileInputStream);
+            }
+        } catch (FileNotFoundException fnfe) {
+            log.error("[dynMsgFromFile] File not found", fnfe);
+            throw fnfe;
+        } catch (IOException ioe) {
+            log.error("[dynMsgFromFile] File I/O exception", ioe);
+            throw ioe;
+        } catch (Throwable t) {
+            log.error("[dynMsgFromFile] An error occurred", t);
+            throw t;
+        }
+    }
 
     public DynamicMessage objectToDynamicMessage(Object o, RpcMessage rpcMessage) {
         DynamicMessage.Builder builder = DynamicMessage.newBuilder(rpcMessage.getMessageDescriptor());
