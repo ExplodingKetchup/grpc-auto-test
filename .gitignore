@@ -5,6 +5,7 @@ target/
 log/
 test-cases/
 protobin/
+out/
 TODO
 
 ### IntelliJ IDEA ###
