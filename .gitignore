@@ -6,6 +6,7 @@ log/
 test-cases/
 protobin/
 out/
+**/node_modules/
 TODO
 
 ### IntelliJ IDEA ###
