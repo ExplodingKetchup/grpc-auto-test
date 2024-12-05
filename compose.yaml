@@ -27,6 +27,32 @@ services:
       - "50051:50051"
     networks:
       - grpc-network
+  node-client:
+    build:
+      context: .
+      dockerfile: ./nodejs/Dockerfile.client
+    container_name: node-client-container
+    volumes:
+      - ./log:/app/log
+      - ./test-cases:/app/test-cases
+      - ./out/client:/app/out/client
+    ports:
+      - "8080:8080"
+    networks:
+      - grpc-network
+  node-server:
+    build:
+      context: .
+      dockerfile: ./nodejs/node-server/Dockerfile.server
+    container_name: node-server-container
+    volumes:
+      - ./log:/app/log
+      - ./test-cases:/app/test-cases
+      - ./out/server:/app/out/server
+    ports:
+      - "50051:50051"
+    networks:
+      - grpc-network
 
 networks:
   grpc-network:
