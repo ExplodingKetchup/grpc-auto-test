@@ -91,11 +91,11 @@ function messageFromFile(filepath, messageType) {
     } catch (e) {
         if (e instanceof protobuf.util.ProtocolError) {
             // e.instance holds the so far decoded message with missing required fields
-            throw new Error("[messageFromFile] Decode message of type [" + messageType.name + "]" +
+            throw new Error("[messageFromFile] Decode message of type [" + messageType + "]" +
                 " from [" + filepath + "] failed: Missing required fields");
           } else {
             // wire format is invalid
-            throw new Error("[messageFromFile] Decode message of type [" + messageType.name + "]" +
+            throw new Error("[messageFromFile] Decode message of type [" + messageType + "]" +
                 " from [" + filepath + "] failed: Invalid wire format");
           }
     }
