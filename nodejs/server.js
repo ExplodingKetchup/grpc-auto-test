@@ -1,9 +1,13 @@
 import * as grpc from '@grpc/grpc-js';
-import { createLogger, loadProtosGrpc, loadProtosProtobufjs, messageFromFile, messageToFile } from './common';
+import { createLogger, loadProtosGrpc, loadProtosProtobufjs, messageFromFile, messageToFile } from './common.js';
+import * as deployConfig from './config/server/deploy.js';
+import * as testConfig from './config/server/test.js';
 
 // Load configs dynamically depending on environment
 const env = process.env.NODE_ENV || 'test';
-import { config } from ('./config/server/' + env);
+console.log("Using environment " + env);
+const config = ((env === 'test') ? testConfig : deployConfig).config;
+console.log(config);
 
 // Configuring logger
 const logger = createLogger(config.log.dir + config.log.filename);
@@ -42,14 +46,10 @@ function getServer() {
     });
     return server;
 }
-  
 let server = getServer();
-  
-server.bindAsync(config.server.host + ':' + config.server.port, grpc.ServerCredentials.createInsecure(), () => {
-    server.start();
+
+server.bindAsync('0.0.0.0:' + config.server.port, grpc.ServerCredentials.createInsecure(), () => {
+    logger.info("Server started on " + config.server.host + ":" + config.server.port);
 });
 
 // END Server
-
-// EXPORT for testing
-export { loadProtosGrpc, loadProtosProtobufjs, messageFromFile, messageToFile }

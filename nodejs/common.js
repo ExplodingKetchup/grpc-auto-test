@@ -31,8 +31,6 @@ function createLogger(logFilePath) {
 function loadProtosGrpc(dirpath) {
     const protos = {};
 
-    logger.info("Hello");
-
     fs.readdirSync(dirpath).forEach(file => {
         if (file.endsWith(".proto")) {
             // Suggested options for similarity to existing grpc.load behavior
@@ -80,8 +78,7 @@ function loadProtosProtobufjs(dirpath) {
 */
 function messageFromFile(filepath, messageType) {
     if (!fs.existsSync(filepath)) {
-        logger.error("[messageFromProtoFile] Path [" + filepath + "] does not exist");
-        throw new Error("Invalid path");
+        throw new Error("[messageFromFile] Path [" + filepath + "] does not exist");
     }
 
     const data = fs.readFileSync(filepath);
@@ -94,11 +91,11 @@ function messageFromFile(filepath, messageType) {
     } catch (e) {
         if (e instanceof protobuf.util.ProtocolError) {
             // e.instance holds the so far decoded message with missing required fields
-            logger.error("[messageFromProtoFile] Decode message of type [" + messageType.name + "]" +
+            throw new Error("[messageFromFile] Decode message of type [" + messageType.name + "]" +
                 " from [" + filepath + "] failed: Missing required fields");
           } else {
             // wire format is invalid
-            logger.error("[messageFromProtoFile] Decode message of type [" + messageType.name + "]" +
+            throw new Error("[messageFromFile] Decode message of type [" + messageType.name + "]" +
                 " from [" + filepath + "] failed: Invalid wire format");
           }
     }

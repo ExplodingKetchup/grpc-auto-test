@@ -33,4 +33,4 @@ USER appuser
 
 EXPOSE 50051
 
-ENTRYPOINT [ "sh", "-c", "npm start-server" ]
+ENTRYPOINT [ "sh", "-c", "npm run start-server" ]

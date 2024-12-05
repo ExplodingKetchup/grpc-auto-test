@@ -33,4 +33,4 @@ USER appuser
 
 EXPOSE 8080
 
-ENTRYPOINT [ "sh", "-c", "npm start-client" ]
+ENTRYPOINT [ "sh", "-c", "npm run start-client" ]
