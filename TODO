@@ -3,5 +3,11 @@ TODO:
 - Add maven invoker check for maven error and throw (50%, not thrown)
 - Auto read log files and verify
 - Containerize core service
+- NodeJS: autogen
+- NodeJS: Core service integration
+- Java: Separate test-cases mount
+- Java: Reorganize constants / configs
+- Java: Autogen properties files
+- Reorganize constants / configs
 - (Optional) multiple test cases per service
 - (Optional) Streaming RPC
