@@ -10,11 +10,14 @@ import org.grpctest.java.common.util.MessageUtil;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Component;
 
+import java.io.File;
 import java.util.function.Function;
 
 @Component
 @Slf4j
 public class JavaClient implements InitializingBean {
+
+    private final Config config;
 
 <#list registry.getAllServices() as service>
     private final ${service.name}Grpc.${service.name}BlockingStub ${service.name?uncap_first}BlockingStub;
@@ -23,6 +26,7 @@ public class JavaClient implements InitializingBean {
 </#list>
 
     public JavaClient(Config config) {
+        this.config = config;
         Channel channel = ManagedChannelBuilder.forAddress(config.getServiceHost(), config.getServicePort()).usePlaintext().build();
 <#list registry.getAllServices() as service>
         this.${service.name?uncap_first}BlockingStub = ${service.name}Grpc.newBlockingStub(channel);
@@ -36,7 +40,7 @@ public class JavaClient implements InitializingBean {
 <#list registry.getAllMethods() as method>
 
         // Invoke test case: ${method.ownerServiceName}.${method.name}
-        ${method.inType} param${method.ownerServiceName}${method.name?cap_first} = MessageUtil.messageFromFile("${testsDir}/${method.ownerServiceName}_${method.name}_param.bin", ${method.inType}.class);
+        ${method.inType} param${method.ownerServiceName}${method.name?cap_first} = MessageUtil.messageFromFile(config.getTestcaseDir() + File.separator + "${method.ownerServiceName}_${method.name}_param.bin", ${method.inType}.class);
         invokeRpcMethod(${method.ownerServiceName?uncap_first}BlockingStub::${method.name}, param${method.ownerServiceName}${method.name?cap_first}, "${method.ownerServiceName}", "${method.name}");
 
 </#list>
@@ -48,7 +52,7 @@ public class JavaClient implements InitializingBean {
             R result = method.apply(parameter);
             log.info("[invokeRpcMethod] Method {}.{} returns {}", serviceName, methodName, result);
             if (result instanceof GeneratedMessageV3) {
-                MessageUtil.messageToFile((GeneratedMessageV3) result, false, serviceName + "_" + methodName + "_return.bin");
+                MessageUtil.messageToFile((GeneratedMessageV3) result, config.getOutDir() + File.separator + serviceName + "_" + methodName + "_return.bin");
             } else {
                 log.error("[invokeRpcMethod] Method {}.{} returns message of type [{}], incompatible with protobuf", serviceName, methodName, result.getClass());
             }

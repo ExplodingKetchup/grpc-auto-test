@@ -27,7 +27,8 @@ public class Registry {
     /** Key format: Message name (shortened) */
     private final Map<String, RpcMessage> messageLookupTable = new HashMap<>();
 
-    public void addMethod(RpcService.RpcMethod method) {
+    /** methodTestCaseMap */
+    public void addMethodToMethodTestCaseMap(RpcService.RpcMethod method) {
         methodTestCaseMap.putIfAbsent(method, new ArrayList<>());
     }
 
@@ -45,7 +46,7 @@ public class Registry {
         methodTestCaseMap.get(method).add(testCase);
     }
 
-    public void deleteMethod(RpcService.RpcMethod method) {
+    public void deleteMethodTestCaseMapEntry(RpcService.RpcMethod method) {
         methodTestCaseMap.remove(method);
     }
 
@@ -67,19 +68,9 @@ public class Registry {
         return methodTestCaseMap.values().stream().flatMap(Collection::stream).toList();
     }
 
+    /** serviceLookupTable */
     public void addServiceToLookupTable(RpcService service) {
         serviceLookupTable.putIfAbsent(service.getName(), service);
-    }
-
-    public void addMethodToLookupTable(RpcService.RpcMethod method) {
-        methodLookupTable.putIfAbsent(getMethodLookupTableKey(method.getOwnerServiceName(), method.getName()), method);
-    }
-
-    public void addServiceAndMethodsToLookupTable(RpcService service) {
-        addServiceToLookupTable(service);
-        for (RpcService.RpcMethod method : service.getMethods()) {
-            addMethodToLookupTable(method);
-        }
     }
 
     public RpcService lookupService(String serviceName) {
@@ -90,6 +81,11 @@ public class Registry {
         return serviceLookupTable.values().stream().toList();
     }
 
+    /** methodLookupTable*/
+    public void addMethodToLookupTable(RpcService.RpcMethod method) {
+        methodLookupTable.putIfAbsent(getMethodLookupTableKey(method.getOwnerServiceName(), method.getName()), method);
+    }
+
     public RpcService.RpcMethod lookupMethod(String serviceName, String methodName) {
         return methodLookupTable.get(getMethodLookupTableKey(serviceName, methodName));
     }
@@ -98,6 +94,31 @@ public class Registry {
         return methodLookupTable.values().stream().toList();
     }
 
+    /** serviceLookupTable + methodLookupTable */
+    public void addServiceAndMethodsToLookupTable(RpcService service) {
+        addServiceToLookupTable(service);
+        for (RpcService.RpcMethod method : service.getMethods()) {
+            addMethodToLookupTable(method);
+        }
+    }
+
+    public List<RpcService.RpcMethod> getAllMethods(RpcService service) {
+        // Name of all methods in the service
+        return service.getMethods().stream()
+                .map(RpcService.RpcMethod::getName)
+                .map(methodName -> lookupMethod(service.getName(), methodName))
+                .toList();
+    }
+
+    public List<RpcService.RpcMethod> getAllMethods(String serviceName) {
+        return getAllMethods(lookupService(serviceName));
+    }
+
+    public RpcService getOwnerService(RpcService.RpcMethod method) {
+        return lookupService(method.getOwnerServiceName());
+    }
+
+    /** messageLookupTable */
     public void addMessageToLookupTable(RpcMessage message) {
         messageLookupTable.putIfAbsent(message.getName(), message);
     }

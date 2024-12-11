@@ -16,6 +16,8 @@ import java.util.List;
 @NoArgsConstructor
 public class RpcService {
 
+    private String ownerNamespaceName;
+
     private String name;
 
     private List<RpcMethod> methods = new ArrayList<>();

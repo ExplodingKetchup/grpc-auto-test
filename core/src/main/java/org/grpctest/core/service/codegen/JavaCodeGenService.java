@@ -1,4 +1,4 @@
-package org.grpctest.core.service;
+package org.grpctest.core.service.codegen;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -10,26 +10,27 @@ import org.grpctest.core.pojo.RpcService;
 import org.grpctest.core.pojo.freemarker.ClientDataModel;
 import org.grpctest.core.pojo.freemarker.JavaServerDataModel;
 import org.grpctest.core.pojo.freemarker.ServiceImplDataModel;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 
 @Service
+@Qualifier("javaCodeGenService")
 @Slf4j
-@AllArgsConstructor
-public class JavaCodeGenService {
+public class JavaCodeGenService extends BaseCodeGenService {
 
     private static final String JAVA_SVC_DIR = "./java/java-server/src/main/java/org/grpctest/java/server/generated/service/";
     private static final String JAVA_CLIENT_FILE = "./java/java-client/src/main/java/org/grpctest/java/client/generated/JavaClient.java";
     private static final String JAVA_SERVER_FILE = "./java/java-server/src/main/java/org/grpctest/java/server/generated/JavaServer.java";
     private static final String JAVA_FILE_EXT = ".java";
 
-    private Configuration freemarkerConfig;
-
-    private final Config config;
-
-    private final Registry registry;
+    @Autowired
+    public JavaCodeGenService(Configuration freemarkerConfig, Config config, Registry registry) {
+        super(freemarkerConfig, config, registry);
+    }
 
     public void generateJavaService(RpcService service) throws Exception {
         ServiceImplDataModel dataModel = new ServiceImplDataModel(service, registry, config.getTestsDir());
@@ -57,5 +58,15 @@ public class JavaCodeGenService {
         try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(JAVA_SERVER_FILE))) {
             template.process(dataModel, bufferedWriter);
         }
+    }
+
+    @Override
+    public void generateServer() throws Exception {
+
+    }
+
+    @Override
+    public void generateClient() throws Exception {
+
     }
 }

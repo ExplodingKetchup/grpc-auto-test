@@ -4,13 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.grpctest.core.data.Registry;
-import org.grpctest.core.pojo.RpcService;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ServiceImplDataModel implements DataModel {
-    private RpcService service;
+public class ServerDataModel implements DataModel {
     private Registry registry;
-    private String testsDir;
 }

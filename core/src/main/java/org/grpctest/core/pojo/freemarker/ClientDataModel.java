@@ -8,7 +8,7 @@ import org.grpctest.core.data.Registry;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ClientDataModel {
+public class ClientDataModel implements DataModel {
     private Registry registry;
     private String testsDir;
 }

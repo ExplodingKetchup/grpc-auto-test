@@ -7,6 +7,8 @@ import org.grpctest.core.data.Registry;
 import org.grpctest.core.pojo.TestCase;
 import org.grpctest.core.pojo.ProtoContent;
 import org.grpctest.core.pojo.RpcService;
+import org.grpctest.core.service.codegen.JavaCodeGenService;
+import org.grpctest.core.service.codegen.NodejsCodeGenService;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +24,8 @@ public class CoreService implements InitializingBean {
     private final ProtobufReader protobufReader;
 
     private final JavaCodeGenService javaCodeGenService;
+
+    private final NodejsCodeGenService nodejsCodeGenService;
 
     private final CustomTestCaseReader customTestCaseReader;    // Although not used, we need the reader to run its init code before core service
 
@@ -89,14 +93,16 @@ public class CoreService implements InitializingBean {
 //            javaCodeGenService.generateJavaClient();
 //            log.info("[Step 7 of 9] Finished generating Java client");
 //
+            // Generate Nodejs
+            nodejsCodeGenService.generateServer();
 //            // Build Docker containers and Docker compose project
 //            mavenInvoker.buildClientServer();
 //            dockerService.dockerComposeUp();
 //            log.info("[Step 8 of 9] Finished building and launched test containers");
             
-            // Analyze result
-            resultAnalyzer.processAllMethods();
-            log.info("[Step 9 of 9] Finished analyzing results");
+//            // Analyze result
+//            resultAnalyzer.processAllMethods();
+//            log.info("[Step 9 of 9] Finished analyzing results");
 
             log.info("Finished testing");
         } catch (Throwable t) {

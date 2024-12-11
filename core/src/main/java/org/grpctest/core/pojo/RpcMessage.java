@@ -11,6 +11,7 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class RpcMessage {
+    private String ownerNamespaceName;
     private String name;
     private Descriptors.Descriptor messageDescriptor;
 }

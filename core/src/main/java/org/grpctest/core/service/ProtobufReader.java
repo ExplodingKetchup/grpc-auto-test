@@ -11,13 +11,10 @@ import org.grpctest.core.pojo.ProtoContent;
 import org.grpctest.core.pojo.RpcMessage;
 import org.grpctest.core.pojo.RpcService;
 import org.grpctest.core.util.StringUtil;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Component;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 
 @Component
 @Slf4j
@@ -41,10 +38,11 @@ public class ProtobufReader {
 
                 // Build Descriptor
                 Descriptors.FileDescriptor fileDescriptor = Descriptors.FileDescriptor.buildFrom(fileDescriptorProto, new Descriptors.FileDescriptor[]{});
+                String namespace = fileDescriptor.getPackage();
 
                 // Loop through message types
                 for (DescriptorProtos.DescriptorProto message : fileDescriptorProto.getMessageTypeList()) {
-                    RpcMessage rpcMessage = new RpcMessage(message.getName(), fileDescriptor.findMessageTypeByName(message.getName()));
+                    RpcMessage rpcMessage = new RpcMessage(namespace, message.getName(), fileDescriptor.findMessageTypeByName(message.getName()));
                     protoContent.getMessages().add(rpcMessage);
                     registry.addMessageToLookupTable(rpcMessage);
                 }
@@ -52,6 +50,7 @@ public class ProtobufReader {
                 // Loop through service declarations
                 for (DescriptorProtos.ServiceDescriptorProto service : fileDescriptorProto.getServiceList()) {
                     RpcService rpcService = new RpcService();
+                    rpcService.setOwnerNamespaceName(namespace);
                     rpcService.setName(service.getName());
                     for (DescriptorProtos.MethodDescriptorProto method : service.getMethodList()) {
                         RpcService.RpcMethod rpcMethod = RpcService.RpcMethod.builder()
@@ -62,7 +61,7 @@ public class ProtobufReader {
                                 .outType(StringUtil.getShortenedClassName(method.getOutputType()))
                                 .build();
                         rpcService.getMethods().add(rpcMethod);
-                        registry.addMethod(rpcMethod);
+                        registry.addMethodToMethodTestCaseMap(rpcMethod);
                     }
                     protoContent.getServices().add(rpcService);
                     registry.addServiceAndMethodsToLookupTable(rpcService);

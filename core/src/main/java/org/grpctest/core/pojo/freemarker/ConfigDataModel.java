@@ -3,13 +3,11 @@ package org.grpctest.core.pojo.freemarker;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.grpctest.core.pojo.RpcService;
-
-import java.util.List;
+import org.grpctest.core.config.Config;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class JavaServerDataModel implements DataModel {
-    private List<RpcService> rpcServices;
+public class ConfigDataModel implements DataModel {
+    private Config config;
 }
