@@ -19,31 +19,25 @@ public class JavaClient implements InitializingBean {
 
     private final Config config;
 
-<#list registry.getAllServices() as service>
-    private final ${service.name}Grpc.${service.name}BlockingStub ${service.name?uncap_first}BlockingStub;
+    private final PeopleServiceGrpc.PeopleServiceBlockingStub peopleServiceBlockingStub;
 
-    private final ${service.name}Grpc.${service.name}Stub ${service.name?uncap_first}AsyncStub;
-</#list>
+    private final PeopleServiceGrpc.PeopleServiceStub peopleServiceAsyncStub;
 
     public JavaClient(Config config) {
         this.config = config;
         Channel channel = ManagedChannelBuilder.forAddress(config.getServiceHost(), config.getServicePort()).usePlaintext().build();
-<#list registry.getAllServices() as service>
-        this.${service.name?uncap_first}BlockingStub = ${service.name}Grpc.newBlockingStub(channel);
-        this.${service.name?uncap_first}AsyncStub = ${service.name}Grpc.newStub(channel);
-</#list>
+        this.peopleServiceBlockingStub = PeopleServiceGrpc.newBlockingStub(channel);
+        this.peopleServiceAsyncStub = PeopleServiceGrpc.newStub(channel);
         log.info("Connected to server at {}:{}", config.getServiceHost(), config.getServicePort());
     }
 
     @Override
     public void afterPropertiesSet() throws Exception {
-<#list registry.getAllMethods() as method>
 
-        // Invoke test case: ${method.id}
-        ${method.inType?split(".")?last} param_${method.id?replace(".", "_")} = MessageUtil.messageFromFile(config.getTestcaseDir() + File.separator + "${method.id?replace(".", "_")}_param.bin", ${method.inType?split(".")?last}.class);
-        invokeRpcMethod(${method.ownerServiceId?split(".")?last?uncap_first}BlockingStub::${method.name}, param_${method.id?replace(".", "_")}, "${method.id}");
+        // Invoke test case: person.PeopleService.getPerson
+        GetPersonRequest param_person_PeopleService_getPerson = MessageUtil.messageFromFile(config.getTestcaseDir() + File.separator + "person_PeopleService_getPerson_param.bin", GetPersonRequest.class);
+        invokeRpcMethod(peopleServiceBlockingStub::getPerson, param_person_PeopleService_getPerson, "person.PeopleService.getPerson");
 
-</#list>
     }
 
     private <T, R> void invokeRpcMethod(Function<T, R> method, T parameter, String methodId) {

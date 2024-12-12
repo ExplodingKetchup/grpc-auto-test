@@ -3,7 +3,8 @@ package org.grpctest.core.service;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.grpctest.core.config.Config;
-import org.grpctest.core.data.Registry;
+import org.grpctest.core.data.RpcModelRegistry;
+import org.grpctest.core.data.TestcaseRegistry;
 import org.grpctest.core.pojo.TestCase;
 import org.grpctest.core.service.util.DynamicMessageUtilService;
 import org.grpctest.core.util.JsonUtil;
@@ -28,7 +29,9 @@ public class CustomTestCaseReader {
     private final Config config;
     private final ResourceLoader resourceLoader;
 
-    private final Registry registry;
+    private final TestcaseRegistry testcaseRegistry;
+
+    private final RpcModelRegistry rpcModelRegistry;
 
     private final DynamicMessageUtilService dynamicMessageUtilService;
 
@@ -60,8 +63,8 @@ public class CustomTestCaseReader {
             testCase.setParamValueDynMsg(
                     dynamicMessageUtilService.objectToDynamicMessage(
                             testCase.getParamValue(),
-                            registry.lookupMessage(
-                                    registry.lookupMethod(testCase.getServiceName(), testCase.getMethodName()).getInType()
+                            rpcModelRegistry.lookupMessage(
+                                    rpcModelRegistry.lookupMethod(testCase.getMethodId()).getInType()
                             )
                     )
             );
@@ -69,12 +72,12 @@ public class CustomTestCaseReader {
             testCase.setReturnValueDynMsg(
                     dynamicMessageUtilService.objectToDynamicMessage(
                             testCase.getReturnValue(),
-                            registry.lookupMessage(
-                                    registry.lookupMethod(testCase.getServiceName(), testCase.getMethodName()).getOutType()
+                            rpcModelRegistry.lookupMessage(
+                                    rpcModelRegistry.lookupMethod(testCase.getMethodId()).getOutType()
                             )
                     )
             );
-            registry.addTestCase(testCase);
+            testcaseRegistry.addTestCase(testCase);
         }
         log.info("[loadTestCasesToRegistry] Finished loading test cases");
     }

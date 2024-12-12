@@ -8,11 +8,18 @@ import org.springframework.stereotype.Component;
 @Getter
 public class Config {
 
+    // Filesystem
+    @Value("${tests.dir:test-cases/client}")
+    private String testcaseDir;
+
+    @Value("${out.dir:out/client}")
+    private String outDir;
+
     // Service discovery
 
-    @Value("${rpc.client.service.host}")
+    @Value("${server.host}")
     private String serviceHost;
 
-    @Value("${rpc.client.service.port}")
+    @Value("${server.port:50051}")
     private Integer servicePort;
 }

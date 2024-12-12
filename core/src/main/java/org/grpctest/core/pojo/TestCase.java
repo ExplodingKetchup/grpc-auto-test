@@ -15,8 +15,7 @@ public class TestCase {
     private String name;
 
     // Identifies which method used to run test case (Use to map service and method field)
-    private String serviceName;
-    private String methodName;
+    private String methodId;
 
     // Method param (put in client code)
     private Object paramValue;

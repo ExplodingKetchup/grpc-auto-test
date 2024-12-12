@@ -21,16 +21,11 @@ public class JavaServer implements InitializingBean {
 
     @Autowired
     public JavaServer(Config config,
-<#list registry.getAllServices() as service>
-                      ${service.name} ${service.name?uncap_first}<#sep>,
-</#list>
-    ) {
+                      PeopleService peopleService    ) {
         this.config = config;
         this.server = ServerBuilder
                 .forPort(config.getServerPort())
-<#list registry.getAllServices() as service>
-                .addService(${service.name?uncap_first})
-</#list>
+                .addService(peopleService)
                 .build();
     }
 

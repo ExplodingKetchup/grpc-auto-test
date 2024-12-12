@@ -37,19 +37,19 @@ console.log("Using environment " + env);
 
     <#list registry.getAllMethods(service) as method>
             // METHOD ${method.name}
-            let param_${method.ownerServiceName}_${method.name} = messageFromFile(
-                config.testcaseDir + "${method.ownerServiceName}_${method.name}_param.bin",
+            let param_${service.name}_${method.name} = messageFromFile(
+                config.testcaseDir + "${service.name}_${method.name}_param.bin",
                 root.lookupType("${registry.lookupMessage(method.inType).ownerNamespaceName}.${method.inType}")
             );
-            logger.info(`[main] Invoke ${method.ownerServiceName}.${method.name}, param: ${"$"}{JSON.stringify(param_${method.ownerServiceName}_${method.name}, null, 2)}`);
-            ${method.ownerServiceName?uncap_first}Stub.${method.name}(
-                param_${method.ownerServiceName}_${method.name},
+            logger.info(`[main] Invoke ${method.id}, param: ${"$"}{JSON.stringify(param_${service.name}_${method.name}, null, 2)}`);
+            ${service.name?uncap_first}Stub.${method.name}(
+                param_${service.name}_${method.name},
                 (err, response) => {
                     genericClientRpcCallback(
                         err,
                         response,
-                        root.lookupType("${registry.lookupMessage(method.outType).ownerNamespaceName}.${method.outType}"),
-                        "${method.ownerServiceName}",
+                        root.lookupType("${method.outType}"),
+                        "${service.name}",
                         "${method.name}"
                     )
                 }

@@ -31,14 +31,9 @@ public class MessageUtil {
         return null;
     }
 
-    public static <M extends GeneratedMessageV3> void messageToFile(M message, boolean isServer, String filename) throws Throwable {
+    public static <M extends GeneratedMessageV3> void messageToFile(M message, String filepath) throws Throwable {
         try {
-            File file;
-            if (isServer) {
-                file = new File(DIR_SERVER_OUT + filename);
-            } else {
-                file = new File(DIR_CLIENT_OUT + filename);
-            }
+            File file = new File(filepath);
             file.createNewFile();
 
             try (FileOutputStream fileOutputStream = new FileOutputStream(file)) {

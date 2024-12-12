@@ -53,7 +53,7 @@ public class Config {
     private String nodejsClientProtoDir;
 
     /** Hostname of the server to which NodeJs client connects to */
-    @Value("${test.nodejs.client.server.host}")
+    @Value("${test.nodejs.client.server.host:NOT_ASSIGNED}")
     private String nodejsClientServerHost;
 
     /** Port of the server to which NodeJs client connects to */
@@ -99,7 +99,7 @@ public class Config {
     private String javaClientOutDir;
 
     /** Hostname of the server to which Java client connects to */
-    @Value("${test.java.client.server.host}")
+    @Value("${test.java.client.server.host:NOT_ASSIGNED}")
     private String javaClientServerHost;
 
     /** Port of the server to which Java client connects to */

@@ -5,15 +5,19 @@ import com.google.protobuf.Descriptors;
 import com.google.protobuf.DynamicMessage;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.grpctest.core.data.Registry;
+import org.grpctest.core.data.RpcModelRegistry;
 import org.grpctest.core.pojo.RpcMessage;
 import org.grpctest.core.util.StringUtil;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
-import java.lang.reflect.Method;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Slf4j
 @Component
@@ -23,10 +27,14 @@ public class DynamicMessageUtilService {
     public static final String DIR_SERVER_OUT = "out/server/";
     public static final String DIR_CLIENT_OUT = "out/client/";
 
-    private final Registry registry;
+    private final RpcModelRegistry rpcModelRegistry;
 
     public void dynMsgToFile(DynamicMessage dynamicMessage, String filepath) throws Throwable {
         try {
+            Path path = Paths.get(filepath);
+            if (Objects.nonNull(path.getParent())) {
+                Files.createDirectories(path.getParent());
+            }
             File file = new File(filepath);
             file.createNewFile();
 
@@ -98,7 +106,7 @@ public class DynamicMessageUtilService {
             case FLOAT -> (Float) value;
             case INT32 -> (Integer) value;
             case INT64 -> (Long) value;
-            case MESSAGE -> objectToDynamicMessage(value, registry.lookupMessage(field.getMessageType().getName()));
+            case MESSAGE -> objectToDynamicMessage(value, rpcModelRegistry.lookupMessage(field.getMessageType().getFullName()));
             case SFIXED32 -> (Integer) value;
             case SFIXED64 -> (Long) value;
             case SINT32 -> (Integer) value;

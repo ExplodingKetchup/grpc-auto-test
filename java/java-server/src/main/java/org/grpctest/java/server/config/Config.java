@@ -10,8 +10,16 @@ import org.springframework.stereotype.Component;
 @NoArgsConstructor
 public class Config {
 
+    // Filesystem
+
+    @Value("${tests.dir:test-cases/server}")
+    private String testcaseDir;
+
+    @Value("${out.dir:out/server}")
+    private String outDir;
+
     /** Port that gRPC server runs on */
-    @Value("${rpc.server.port}")
+    @Value("${server.port}")
     private int serverPort;
 
 }

@@ -3,7 +3,8 @@ package org.grpctest.core.service;
 import com.google.protobuf.DynamicMessage;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.grpctest.core.data.Registry;
+import org.grpctest.core.data.RpcModelRegistry;
+import org.grpctest.core.data.TestcaseRegistry;
 import org.grpctest.core.pojo.RpcService;
 import org.grpctest.core.pojo.TestCase;
 import org.grpctest.core.service.util.DynamicMessageUtilService;
@@ -34,37 +35,39 @@ public class ResultAnalyzer {
 
     private final String outputFileName = generateFileName();
 
-    private final Registry registry;
+    private final RpcModelRegistry rpcModelRegistry;
+
+    private final TestcaseRegistry testcaseRegistry;
 
     private final DynamicMessageUtilService dynamicMessageUtilService;
 
     public void processAllMethods() throws Throwable {
-        for (RpcService.RpcMethod method : registry.getAllMethods()) {
+        for (RpcService.RpcMethod method : rpcModelRegistry.getAllMethods()) {
             processOneMethod(method);
         }
     }
 
     private void processOneMethod(RpcService.RpcMethod method) throws Throwable {
         // File paths
-        String actualParamFilePath = DynamicMessageUtilService.DIR_SERVER_OUT + method.getOwnerServiceName() + "_" + method.getName() + "_param.bin";
-        String actualReturnFilePath = DynamicMessageUtilService.DIR_CLIENT_OUT + method.getOwnerServiceName() + "_" + method.getName() + "_return.bin";
+        String actualParamFilePath = DynamicMessageUtilService.DIR_SERVER_OUT + method.getId().replace(".", "_") + "_param.bin";
+        String actualReturnFilePath = DynamicMessageUtilService.DIR_CLIENT_OUT + method.getId().replace(".", "_") + "_return.bin";
 
         // Read actual param
         byte[] paramRaw = FileUtil.readBytes(actualParamFilePath);
         DynamicMessage paramParsed = dynamicMessageUtilService.dynMsgFromFile(
                 actualParamFilePath,
-                registry.lookupMessage(method.getInType()).getMessageDescriptor()
+                rpcModelRegistry.lookupMessage(method.getInType()).getMessageDescriptor()
         );
 
         // Read actual return
         byte[] returnRaw = FileUtil.readBytes(actualReturnFilePath);
         DynamicMessage returnParsed = dynamicMessageUtilService.dynMsgFromFile(
                 actualReturnFilePath,
-                registry.lookupMessage(method.getOutType()).getMessageDescriptor()
+                rpcModelRegistry.lookupMessage(method.getOutType()).getMessageDescriptor()
         );
 
         // Read expected values
-        TestCase testCase = registry.getMethodTestCases(method).get(0);
+        TestCase testCase = testcaseRegistry.getMethodTestCases(method).get(0);
         byte[] expectedParamRaw = testCase.getParamValueDynMsg().toByteArray();
         DynamicMessage expectedParamParsed = testCase.getParamValueDynMsg();
         byte[] expectedReturnRaw = testCase.getReturnValueDynMsg().toByteArray();
@@ -79,8 +82,7 @@ public class ResultAnalyzer {
         // Compile info into a String and append to File
         appendToFile(
                 formatResultCaseAsString(
-                        method.getOwnerServiceName(),
-                        method.getName(),
+                        method.getId(),
                         paramRaw,
                         paramParsed,
                         expectedParamRaw,
@@ -109,8 +111,7 @@ public class ResultAnalyzer {
     /**
      * Format this bunch of information to a proper String format to be written to file
      *
-     * @param serviceName
-     * @param methodName
+     * @param methodId
      * @param paramRaw
      * @param paramParsed
      * @param expectedParamRaw
@@ -124,8 +125,7 @@ public class ResultAnalyzer {
      * @param remarks
      * @return
      */
-    private String formatResultCaseAsString(String serviceName,
-                                            String methodName,
+    private String formatResultCaseAsString(String methodId,
                                             byte[] paramRaw,
                                             DynamicMessage paramParsed,
                                             byte[] expectedParamRaw,
@@ -141,7 +141,7 @@ public class ResultAnalyzer {
 
         sb.append(">>>>============================\n");
 
-        sb.append("--- ").append(serviceName).append(".").append(methodName).append(" ---\n\n");
+        sb.append("--- ").append(methodId).append(" ---\n\n");
 
         sb.append("Actual param (raw):\n").append(Base64.getEncoder().encodeToString(paramRaw)).append("\n\n");
         sb.append("Actual param (parsed):\n").append(paramParsed.toString()).append("\n\n");

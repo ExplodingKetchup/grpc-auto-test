@@ -1,7 +1,6 @@
 {
   "name": "Test case 1",
-  "serviceName": "PeopleService",
-  "methodName": "getPerson",
+  "methodId": "person.PeopleService.getPerson",
   "paramValue": {
     "personId": {
       "id": 1

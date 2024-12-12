@@ -16,24 +16,25 @@ console.log("Using environment " + env);
     let root = loadProtosProtobufjs(config.protoDir);
 
     // BEGIN RPC methods implementation
-    function getPerson(call, callback) {
+    function PeopleService_getPerson(call, callback) {
         try {
-            callback(null, getPersonImpl(call.request));
+            callback(null, PeopleService_getPersonImpl(call.request));
         } catch (e) {
-            logger.error(`[getPerson] An error occurred: ${e.message}\n${e.stack}`);
+            logger.error(`[PeopleService_getPerson] An error occurred: ${e.message}\n${e.stack}`);
         }
     }
 
-    function getPersonImpl(request) {
-        logger.info(`[getPersonImpl] Received request: ${JSON.stringify(request, null, 2)}`);
+    function PeopleService_getPersonImpl(request) {
+        logger.info(`[PeopleService_getPersonImpl] Received request: ${JSON.stringify(request, null, 2)}`);
 
-        let messageType = root.lookupType("person.GetPersonResponse");
-        messageToFile(messageType.fromObject(request), messageType, config.outDir + "PeopleService_getPerson_param.bin");
+        let requestMessageType = root.lookupType("person.GetPersonRequest");
+        let responseMessageType = root.lookupType("person.GetPersonResponse");
+        messageToFile(requestMessageType.fromObject(request), requestMessageType, config.outDir + "PeopleService_getPerson_param.bin");
         let retval = messageFromFile(
-            config.testcaseDir + "PeopleService_getPerson_return.bin", 
-            messageType
+            config.testcaseDir + "PeopleService_getPerson_return.bin",
+            responseMessageType
         );
-        logger.info(`[getPersonImpl] Response: ${JSON.stringify(retval, null, 2)}`)
+        logger.info(`[PeopleService_getPersonImpl] Response: ${JSON.stringify(retval, null, 2)}`)
         return retval;
     }
 
@@ -42,9 +43,11 @@ console.log("Using environment " + env);
     // BEGIN Server
     function getServer() {
         let server = new grpc.Server();
+
         server.addService(protosGrpc.person.PeopleService.service, {
-            getPerson: getPerson
+            getPerson: PeopleService_getPerson
         });
+
         return server;
     }
 

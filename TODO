@@ -4,10 +4,25 @@ TODO:
 - Auto read log files and verify
 - Containerize core service
 - NodeJS: autogen
+- Add namespace in core registry
 - NodeJS: Core service integration
 - Java: Separate test-cases mount
 - Java: Reorganize constants / configs
 - Java: Autogen properties files
+- Java: possible bugs at generated/JavaClient line 34
+    - param(ServiceName)(MethodName) may be confused with param(ServiceNameMethod)(Name)
 - Reorganize constants / configs
+- Reorganize ftl data models
+    - Each data model should contain 1 registry and 1 config object
+    - Base models: ClientDataModel and ServerDataModel (Contains everything)
+    - Can extend base models for cases such as Java service impl (Only contains 1 service)
+- Reorganize java codegen
+- Deploy arbitrarily 1 server and 1 client only with docker
+- Test with multiple rpc files
+- Codegen Dockerfiles and compose.yaml
+- Implement RPC throwing exceptions (we purposefully throw exceptions from server to see what client received)
+- (Optional) Compile common.protobin in Core project
 - (Optional) multiple test cases per service
 - (Optional) Streaming RPC
+- (Optional) Allow namespace to differentiate methods with same name, e.g. ns1.AService.aMethod != ns2.AService.aMethod
+- (Optional) Allow namespace to differentiate messages with same name

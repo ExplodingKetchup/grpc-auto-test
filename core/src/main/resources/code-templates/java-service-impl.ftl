@@ -1,3 +1,4 @@
+<#assign service = registry.lookupService(serviceId)>
 package org.grpctest.java.server.generated.service;
 
 import io.grpc.stub.StreamObserver;
@@ -17,12 +18,12 @@ public class ${service.name} extends ${service.name}Grpc.${service.name}ImplBase
     @Autowired
     private Config config;
 
-<#list service.methods as method>
+<#list registry.getAllMethods(serviceId) as method>
     @Override
     <#if method.type == "UNARY">
-    public void ${method.name}(${method.inType} request, StreamObserver<${method.outType}> responseObserver) {
+    public void ${method.name}(${method.inType?split(".")?last} request, StreamObserver<${method.outType?split(".")?last}> responseObserver) {
         try {
-            MessageUtil.messageToFile(request, config.getOutDir() + File.separator + "${service.name}_${method.name}_param.bin");
+            MessageUtil.messageToFile(request, config.getOutDir() + File.separator + "${method.id?replace(".", "_")}_param.bin");
             responseObserver.onNext(${method.name}Impl(request));
             responseObserver.onCompleted();
         } catch (Throwable t) {
@@ -31,9 +32,9 @@ public class ${service.name} extends ${service.name}Grpc.${service.name}ImplBase
     }
     </#if>
 
-    private ${method.outType} ${method.name}Impl(${method.inType} request) {
+    private ${method.outType?split(".")?last} ${method.name}Impl(${method.inType?split(".")?last} request) {
         log.info("[${method.name}Impl] Received request {}", request);
-        return MessageUtil.messageFromFile(config.getTestcaseDir() + File.separator + "${service.name}_${method.name}_return.bin", ${method.outType}.class);
+        return MessageUtil.messageFromFile(config.getTestcaseDir() + File.separator + "${method.id?replace(".", "_")}_return.bin", ${method.outType?split(".")?last}.class);
     }
 </#list>
 }

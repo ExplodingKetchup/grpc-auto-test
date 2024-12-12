@@ -6,8 +6,8 @@ import io.grpc.MethodDescriptor;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.grpctest.core.config.Config;
-import org.grpctest.core.data.Registry;
-import org.grpctest.core.pojo.ProtoContent;
+import org.grpctest.core.data.RpcModelRegistry;
+import org.grpctest.core.data.TestcaseRegistry;
 import org.grpctest.core.pojo.RpcMessage;
 import org.grpctest.core.pojo.RpcService;
 import org.grpctest.core.util.StringUtil;
@@ -23,16 +23,17 @@ public class ProtobufReader {
 
     private final Config config;
 
-    private final Registry registry;
+    private final TestcaseRegistry testcaseRegistry;
 
-    public ProtoContent loadProtoContent() throws Throwable {
+    private final RpcModelRegistry rpcModelRegistry;
+
+    public void loadProtoContent() throws Throwable {
         try (FileInputStream inputStream = new FileInputStream(config.getProtoDescriptorPath())) {
 
             // Get content of descriptor set
             DescriptorProtos.FileDescriptorSet descriptorSet = DescriptorProtos.FileDescriptorSet.parseFrom(inputStream);
 
             // Loop through each .proto files
-            ProtoContent protoContent = new ProtoContent();
             for (DescriptorProtos.FileDescriptorProto fileDescriptorProto : descriptorSet.getFileList()) {
                 log.info("[loadProtoContent] Reading content of [{}]", fileDescriptorProto.getName());
 
@@ -43,31 +44,28 @@ public class ProtobufReader {
                 // Loop through message types
                 for (DescriptorProtos.DescriptorProto message : fileDescriptorProto.getMessageTypeList()) {
                     RpcMessage rpcMessage = new RpcMessage(namespace, message.getName(), fileDescriptor.findMessageTypeByName(message.getName()));
-                    protoContent.getMessages().add(rpcMessage);
-                    registry.addMessageToLookupTable(rpcMessage);
+                    rpcModelRegistry.addMessageToLookupTable(rpcMessage);
                 }
 
                 // Loop through service declarations
                 for (DescriptorProtos.ServiceDescriptorProto service : fileDescriptorProto.getServiceList()) {
-                    RpcService rpcService = new RpcService();
-                    rpcService.setOwnerNamespaceName(namespace);
-                    rpcService.setName(service.getName());
+                    RpcService rpcService = new RpcService(namespace, service.getName());
                     for (DescriptorProtos.MethodDescriptorProto method : service.getMethodList()) {
                         RpcService.RpcMethod rpcMethod = RpcService.RpcMethod.builder()
-                                .ownerServiceName(rpcService.getName())
+                                .ownerServiceId(rpcService.getId())
                                 .name(StringUtil.uncapitalizeFirstLetter(method.getName()))
                                 .type(determineMethodType(method))
-                                .inType(StringUtil.getShortenedClassName(method.getInputType()))
-                                .outType(StringUtil.getShortenedClassName(method.getOutputType()))
+                                .inType(method.getInputType().substring(1))
+                                .outType(method.getOutputType().substring(1))
                                 .build();
-                        rpcService.getMethods().add(rpcMethod);
-                        registry.addMethodToMethodTestCaseMap(rpcMethod);
+                        rpcMethod.deriveId();
+                        rpcService.getMethods().add(rpcMethod.getId());
+                        testcaseRegistry.addMethod(rpcMethod);
+                        rpcModelRegistry.addMethodToLookupTable(rpcMethod);
                     }
-                    protoContent.getServices().add(rpcService);
-                    registry.addServiceAndMethodsToLookupTable(rpcService);
+                    rpcModelRegistry.addServiceToLookupTable(rpcService);
                 }
             }
-            return protoContent;
         } catch (IOException ioe) {
             log.error("[loadProtoContent] Fail to open resource at {}", config.getProtoDescriptorPath(), ioe);
             throw ioe;

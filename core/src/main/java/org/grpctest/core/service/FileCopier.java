@@ -23,12 +23,14 @@ public class FileCopier {
 
     // Target directory to put proto files in a Java test program
     private static final String PROTO_TARGET_JAVA = "java/common/src/main/proto";
+    private static final String PROTO_TARGET_NODEJS = "nodejs/proto";
 
     private final Config config;
     private final ResourceLoader resourceLoader;
 
     public void copyProtos() throws Throwable {
         copyResourceFiles(config.getProtoClasspath(), PROTO_TARGET_JAVA);
+        copyResourceFiles(config.getProtoClasspath(), PROTO_TARGET_NODEJS);
     }
 
     /**

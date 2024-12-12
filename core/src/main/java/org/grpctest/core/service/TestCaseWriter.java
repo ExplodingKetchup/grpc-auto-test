@@ -4,7 +4,7 @@ import com.google.protobuf.DynamicMessage;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.grpctest.core.config.Config;
-import org.grpctest.core.data.Registry;
+import org.grpctest.core.data.TestcaseRegistry;
 import org.grpctest.core.pojo.TestCase;
 import org.grpctest.core.service.util.DynamicMessageUtilService;
 import org.springframework.stereotype.Service;
@@ -17,28 +17,28 @@ import java.io.*;
 @AllArgsConstructor
 public class TestCaseWriter {
     private final Config config;
-    private final Registry registry;
+    private final TestcaseRegistry testcaseRegistry;
     private final DynamicMessageUtilService dynamicMessageUtilService;
 
     public void writeAllTestCases() throws Throwable {
-        for (TestCase testCase : registry.getAllTestCases()) {
+        for (TestCase testCase : testcaseRegistry.getAllTestCases()) {
             writeTestCaseToFile(testCase);
         }
     }
 
     private void writeTestCaseToFile(TestCase testCase) throws Throwable {
-        String paramFileName = testCase.getServiceName() + "_" + testCase.getMethodName() + "_param.bin";
-        String returnFileName = testCase.getServiceName() + "_" + testCase.getMethodName() + "_return.bin";
+        String paramFileName = "client" + File.separator + testCase.getMethodId().replace(".", "_") + "_param.bin";
+        String returnFileName = "server" + File.separator + testCase.getMethodId().replace(".", "_") + "_return.bin";
         writeDynMsgToFile(testCase.getParamValueDynMsg(), paramFileName);
         writeDynMsgToFile(testCase.getReturnValueDynMsg(), returnFileName);
     }
 
     private void writeDynMsgToFile(DynamicMessage dynamicMessage, String filename) throws Throwable {
         String filepath = config.getTestsDir();
-        if (filepath.endsWith("/")) {
+        if (filepath.endsWith(File.separator)) {
             filepath = filepath + filename;
         } else {
-            filepath = filepath + "/" + filename;
+            filepath = filepath + File.separator + filename;
         }
         dynamicMessageUtilService.dynMsgToFile(dynamicMessage, filepath);
     }

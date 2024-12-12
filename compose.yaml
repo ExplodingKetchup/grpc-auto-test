@@ -8,7 +8,7 @@ services:
     container_name: java-client-container
     volumes:
       - ./log:/app/log
-      - ./test-cases:/app/test-cases
+      - ./test-cases/client:/app/test-cases/client
       - ./out/client:/app/out/client
     ports:
       - "8080:8080"
@@ -21,7 +21,7 @@ services:
     container_name: java-server-container
     volumes:
       - ./log:/app/log
-      - ./test-cases:/app/test-cases
+      - ./test-cases/server:/app/test-cases/server
       - ./out/server:/app/out/server
     ports:
       - "50051:50051"

@@ -35,17 +35,17 @@ console.log("Using environment " + env);
             logger.info(`[main] Connected to server at ${config.server.host}:${config.server.port}`);
 
             // METHOD getPerson
-            let req0 = messageFromFile(
+            let param_PeopleService_getPerson = messageFromFile(
                 config.testcaseDir + "PeopleService_getPerson_param.bin",
-                root.lookupType("person.GetPersonRequest")
+                root.lookupType("person.person.GetPersonRequest")
             );
-            logger.info(`[main] Invoke PeopleService.getPerson, param: ${JSON.stringify(req0, null, 2)}`);
+            logger.info(`[main] Invoke person.PeopleService.getPerson, param: ${JSON.stringify(param_PeopleService_getPerson, null, 2)}`);
             peopleServiceStub.getPerson(
-                req0,
-                (err, getPersonResponse) => {
+                param_PeopleService_getPerson,
+                (err, response) => {
                     genericClientRpcCallback(
                         err,
-                        getPersonResponse, 
+                        response,
                         root.lookupType("person.GetPersonResponse"),
                         "PeopleService",
                         "getPerson"

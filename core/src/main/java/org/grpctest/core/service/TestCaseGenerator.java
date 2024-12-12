@@ -7,7 +7,7 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.util.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.grpctest.core.data.Registry;
+import org.grpctest.core.data.RpcModelRegistry;
 import org.grpctest.core.pojo.RpcMessage;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +20,7 @@ import java.util.Random;
 public class TestCaseGenerator {
     private final Random random = new Random(System.currentTimeMillis());
 
-    private final Registry registry;
+    private final RpcModelRegistry rpcModelRegistry;
 
     public String generateRandomMessageJson(RpcMessage message) {
         try {
@@ -65,7 +65,7 @@ public class TestCaseGenerator {
             case FLOAT -> random.nextFloat();
             case INT -> random.nextInt();
             case LONG -> random.nextLong();
-            case MESSAGE -> generateRandomMessage(registry.lookupMessage(field.getMessageType().getName()));
+            case MESSAGE -> generateRandomMessage(rpcModelRegistry.lookupMessage(field.getMessageType().getFullName()));
             case STRING -> randomString();
         };
     }

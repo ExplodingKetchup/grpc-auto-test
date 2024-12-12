@@ -52,4 +52,17 @@ public class StringUtil {
     public static String getShortenedClassName(String longClassName) {
         return longClassName.substring(longClassName.lastIndexOf(".") + 1);
     }
+
+    public static String getServiceId(String namespace, String serviceName) {
+        return namespace + "." + serviceName;
+    }
+
+    public static String getMethodId(String namespace, String serviceName, String methodName) {
+        return namespace + "." + serviceName + "." + methodName;
+    }
+
+    public static String getMessageId(String namespace, String messageName) {
+        return namespace + "." + messageName;
+    }
+
 }

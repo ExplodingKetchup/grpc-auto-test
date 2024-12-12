@@ -3,10 +3,10 @@ package org.grpctest.core.service.codegen;
 import freemarker.template.Configuration;
 import lombok.extern.slf4j.Slf4j;
 import org.grpctest.core.config.Config;
-import org.grpctest.core.data.Registry;
-import org.grpctest.core.pojo.freemarker.ClientDataModel;
-import org.grpctest.core.pojo.freemarker.ConfigDataModel;
-import org.grpctest.core.pojo.freemarker.ServerDataModel;
+import org.grpctest.core.data.RpcModelRegistry;
+import org.grpctest.core.freemarker.datamodels.ClientDataModel;
+import org.grpctest.core.freemarker.datamodels.ConfigDataModel;
+import org.grpctest.core.freemarker.datamodels.ServerDataModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -26,14 +26,14 @@ public class NodejsCodeGenService extends BaseCodeGenService {
     private static final String NODEJS_SERVER_CONFIG_FILE = "./nodejs/config/server/deploy.js";
 
     @Autowired
-    public NodejsCodeGenService(Configuration freemarkerConfig, Config config, Registry registry) {
+    public NodejsCodeGenService(Configuration freemarkerConfig, Config config, RpcModelRegistry registry) {
         super(freemarkerConfig, config, registry);
     }
 
     public void generateNodeClient() throws Exception {
         generateFileFromFtl(
                 NODEJS_CLIENT_FTL,
-                new ClientDataModel(registry, config.getTestsDir()),
+                new ClientDataModel(registry),
                 NODEJS_CLIENT_FILE
         );
     }
@@ -65,10 +65,12 @@ public class NodejsCodeGenService extends BaseCodeGenService {
     @Override
     public void generateServer() throws Exception {
         generateNodeServer();
+        generateNodeServerConfig();
     }
 
     @Override
     public void generateClient() throws Exception {
         generateNodeClient();
+        generateNodeClientConfig();
     }
 }

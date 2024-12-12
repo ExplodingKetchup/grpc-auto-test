@@ -4,6 +4,7 @@ import io.grpc.MethodDescriptor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.grpctest.core.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,18 +17,31 @@ import java.util.List;
 @NoArgsConstructor
 public class RpcService {
 
+    /** namespace.service */
+    private String id;
+
     private String ownerNamespaceName;
 
     private String name;
 
-    private List<RpcMethod> methods = new ArrayList<>();
+    /** List of ids of methods belonging to this Service */
+    private List<String> methods = new ArrayList<>();
+
+    public RpcService(String ownerNamespaceName, String name) {
+        this.ownerNamespaceName = ownerNamespaceName;
+        this.name = name;
+        this.id = StringUtil.getServiceId(ownerNamespaceName, name);
+    }
 
     @Data
     @Builder
     public static class RpcMethod {
 
+        /** namespace.service.method */
+        private String id;
+
         // Service that this method belongs to
-        private String ownerServiceName;
+        private String ownerServiceId;
 
         // Name of RPC method
         private String name;
@@ -35,10 +49,19 @@ public class RpcService {
         // Type of gRPC method
         private MethodDescriptor.MethodType type;
 
-        // Name of the parameter (shortened class name)
+        // ID of the parameter
         private String inType;
 
-        // Name of the return (shortened class name)
+        // ID of the return value
         private String outType;
+
+        /**
+         * Create id in format namespace.service.method<br>
+         * Set {@code id} property.
+         */
+        public void deriveId() {
+            String[] owner = ownerServiceId.split("\\.");
+            this.id = StringUtil.getMethodId(owner[0], owner[1], name);
+        }
     }
 }

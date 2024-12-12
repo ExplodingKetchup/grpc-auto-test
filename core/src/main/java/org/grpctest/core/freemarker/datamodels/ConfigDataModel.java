@@ -1,4 +1,4 @@
-package org.grpctest.core.pojo.freemarker;
+package org.grpctest.core.freemarker.datamodels;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

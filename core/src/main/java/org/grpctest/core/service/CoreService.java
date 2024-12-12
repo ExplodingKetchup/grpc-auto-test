@@ -3,9 +3,9 @@ package org.grpctest.core.service;
 import com.google.protobuf.DynamicMessage;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.grpctest.core.data.Registry;
+import org.grpctest.core.data.RpcModelRegistry;
+import org.grpctest.core.data.TestcaseRegistry;
 import org.grpctest.core.pojo.TestCase;
-import org.grpctest.core.pojo.ProtoContent;
 import org.grpctest.core.pojo.RpcService;
 import org.grpctest.core.service.codegen.JavaCodeGenService;
 import org.grpctest.core.service.codegen.NodejsCodeGenService;
@@ -33,7 +33,9 @@ public class CoreService implements InitializingBean {
     
     private final TestCaseWriter testCaseWriter;
 
-    private final Registry registry;
+    private final RpcModelRegistry rpcModelRegistry;
+
+    private final TestcaseRegistry testcaseRegistry;
     
     private final DockerService dockerService;
     
@@ -52,33 +54,18 @@ public class CoreService implements InitializingBean {
 //            log.info("[Step 2 of 9] Finished compiling .proto file for Java");
 //
             // Read content of .proto files
-            ProtoContent protoContent = protobufReader.loadProtoContent();
+            protobufReader.loadProtoContent();
             log.info("[Step 3 of 9] Finished reading content of .proto files");
 
             // Load test cases
             customTestCaseReader.loadTestCasesToRegistry();
 
             // Generate random test cases for services without custom test cases
-            for (RpcService.RpcMethod method : registry.getAllMethodsWithoutTestCases()) {
-                DynamicMessage paramDynMsg = testCaseGenerator.generateRandomMessage(registry.lookupMessage(method.getInType()));
-                DynamicMessage returnDynMsg = testCaseGenerator.generateRandomMessage(registry.lookupMessage(method.getOutType()));
-                TestCase testCase = new TestCase(method.getOwnerServiceName() + "." + method.getName() + "_random",
-                        method.getOwnerServiceName(),
-                        method.getName(),
-                        null,
-                        null,
-                        paramDynMsg,
-                        null,
-                        null,
-                        returnDynMsg
-                );
-                log.info("Added test case {}", testCase);
-                registry.addTestCase(method, testCase);
-            }
+            generateRandomTestcases();
             log.info("[Step 4 of 9] Finished loading test cases");
 
 //            // Write all test cases to binary file
-//            testCaseWriter.writeAllTestCases();
+            testCaseWriter.writeAllTestCases();
 //            log.info("[Step 5 of 9] Finished writing test cases to file");
 //
 //            // Generate Java server
@@ -89,12 +76,12 @@ public class CoreService implements InitializingBean {
 //            javaCodeGenService.generateJavaServer();
 //            log.info("[Step 6 of 9] Finished generating Java server");
 //
-//            // Generate Java client
-//            javaCodeGenService.generateJavaClient();
+            // Generate Java client
+//            javaCodeGenService.generateServer();
 //            log.info("[Step 7 of 9] Finished generating Java client");
 //
             // Generate Nodejs
-            nodejsCodeGenService.generateServer();
+//            nodejsCodeGenService.generateNodeClient();
 //            // Build Docker containers and Docker compose project
 //            mavenInvoker.buildClientServer();
 //            dockerService.dockerComposeUp();
@@ -107,6 +94,24 @@ public class CoreService implements InitializingBean {
             log.info("Finished testing");
         } catch (Throwable t) {
             log.error("An error occurred, terminating test", t);
+        }
+    }
+
+    private void generateRandomTestcases() {
+        for (RpcService.RpcMethod method : testcaseRegistry.getAllMethodsWithoutTestCases()) {
+            DynamicMessage paramDynMsg = testCaseGenerator.generateRandomMessage(rpcModelRegistry.lookupMessage(method.getInType()));
+            DynamicMessage returnDynMsg = testCaseGenerator.generateRandomMessage(rpcModelRegistry.lookupMessage(method.getOutType()));
+            TestCase testCase = new TestCase(method.getId() + "_random",
+                    method.getId(),
+                    null,
+                    null,
+                    paramDynMsg,
+                    null,
+                    null,
+                    returnDynMsg
+            );
+            log.info("[generateRandomTestcases] Added test case {}", testCase);
+            testcaseRegistry.addTestCase(testCase);
         }
     }
 }
