@@ -10,7 +10,6 @@ out/
 TODO
 ~$*.xlsx
 cpp/
-setup/
 
 ### IntelliJ IDEA ###
 .idea/modules.xml
