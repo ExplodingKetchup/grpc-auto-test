@@ -69,7 +69,7 @@ public class CoreService implements InitializingBean {
 //            log.info("[Step 5 of 9] Finished writing test cases to file");
 
             // Generate Java test
-//            javaCodeGenService.generateAllFiles();
+            javaCodeGenService.generateAllFiles();
 //            log.info("[Step 6 of 9] Finished generating Java server");
 
             // Generate Nodejs
@@ -80,8 +80,8 @@ public class CoreService implements InitializingBean {
 //            log.info("[Step 8 of 9] Finished building and launched test containers");
             
             // Analyze result
-            resultAnalyzer.processAllMethods();
-            log.info("[Step 9 of 9] Finished analyzing results");
+//            resultAnalyzer.processAllMethods();
+//            log.info("[Step 9 of 9] Finished analyzing results");
 
             log.info("Finished testing");
         } catch (Throwable t) {

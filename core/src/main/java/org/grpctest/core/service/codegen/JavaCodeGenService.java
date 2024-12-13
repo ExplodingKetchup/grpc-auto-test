@@ -5,6 +5,7 @@ import freemarker.template.Template;
 import lombok.extern.slf4j.Slf4j;
 import org.grpctest.core.config.Config;
 import org.grpctest.core.data.RpcModelRegistry;
+import org.grpctest.core.freemarker.datamodels.ConfigDataModel;
 import org.grpctest.core.freemarker.datamodels.ServerDataModel;
 import org.grpctest.core.pojo.RpcService;
 import org.grpctest.core.freemarker.datamodels.ClientDataModel;
@@ -22,8 +23,12 @@ public class JavaCodeGenService extends BaseCodeGenService {
     private static final String JAVA_SVC_DIR = "./java/java-server/src/main/java/org/grpctest/java/server/generated/service/";
     private static final String JAVA_CLIENT_FTL = "java-client.ftl";
     private static final String JAVA_CLIENT_FILE = "./java/java-client/src/main/java/org/grpctest/java/client/generated/JavaClient.java";
+    private static final String JAVA_CLIENT_CONFIG_FTL = "java-client-config.ftl";
+    private static final String JAVA_CLIENT_CONFIG_FILE = "./java/java-client/src/main/resources/application.properties";
     private static final String JAVA_SERVER_FTL = "java-server.ftl";
     private static final String JAVA_SERVER_FILE = "./java/java-server/src/main/java/org/grpctest/java/server/generated/JavaServer.java";
+    private static final String JAVA_SERVER_CONFIG_FTL = "java-server-config.ftl";
+    private static final String JAVA_SERVER_CONFIG_FILE = "./java/java-server/src/main/resources/application.properties";
     private static final String JAVA_FILE_EXT = ".java";
 
     @Autowired
@@ -56,7 +61,19 @@ public class JavaCodeGenService extends BaseCodeGenService {
     }
 
     public void generateJavaClientConfig() throws Exception {
+        generateFileFromFtl(
+                JAVA_CLIENT_CONFIG_FTL,
+                new ConfigDataModel(config),
+                JAVA_CLIENT_CONFIG_FILE
+        );
+    }
 
+    public void generateJavaServerConfig() throws Exception {
+        generateFileFromFtl(
+                JAVA_SERVER_CONFIG_FTL,
+                new ConfigDataModel(config),
+                JAVA_SERVER_CONFIG_FILE
+        );
     }
 
     @Override
@@ -65,10 +82,12 @@ public class JavaCodeGenService extends BaseCodeGenService {
         for (RpcService service : registry.getAllServices()) {
             generateJavaService(service);
         }
+        generateJavaServerConfig();
     }
 
     @Override
     public void generateClient() throws Exception {
         generateJavaClient();
+        generateJavaClientConfig();
     }
 }
