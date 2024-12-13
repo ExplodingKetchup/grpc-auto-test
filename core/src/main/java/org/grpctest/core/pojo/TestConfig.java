@@ -14,14 +14,12 @@ public class TestConfig {
 
     @Getter
     public enum Language {
-        JAVA("JAVA", "Java"),
-        NODEJS("NODE", "Node.JS");
+        JAVA("Java"),
+        NODEJS("Node.JS");
 
-        private final String id;
         private final String displayName;
 
-        Language(String id, String displayName) {
-            this.id = id;
+        Language(String displayName) {
             this.displayName = displayName;
         }
     }

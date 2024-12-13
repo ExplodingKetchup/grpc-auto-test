@@ -50,7 +50,7 @@ public class SetupScriptInterpreter {
 
     private void interpretServerOpCode(String arg) throws IllegalArgumentException {
         try {
-            testConfig.setServer(TestConfig.Language.valueOf(arg));
+            testConfig.setServer(TestConfig.Language.valueOf(StringUtils.capitalize(arg)));
         } catch (IllegalArgumentException iae) {
             log.error("[interpretServerOpCode] Illegal argument: {}", arg);
             throw new IllegalArgumentException("Illegal argument for opcode SERVER", iae);
@@ -59,7 +59,7 @@ public class SetupScriptInterpreter {
 
     private void interpretClientOpCode(String arg) throws IllegalArgumentException {
         try {
-            testConfig.setClient(TestConfig.Language.valueOf(arg));
+            testConfig.setClient(TestConfig.Language.valueOf(StringUtils.capitalize(arg)));
         } catch (IllegalArgumentException iae) {
             log.error("[interpretClientOpCode] Illegal argument: {}", arg);
             throw new IllegalArgumentException("Illegal argument for opcode CLIENT", iae);
