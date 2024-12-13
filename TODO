@@ -20,6 +20,7 @@ TODO:
 - Deploy arbitrarily 1 server and 1 client only with docker
 - Test with multiple rpc files
 - Codegen Dockerfiles and compose.yaml
+- CoreService clean up service
 - Implement RPC throwing exceptions (we purposefully throw exceptions from server to see what client received)
 - (Optional) Compile common.protobin in Core project
 - (Optional) multiple test cases per service

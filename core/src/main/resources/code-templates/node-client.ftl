@@ -17,12 +17,12 @@ console.log("Using environment " + env);
     let root = loadProtosProtobufjs(config.protoDir);
 
     // Client generic rpc callback
-    function genericClientRpcCallback(err, response, responseType, serviceName, methodName) {
+    function genericClientRpcCallback(err, response, responseType, methodId) {
         if (err) {
             logger.error(`[genericClientRpcCallback] RPC invoke failed: ${"$"}{err.message}\n${"$"}{err.stack}`);
         } else {
-            logger.info(`[genericClientRpcCallback] Method ${"$"}{serviceName}.${"$"}{methodName} returns ${"$"}{JSON.stringify(responseType.fromObject(response), null, 2)}`);
-            messageToFile(responseType.fromObject(response), responseType, config.outDir + serviceName + "_" + methodName + "_return.bin");
+            logger.info(`[genericClientRpcCallback] Method ${"$"}{methodId} returns ${"$"}{JSON.stringify(responseType.fromObject(response), null, 2)}`);
+            messageToFile(responseType.fromObject(response), responseType, config.outDir + methodId.replaceAll(".", "_") + "_return.bin");
         }
     }
 
@@ -32,25 +32,24 @@ console.log("Using environment " + env);
 
 <#list registry.getAllServices() as service>
             // >>> SERVICE ${service.name}
-            let ${service.name?uncap_first}Stub = new protosGrpc.${service.ownerNamespaceName}.${service.name}(config.server.host + ':' + config.server.port, grpc.credentials.createInsecure());
+            let ${service.name?uncap_first}Stub = new protosGrpc.${service.id}(config.server.host + ':' + config.server.port, grpc.credentials.createInsecure());
             logger.info(`[main] Connected to server at ${"$"}{config.server.host}:${"$"}{config.server.port}`);
 
     <#list registry.getAllMethods(service) as method>
             // METHOD ${method.name}
-            let param_${service.name}_${method.name} = messageFromFile(
-                config.testcaseDir + "${service.name}_${method.name}_param.bin",
-                root.lookupType("${registry.lookupMessage(method.inType).ownerNamespaceName}.${method.inType}")
+            let param_${method.id?replace(".", "_")} = messageFromFile(
+                config.testcaseDir + "${method.id?replace(".", "_")}_param.bin",
+                root.lookupType("${method.inType}")
             );
-            logger.info(`[main] Invoke ${method.id}, param: ${"$"}{JSON.stringify(param_${service.name}_${method.name}, null, 2)}`);
+            logger.info(`[main] Invoke ${method.id}, param: ${"$"}{JSON.stringify(param_${method.id?replace(".", "_")}, null, 2)}`);
             ${service.name?uncap_first}Stub.${method.name}(
-                param_${service.name}_${method.name},
+                param_${method.id?replace(".", "_")},
                 (err, response) => {
                     genericClientRpcCallback(
                         err,
                         response,
                         root.lookupType("${method.outType}"),
-                        "${service.name}",
-                        "${method.name}"
+                        "${method.id}"
                     )
                 }
             )

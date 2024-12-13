@@ -45,14 +45,14 @@ public class CoreService implements InitializingBean {
     public void afterPropertiesSet() throws Exception {
 
         try {
-//            // Copy predefined files to destination
+            // Copy predefined files to destination
 //            fileCopier.copyProtos();
 //            log.info("[Step 1 of 9] Finished copy predefined files for Java");
 //
 //            // Compile .proto files for Java
 //            mavenInvoker.buildCommon();
 //            log.info("[Step 2 of 9] Finished compiling .proto file for Java");
-//
+
             // Read content of .proto files
             protobufReader.loadProtoContent();
             log.info("[Step 3 of 9] Finished reading content of .proto files");
@@ -64,32 +64,24 @@ public class CoreService implements InitializingBean {
             generateRandomTestcases();
             log.info("[Step 4 of 9] Finished loading test cases");
 
-//            // Write all test cases to binary file
-            testCaseWriter.writeAllTestCases();
+            // Write all test cases to binary file
+//            testCaseWriter.writeAllTestCases();
 //            log.info("[Step 5 of 9] Finished writing test cases to file");
-//
-//            // Generate Java server
-//            for (RpcService service : registry.getAllServices()) {
-//                // Generate source codes
-//                javaCodeGenService.generateJavaService(service);
-//            }
-//            javaCodeGenService.generateJavaServer();
+
+            // Generate Java test
+//            javaCodeGenService.generateAllFiles();
 //            log.info("[Step 6 of 9] Finished generating Java server");
-//
-            // Generate Java client
-//            javaCodeGenService.generateServer();
-//            log.info("[Step 7 of 9] Finished generating Java client");
-//
+
             // Generate Nodejs
-//            nodejsCodeGenService.generateNodeClient();
-//            // Build Docker containers and Docker compose project
+//            nodejsCodeGenService.generateAllFiles();
+            // Build Docker containers and Docker compose project
 //            mavenInvoker.buildClientServer();
 //            dockerService.dockerComposeUp();
 //            log.info("[Step 8 of 9] Finished building and launched test containers");
             
-//            // Analyze result
-//            resultAnalyzer.processAllMethods();
-//            log.info("[Step 9 of 9] Finished analyzing results");
+            // Analyze result
+            resultAnalyzer.processAllMethods();
+            log.info("[Step 9 of 9] Finished analyzing results");
 
             log.info("Finished testing");
         } catch (Throwable t) {

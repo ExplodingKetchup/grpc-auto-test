@@ -9,7 +9,7 @@ config.testcaseDir = '${config.nodejsClientTestsDir}';
 config.outDir = '${config.nodejsClientOutDir}';
 config.server = {
     host : '${config.nodejsClientServerHost}',
-    port : ${config.nodejsClientServerPort}
+    port : ${config.nodejsClientServerPort?c}
 };
 
 export { config };

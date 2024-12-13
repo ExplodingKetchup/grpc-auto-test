@@ -17,12 +17,12 @@ console.log("Using environment " + env);
     let root = loadProtosProtobufjs(config.protoDir);
 
     // Client generic rpc callback
-    function genericClientRpcCallback(err, response, responseType, serviceName, methodName) {
+    function genericClientRpcCallback(err, response, responseType, methodId) {
         if (err) {
             logger.error(`[genericClientRpcCallback] RPC invoke failed: ${err.message}\n${err.stack}`);
         } else {
-            logger.info(`[genericClientRpcCallback] Method ${serviceName}.${methodName} returns ${JSON.stringify(responseType.fromObject(response), null, 2)}`);
-            messageToFile(responseType.fromObject(response), responseType, config.outDir + serviceName + "_" + methodName + "_return.bin");
+            logger.info(`[genericClientRpcCallback] Method ${methodId} returns ${JSON.stringify(responseType.fromObject(response), null, 2)}`);
+            messageToFile(responseType.fromObject(response), responseType, config.outDir + methodId.replaceAll(".", "_") + "_return.bin");
         }
     }
 
@@ -35,20 +35,19 @@ console.log("Using environment " + env);
             logger.info(`[main] Connected to server at ${config.server.host}:${config.server.port}`);
 
             // METHOD getPerson
-            let param_PeopleService_getPerson = messageFromFile(
-                config.testcaseDir + "PeopleService_getPerson_param.bin",
-                root.lookupType("person.person.GetPersonRequest")
+            let param_person_PeopleService_getPerson = messageFromFile(
+                config.testcaseDir + "person_PeopleService_getPerson_param.bin",
+                root.lookupType("person.GetPersonRequest")
             );
-            logger.info(`[main] Invoke person.PeopleService.getPerson, param: ${JSON.stringify(param_PeopleService_getPerson, null, 2)}`);
+            logger.info(`[main] Invoke person.PeopleService.getPerson, param: ${JSON.stringify(param_person_PeopleService_getPerson, null, 2)}`);
             peopleServiceStub.getPerson(
-                param_PeopleService_getPerson,
+                param_person_PeopleService_getPerson,
                 (err, response) => {
                     genericClientRpcCallback(
                         err,
                         response,
                         root.lookupType("person.GetPersonResponse"),
-                        "PeopleService",
-                        "getPerson"
+                        "person.PeopleService.getPerson"
                     )
                 }
             )

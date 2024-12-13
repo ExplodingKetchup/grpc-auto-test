@@ -17,25 +17,25 @@ console.log("Using environment " + env);
 
     // BEGIN RPC methods implementation
 <#list registry.getAllMethods() as method>
-    function ${method.ownerServiceName}_${method.name}(call, callback) {
+    function ${method.id?replace(".", "_")}(call, callback) {
         try {
-            callback(null, ${method.ownerServiceName}_${method.name}Impl(call.request));
+            callback(null, ${method.id?replace(".", "_")}_impl(call.request));
         } catch (e) {
-            logger.error(`[${method.ownerServiceName}_${method.name}] An error occurred: ${"$"}{e.message}\n${"$"}{e.stack}`);
+            logger.error(`[${method.id?replace(".", "_")}] An error occurred: ${"$"}{e.message}\n${"$"}{e.stack}`);
         }
     }
 
-    function ${method.ownerServiceName}_${method.name}Impl(request) {
-        logger.info(`[${method.ownerServiceName}_${method.name}Impl] Received request: ${"$"}{JSON.stringify(request, null, 2)}`);
+    function ${method.id?replace(".", "_")}_impl(request) {
+        logger.info(`[${method.id?replace(".", "_")}_impl] Received request: ${"$"}{JSON.stringify(request, null, 2)}`);
 
-        let requestMessageType = root.lookupType("${registry.lookupMessage(method.inType).ownerNamespaceName}.${registry.lookupMessage(method.inType).name}");
-        let responseMessageType = root.lookupType("${registry.lookupMessage(method.outType).ownerNamespaceName}.${registry.lookupMessage(method.outType).name}");
-        messageToFile(requestMessageType.fromObject(request), requestMessageType, config.outDir + "${method.ownerServiceName}_${method.name}_param.bin");
+        let requestMessageType = root.lookupType("${method.inType}");
+        let responseMessageType = root.lookupType("${method.outType}");
+        messageToFile(requestMessageType.fromObject(request), requestMessageType, config.outDir + "${method.id?replace(".", "_")}_param.bin");
         let retval = messageFromFile(
-            config.testcaseDir + "${method.ownerServiceName}_${method.name}_return.bin",
+            config.testcaseDir + "${method.id?replace(".", "_")}_return.bin",
             responseMessageType
         );
-        logger.info(`[${method.ownerServiceName}_${method.name}Impl] Response: ${"$"}{JSON.stringify(retval, null, 2)}`)
+        logger.info(`[${method.id?replace(".", "_")}_impl] Response: ${"$"}{JSON.stringify(retval, null, 2)}`)
         return retval;
     }
 
@@ -47,9 +47,9 @@ console.log("Using environment " + env);
         let server = new grpc.Server();
 
 <#list registry.getAllServices() as service>
-        server.addService(protosGrpc.${service.ownerNamespaceName}.${service.name}.service, {
+        server.addService(protosGrpc.${service.id}.service, {
     <#list registry.getAllMethods(service) as method>
-            ${method.name}: ${method.ownerServiceName}_${method.name}
+            ${method.name}: ${method.id?replace(".", "_")}
     </#list>
         });
 
