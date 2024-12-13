@@ -8,6 +8,8 @@ protobin/
 out/
 **/node_modules/
 TODO
+~$*.xlsx
+cpp/
 
 ### IntelliJ IDEA ###
 .idea/modules.xml
