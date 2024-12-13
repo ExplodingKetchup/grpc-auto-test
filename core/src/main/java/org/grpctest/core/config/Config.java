@@ -31,6 +31,10 @@ public class Config {
     @Value("${core.out.tests.dir:test-cases}")
     private String testsDir;
 
+    /** Test setup script (File path) */
+    @Value("${core.setup.script:setup/setup.txt}")
+    private String setupScriptFilePath;
+
     /** Enable debug mode */
     @Value("${core.dev.debug.enabled:false}")
     private boolean debugEnabled;
