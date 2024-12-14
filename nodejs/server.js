@@ -9,7 +9,7 @@ console.log("Using environment " + env);
     console.log(config);
 
     // Configuring logger
-    const logger = createLogger(config.log.dir + config.log.filename);
+    const logger = createLogger(config.log.dir, config.log.filename.slice(0, -4));
 
     // Global variables
     let protosGrpc = loadProtosGrpc(config.protoDir);

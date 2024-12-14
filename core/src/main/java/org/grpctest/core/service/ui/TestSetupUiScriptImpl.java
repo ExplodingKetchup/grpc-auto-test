@@ -3,9 +3,11 @@ package org.grpctest.core.service.ui;
 import lombok.extern.slf4j.Slf4j;
 import org.grpctest.core.config.Config;
 import org.grpctest.core.pojo.TestConfig;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service
+@Qualifier("script")
 @Slf4j
 public class TestSetupUiScriptImpl implements TestSetupUi {
 

@@ -3,10 +3,19 @@ import * as protoLoader from '@grpc/proto-loader';
 import * as fs from 'fs';
 import protobuf from 'protobufjs';
 import * as winston from 'winston';
+import DailyRotateFile from 'winston-daily-rotate-file';
 
 // Common utilities
 
-function createLogger(logFilePath) {
+function createLogger(logFolder, logFilePrefix) {
+    // Configure the transport for daily rotation
+    const transport = new DailyRotateFile({
+        filename: logFolder + logFilePrefix + '.%DATE%.log',    // Log file name with date placeholder
+        datePattern: 'YYYY-MM-DD',                              // Rotation frequency based on date
+        zippedArchive: true,                                    // Compress old log files
+        maxSize: '20m',                                         // Maximum file size before rotation
+        maxFiles: '14d',                                        // Keep logs for 14 days
+    });
     return winston.createLogger({
         level: 'info',
         format: winston.format.combine(
@@ -16,7 +25,7 @@ function createLogger(logFilePath) {
             })
         ),
         transports: [
-          new winston.transports.File({ filename: logFilePath, level: 'info' }),
+          transport,
           new winston.transports.Console({ format: winston.format.simple() })
         ],
     });

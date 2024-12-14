@@ -107,15 +107,8 @@ public class MavenInvoker {
         }
     }
 
-    public void buildClientServer() throws Throwable {
+    public void buildServer() throws Throwable {
         try {
-            this.
-                    setWorkingDir(JAVA_CLIENT)
-                    .addMvnGoal(MavenGoal.CLEAN)
-                    .addMvnGoal(MavenGoal.PACKAGE)
-                    .addParam("DskipTests", "")
-                    .execute("client");
-
             this.
                     setWorkingDir(JAVA_SERVER)
                     .addMvnGoal(MavenGoal.CLEAN)
@@ -123,7 +116,21 @@ public class MavenInvoker {
                     .addParam("DskipTests", "")
                     .execute("server");
         } catch (Exception e) {
-            log.error("[buildClientServer] An error occurred", e);
+            log.error("[buildServer] An error occurred", e);
+            throw e;
+        }
+    }
+
+    public void buildClient() throws Throwable {
+        try {
+            this.
+                    setWorkingDir(JAVA_CLIENT)
+                    .addMvnGoal(MavenGoal.CLEAN)
+                    .addMvnGoal(MavenGoal.PACKAGE)
+                    .addParam("DskipTests", "")
+                    .execute("client");
+        } catch (Exception e) {
+            log.error("[buildClient] An error occurred", e);
             throw e;
         }
     }

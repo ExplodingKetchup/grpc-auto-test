@@ -6,10 +6,15 @@ import org.apache.commons.lang3.StringUtils;
 import org.grpctest.core.config.Config;
 import org.springframework.stereotype.Component;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -59,6 +64,30 @@ public class ExternalProcessUtilService {
             if (exitCode != 0) {
                 throw new Exception("External process [" + cmd + "] failed with exit code " + exitCode);
             }
+        }
+    }
+
+    public String executeAndReturnOutput(String workingDir, String cmd) throws Exception {
+        // Get working directory
+        String resolvedWorkingDir = StringUtils.startsWith(workingDir, "./") ? (System.getProperty("user.dir") + workingDir.substring(1)) : workingDir;
+
+        // Create process
+        ProcessBuilder processBuilder = new ProcessBuilder();
+        processBuilder.command("sh", "-c", cmd);
+        processBuilder.directory(new File(resolvedWorkingDir));
+        processBuilder.redirectErrorStream(true);
+
+        // Launch process
+        Process process = processBuilder.start();
+        InputStream processInputStream = process.getInputStream();
+        int exitCode = process.waitFor();
+        if (exitCode != 0) {
+            throw new Exception("External process [" + cmd + "] failed with exit code " + exitCode);
+        } else {
+            return new BufferedReader(
+                    new InputStreamReader(processInputStream, StandardCharsets.UTF_8))
+                    .lines()
+                    .collect(Collectors.joining("\n"));
         }
     }
 }
