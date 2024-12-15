@@ -2,12 +2,14 @@ package org.grpctest.core.config;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.grpctest.core.pojo.CleanupMode;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
 @Getter
+@Setter
 @NoArgsConstructor
 public class Config {
 
@@ -37,11 +39,11 @@ public class Config {
     private String setupScriptFilePath;
 
     /** Max waiting time for docker compose to build and launch server / client */
-    @Value("${core.docker.compose.timeout.ms:300000")
+    @Value("${core.docker.compose.timeout.ms:300000}")
     private long dockerComposeTimeoutMillis;
 
     /** Max waiting time after successfully launch server + client before force quit */
-    @Value("${core.test.timeout.ms:300000")
+    @Value("${core.test.timeout.ms:300000}")
     private long testTimeoutMillis;
 
     /** Max time waiting for server to start (after successful docker compose up server) before launching client */
@@ -49,7 +51,7 @@ public class Config {
     private long serverStartupTimeoutMillis;
 
     /** Cleans up temporary files before or after test, or both, or none. Check {@link org.grpctest.core.pojo.CleanupMode} for details */
-    @Value("${core.cleanup.mode:3}")
+    @Value("${core.cleanup.mode:BEFORE_AND_AFTER}")
     private CleanupMode cleanupMode;
 
     /** Enable debug mode */

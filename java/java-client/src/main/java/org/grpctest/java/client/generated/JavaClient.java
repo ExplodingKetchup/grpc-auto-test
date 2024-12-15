@@ -38,6 +38,7 @@ public class JavaClient implements InitializingBean {
         GetPersonRequest param_person_PeopleService_getPerson = MessageUtil.messageFromFile(config.getTestcaseDir() + File.separator + "person_PeopleService_getPerson_param.bin", GetPersonRequest.class);
         invokeRpcMethod(peopleServiceBlockingStub::getPerson, param_person_PeopleService_getPerson, "person.PeopleService.getPerson");
 
+        while(true);
     }
 
     private <T, R> void invokeRpcMethod(Function<T, R> method, T parameter, String methodId) {

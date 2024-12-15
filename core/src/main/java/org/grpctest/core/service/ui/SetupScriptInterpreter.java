@@ -1,6 +1,7 @@
 package org.grpctest.core.service.ui;
 
 import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.grpctest.core.pojo.TestConfig;
@@ -9,7 +10,7 @@ import org.springframework.stereotype.Service;
 import java.io.*;
 import java.util.Arrays;
 
-@AllArgsConstructor
+@NoArgsConstructor
 @Service
 @Slf4j
 public class SetupScriptInterpreter {
@@ -17,6 +18,7 @@ public class SetupScriptInterpreter {
     private TestConfig testConfig;
 
     public TestConfig interpretScript(String filepath) throws IllegalArgumentException, FileNotFoundException, IOException {
+        testConfig = new TestConfig();
         try (BufferedReader bufferedReader = new BufferedReader(new FileReader(filepath))) {
             String line;
             while ((line = bufferedReader.readLine()) != null) {

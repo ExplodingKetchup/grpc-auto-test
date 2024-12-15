@@ -65,4 +65,7 @@ console.log("Using environment " + env);
 
     main();
 
+    // Keep running for 1 min (60000 ms)
+    setTimeout(() => {}, 60000);
+
 })();

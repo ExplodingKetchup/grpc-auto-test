@@ -3,14 +3,16 @@ TODO:
 - Add maven invoker check for maven error and throw (50%, not thrown)
 - Auto read log files and verify
 - Containerize core service
-- Deploy arbitrarily 1 server and 1 client only with docker
 - Test with multiple rpc files
 - Codegen Dockerfiles and compose.yaml
-- CoreService clean up service
 - Testcase from users read from files (not resources) or allow user to edit and save to files
 - Implement RPC throwing exceptions (we purposefully throw exceptions from server to see what client received)
 - (Optional) Compile common.protobin in Core project
 - (Optional) multiple test cases per service
 - (Optional) Streaming RPC
-- (Optional) Allow namespace to differentiate methods with same name, e.g. ns1.AService.aMethod != ns2.AService.aMethod
-- (Optional) Allow namespace to differentiate messages with same name
+- Include metadata in RPC calls
+- Exception / Error handling
+- Channels-specific problems (e.g. compression)
+- Deadlines inconsistencies (Set same deadlines for both client and server, then wait and send delayed response)
+- RPC cancellation inconsistencies
+- RPC status difference between server and client due to languages? (e.g. server: success, client: fail)

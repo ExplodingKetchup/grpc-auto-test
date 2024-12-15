@@ -44,6 +44,7 @@ public class JavaClient implements InitializingBean {
         invokeRpcMethod(${method.ownerServiceId?split(".")?last?uncap_first}BlockingStub::${method.name}, param_${method.id?replace(".", "_")}, "${method.id}");
 
 </#list>
+        while(true);
     }
 
     private <T, R> void invokeRpcMethod(Function<T, R> method, T parameter, String methodId) {

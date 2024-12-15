@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -54,6 +55,7 @@ public class DockerService {
                 if (healthCheck(validServices.split(" "))) {
                     consecutiveSuccessHealthChecks++;
                     if (consecutiveSuccessHealthChecks >= STABLE_THRESHOLD_INTERVALS) {
+                        log.info("[dockerComposeUpSpecifyServices] Successfully launched service [{}]", (Object) services);
                         return;
                     }
                 } else {

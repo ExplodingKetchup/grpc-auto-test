@@ -131,6 +131,8 @@ public class CoreService implements InitializingBean {
 
             // Ask user which languages to test
             TestConfig testConfig = testSetupUi.setupEverything();
+            setServerInConfig(testConfig);
+            log.info("Finished reading user input. Server: [{}]. Client: [{}]", testConfig.getServer().getDisplayName(), testConfig.getClient().getDisplayName());
 
             // Build and launch server
             switch (testConfig.getServer()) {
@@ -140,6 +142,7 @@ public class CoreService implements InitializingBean {
 
             // Wait for server to start properly
             TimeUtil.pollForCondition(() -> checkServerRunning(testConfig.getServer()), 1000, config.getServerStartupTimeoutMillis());
+            log.info("Server started, will start launching client...");
 
             // Build and launch client
             switch (testConfig.getClient()) {
@@ -156,6 +159,7 @@ public class CoreService implements InitializingBean {
         } finally {
             try {
                 // Clean up and Analyze results if there was no error last run
+                log.info("Tests are finished. Did we encounter error? {}", hasError);
                 finalize(!hasError);
                 log.info("Finished testing");
             } catch (Throwable e) {
@@ -202,6 +206,14 @@ public class CoreService implements InitializingBean {
             );
             log.info("[generateRandomTestcases] Added test case {}", testCase);
             testcaseRegistry.addTestCase(testCase);
+        }
+    }
+
+    private void setServerInConfig(TestConfig testConfig) {
+        String serverName = TestConfig.Language.SERVER_NAME.get(testConfig.getServer());
+        switch (testConfig.getClient()) {
+            case JAVA -> config.setJavaClientServerHost(serverName);
+            case NODEJS -> config.setNodejsClientServerHost(serverName);
         }
     }
 
