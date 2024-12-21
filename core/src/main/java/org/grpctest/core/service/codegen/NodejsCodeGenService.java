@@ -4,6 +4,7 @@ import freemarker.template.Configuration;
 import lombok.extern.slf4j.Slf4j;
 import org.grpctest.core.config.Config;
 import org.grpctest.core.data.RpcModelRegistry;
+import org.grpctest.core.data.TestcaseRegistry;
 import org.grpctest.core.freemarker.datamodels.ClientDataModel;
 import org.grpctest.core.freemarker.datamodels.ConfigDataModel;
 import org.grpctest.core.freemarker.datamodels.ServerDataModel;
@@ -26,8 +27,8 @@ public class NodejsCodeGenService extends BaseCodeGenService {
     private static final String NODEJS_SERVER_CONFIG_FILE = "./nodejs/config/server/deploy.js";
 
     @Autowired
-    public NodejsCodeGenService(Configuration freemarkerConfig, Config config, RpcModelRegistry registry) {
-        super(freemarkerConfig, config, registry);
+    public NodejsCodeGenService(Configuration freemarkerConfig, Config config, RpcModelRegistry registry, TestcaseRegistry testcaseRegistry) {
+        super(freemarkerConfig, config, registry, testcaseRegistry);
     }
 
     public void generateNodeClient() throws Exception {
@@ -41,7 +42,7 @@ public class NodejsCodeGenService extends BaseCodeGenService {
     public void generateNodeServer() throws Exception {
         generateFileFromFtl(
                 NODEJS_SERVER_FTL,
-                new ServerDataModel(registry),
+                new ServerDataModel(registry, testcaseRegistry),
                 NODEJS_SERVER_FILE
         );
     }

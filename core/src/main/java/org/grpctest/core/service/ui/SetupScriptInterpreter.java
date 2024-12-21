@@ -1,30 +1,32 @@
 package org.grpctest.core.service.ui;
 
-import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.grpctest.core.pojo.TestConfig;
+import org.apache.commons.lang3.tuple.Pair;
+import org.grpctest.core.enums.MetadataType;
+import org.grpctest.core.pojo.RuntimeConfig;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
 import java.util.Arrays;
+import java.util.Objects;
 
 @NoArgsConstructor
 @Service
 @Slf4j
 public class SetupScriptInterpreter {
 
-    private TestConfig testConfig;
+    private RuntimeConfig runtimeConfig;
 
-    public TestConfig interpretScript(String filepath) throws IllegalArgumentException, FileNotFoundException, IOException {
-        testConfig = new TestConfig();
+    public RuntimeConfig interpretScript(String filepath) throws IllegalArgumentException, FileNotFoundException, IOException {
+        runtimeConfig = new RuntimeConfig();
         try (BufferedReader bufferedReader = new BufferedReader(new FileReader(filepath))) {
             String line;
             while ((line = bufferedReader.readLine()) != null) {
                 interpretSingleLine(line);
             }
-            return testConfig;
+            return runtimeConfig;
         } catch (FileNotFoundException fnfe) {
             log.error("[interpretScript] Invalid file path: {}", filepath);
             throw fnfe;
@@ -47,12 +49,14 @@ public class SetupScriptInterpreter {
             case SERVER -> interpretServerOpCode(words[1]);
             case CLIENT -> interpretClientOpCode(words[1]);
             case TESTCASE -> interpretTestcaseOpCode(Arrays.copyOfRange(words, 1, words.length));
+            case METADATA -> interpretMetadataOpCode(Arrays.copyOfRange(words, 1, words.length));
+            case MOCK_EXCEPTION -> interpretMockExceptionOpCode();
         }
     }
 
     private void interpretServerOpCode(String arg) throws IllegalArgumentException {
         try {
-            testConfig.setServer(TestConfig.Language.valueOf(StringUtils.capitalize(arg)));
+            runtimeConfig.setServer(RuntimeConfig.Language.valueOf(StringUtils.capitalize(arg)));
         } catch (IllegalArgumentException iae) {
             log.error("[interpretServerOpCode] Illegal argument: {}", arg);
             throw new IllegalArgumentException("Illegal argument for opcode SERVER", iae);
@@ -61,7 +65,7 @@ public class SetupScriptInterpreter {
 
     private void interpretClientOpCode(String arg) throws IllegalArgumentException {
         try {
-            testConfig.setClient(TestConfig.Language.valueOf(StringUtils.capitalize(arg)));
+            runtimeConfig.setClient(RuntimeConfig.Language.valueOf(StringUtils.capitalize(arg)));
         } catch (IllegalArgumentException iae) {
             log.error("[interpretClientOpCode] Illegal argument: {}", arg);
             throw new IllegalArgumentException("Illegal argument for opcode CLIENT", iae);
@@ -69,12 +73,75 @@ public class SetupScriptInterpreter {
     }
 
     private void interpretTestcaseOpCode(String[] args) {
+        for (String arg: args) {
+            // Flags
+            Pair<String, String> flag = parseFlagArg(arg);
+            if (Objects.nonNull(flag)) {
+                switch (flag.getLeft()) {
+                    case "random" -> {
+                        runtimeConfig.setEnableAllRandomTestcase(true);
+                    }
+                    default -> {
+                        log.warn("[interpretTestcaseOpCode] Invalid flag will be ignored: {}", flag.getLeft());
+                    }
+                }
+            }
+        }
+    }
 
+    private void interpretMetadataOpCode(String[] args) {
+        for (String arg: args) {
+            // Flags
+            Pair<String, String> flag = parseFlagArg(arg);
+            if (Objects.nonNull(flag)) {
+                switch (flag.getLeft()) {
+                    case "server-client" -> {
+                        runtimeConfig.setServerToClientMetadataType(MetadataType.valueOf(flag.getRight()));
+                    }
+                    case "client-server" -> {
+                        runtimeConfig.setClientToServerMetadataType(MetadataType.valueOf(flag.getRight()));
+                    }
+                    default -> {
+                        log.warn("[interpretMetadataOpCode] Invalid flag will be ignored: {}", flag.getLeft());
+                    }
+                }
+            }
+        }
+    }
+
+    private void interpretMockExceptionOpCode() {
+        runtimeConfig.setEnableException(true);
+    }
+
+    /**
+     * Extract information from a "flag" arg (in the form --(flag_key):(flag_value) or --(flag_key))
+     * @param arg
+     * @return a {@link Pair} of (flag_key) : (flag_value); (flag_value) will be {@literal null}
+     * when arg is in the form "--(flag_key)"; returns {@literal null} if {@code arg} is not in the flag format
+     */
+    private Pair<String, String> parseFlagArg(String arg) {
+        if (arg.startsWith("--")) {
+            String[] splitFlagArg = arg.substring(2).split(":");
+            if (splitFlagArg.length > 2) return null;
+            String flagKey = splitFlagArg[0];
+            String flagValue = null;
+            if (splitFlagArg.length > 1) flagValue = splitFlagArg[1];
+            return Pair.of(flagKey, flagValue);
+        } else {
+            return null;
+        }
     }
 
     private enum OpCode {
+        /** SERVER {@link org.grpctest.core.pojo.RuntimeConfig.Language} */
         SERVER,
+        /** CLIENT {@link org.grpctest.core.pojo.RuntimeConfig.Language} */
         CLIENT,
-        TESTCASE
+        /** TESTCASE (--random) */
+        TESTCASE,
+        /** METADATA (--server-client:{@link org.grpctest.core.enums.MetadataType}) (--client-server:{@link org.grpctest.core.enums.MetadataType}) */
+        METADATA,
+        /** MOCK_EXCEPTION */
+        MOCK_EXCEPTION
     }
 }

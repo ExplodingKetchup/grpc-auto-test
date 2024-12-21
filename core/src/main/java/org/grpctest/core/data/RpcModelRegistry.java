@@ -1,6 +1,10 @@
 package org.grpctest.core.data;
 
+import io.grpc.Metadata;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.Pair;
+import org.grpctest.core.enums.MetadataType;
 import org.grpctest.core.pojo.RpcMessage;
 import org.grpctest.core.pojo.RpcService;
 import org.grpctest.core.util.StringUtil;
@@ -26,6 +30,14 @@ public class RpcModelRegistry {
 
     /** RpcMessage.id : RpcMessage */
     private final Map<String, RpcMessage> messageLookupTable = new HashMap<>();
+
+    /** Client to Server metadata (fixed per run) */
+    @Getter
+    private final Map<String, Pair<MetadataType, String>> clientToServerMetadata = new HashMap<>();
+
+    /** Server to Client metadata (fixed per run) */
+    @Getter
+    private final Map<String, Pair<MetadataType, String>> serverToClientMetadata = new HashMap<>();
 
     // serviceLookupTable
 
@@ -100,5 +112,33 @@ public class RpcModelRegistry {
 
     public List<RpcMessage> getAllMessages() {
         return messageLookupTable.values().stream().toList();
+    }
+
+    // clientToServerMetadata
+
+    public void addClientToServerMetadata(Map<String, Pair<MetadataType, String>> metadata) {
+        clientToServerMetadata.putAll(metadata);
+    }
+
+    public void addClientToServerMetadata(String key, MetadataType type, String value) {
+        clientToServerMetadata.putIfAbsent(key, Pair.of(type, value));
+    }
+
+    public Map<String, Pair<MetadataType, String>> getAllClientToServerMetadata() {
+        return clientToServerMetadata;
+    }
+
+    // serverToClientMetadata
+
+    public void addServerToClientMetadata(Map<String, Pair<MetadataType, String>> metadata) {
+        serverToClientMetadata.putAll(metadata);
+    }
+
+    public void addServerToClientMetadata(String key, MetadataType type, String value) {
+        serverToClientMetadata.putIfAbsent(key, Pair.of(type, value));
+    }
+
+    public Map<String, Pair<MetadataType, String>> getAllServerToClientMetadata() {
+        return serverToClientMetadata;
     }
 }

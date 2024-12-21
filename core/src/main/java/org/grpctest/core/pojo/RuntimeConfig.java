@@ -1,21 +1,32 @@
 package org.grpctest.core.pojo;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.grpctest.core.enums.MetadataType;
 
 import java.util.HashMap;
-import java.util.Map;
 
+/** Configs that are better suited to be set at runtime (esp. if they vary between each run) */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class TestConfig {
+@Builder
+public class RuntimeConfig {
 
     private Language server;
 
     private Language client;
+
+    @Builder.Default
+    private MetadataType serverToClientMetadataType = MetadataType.NONE;
+
+    @Builder.Default
+    private MetadataType clientToServerMetadataType = MetadataType.NONE;
+
+    @Builder.Default
+    private Boolean enableException = false;
+
+    @Builder.Default
+    private Boolean enableAllRandomTestcase = false;
 
     @Getter
     public enum Language {

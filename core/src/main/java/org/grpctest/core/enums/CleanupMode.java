@@ -1,4 +1,4 @@
-package org.grpctest.core.pojo;
+package org.grpctest.core.enums;
 
 import lombok.Getter;
 

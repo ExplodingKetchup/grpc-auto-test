@@ -23,9 +23,21 @@ public class ${service.name} extends ${service.name}Grpc.${service.name}ImplBase
     <#if method.type == "UNARY">
     public void ${method.name}(${method.inType?split(".")?last} request, StreamObserver<${method.outType?split(".")?last}> responseObserver) {
         try {
+            log.info("[${method.name}] Received request {}", request);
             MessageUtil.messageToFile(request, config.getOutDir() + File.separator + "${method.id?replace(".", "_")}_param.bin");
-            responseObserver.onNext(${method.name}Impl(request));
+            responseObserver.onNext(MessageUtil.messageFromFile(config.getTestcaseDir() + File.separator + "${method.id?replace(".", "_")}_return_0.bin", ${method.outType?split(".")?last}.class));
+
+        <#if testcaseRegistry.getExceptionForMethod(method)??>
+            <#assign rpcException = testcaseRegistry.getExceptionForMethod(method)>
+            Metadata trailers = new Metadata();
+            <#assign trailers = rpcException.trailingMetadata>
+            <#list trailers?keys as trailerKey>
+            trailers.put(Metadata.Key.of("${trailerKey}", Metadata.ASCII_STRING_MARSHALLER), "${trailers[trailerKey].getRight()}");
+            </#list>
+            responseObserver.onError(Status.${rpcException.statusCode.name()}.withDescription("${rpcException.description}").asRuntimeException(trailers));
+        <#else>
             responseObserver.onCompleted();
+        </#if>
         } catch (Throwable t) {
             log.error("[${method.name}] An error occurred", t);
         }
@@ -33,8 +45,7 @@ public class ${service.name} extends ${service.name}Grpc.${service.name}ImplBase
     </#if>
 
     private ${method.outType?split(".")?last} ${method.name}Impl(${method.inType?split(".")?last} request) {
-        log.info("[${method.name}Impl] Received request {}", request);
-        return MessageUtil.messageFromFile(config.getTestcaseDir() + File.separator + "${method.id?replace(".", "_")}_return.bin", ${method.outType?split(".")?last}.class);
+
     }
 </#list>
 }

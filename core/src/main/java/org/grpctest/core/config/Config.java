@@ -3,7 +3,7 @@ package org.grpctest.core.config;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.grpctest.core.pojo.CleanupMode;
+import org.grpctest.core.enums.CleanupMode;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -50,8 +50,8 @@ public class Config {
     @Value("${core.docker.server.startup.timeout.ms:300000}")
     private long serverStartupTimeoutMillis;
 
-    /** Cleans up temporary files before or after test, or both, or none. Check {@link org.grpctest.core.pojo.CleanupMode} for details */
-    @Value("${core.cleanup.mode:BEFORE_AND_AFTER}")
+    /** Cleans up temporary files before or after test, or both, or none. Check {@link CleanupMode} for details */
+    @Value("${core.cleanup.mode:BEFORE}")
     private CleanupMode cleanupMode;
 
     /** Enable debug mode */

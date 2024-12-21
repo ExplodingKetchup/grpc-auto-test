@@ -1,8 +1,7 @@
 package org.grpctest.java.client.generated;
 
 import com.google.protobuf.GeneratedMessageV3;
-import io.grpc.Channel;
-import io.grpc.ManagedChannelBuilder;
+import io.grpc.*;
 import lombok.extern.slf4j.Slf4j;
 import org.grpctest.java.common.define.*;
 import org.grpctest.java.client.config.Config;
@@ -23,9 +22,10 @@ public class JavaClient implements InitializingBean {
 
     private final PeopleServiceGrpc.PeopleServiceStub peopleServiceAsyncStub;
 
-    public JavaClient(Config config) {
+    public JavaClient(Config config, ClientInterceptor clientInterceptor) {
         this.config = config;
-        Channel channel = ManagedChannelBuilder.forAddress(config.getServiceHost(), config.getServicePort()).usePlaintext().build();
+        Channel originChannel = ManagedChannelBuilder.forAddress(config.getServiceHost(), config.getServicePort()).usePlaintext().build();
+        Channel channel = ClientInterceptors.intercept(originChannel, clientInterceptor);
         this.peopleServiceBlockingStub = PeopleServiceGrpc.newBlockingStub(channel);
         this.peopleServiceAsyncStub = PeopleServiceGrpc.newStub(channel);
         log.info("Connected to server at {}:{}", config.getServiceHost(), config.getServicePort());
@@ -35,7 +35,7 @@ public class JavaClient implements InitializingBean {
     public void afterPropertiesSet() throws Exception {
 
         // Invoke test case: person.PeopleService.getPerson
-        GetPersonRequest param_person_PeopleService_getPerson = MessageUtil.messageFromFile(config.getTestcaseDir() + File.separator + "person_PeopleService_getPerson_param.bin", GetPersonRequest.class);
+        GetPersonRequest param_person_PeopleService_getPerson = MessageUtil.messageFromFile(config.getTestcaseDir() + File.separator + "person_PeopleService_getPerson_param_0.bin", GetPersonRequest.class);
         invokeRpcMethod(peopleServiceBlockingStub::getPerson, param_person_PeopleService_getPerson, "person.PeopleService.getPerson");
 
         while(true);
@@ -53,6 +53,13 @@ public class JavaClient implements InitializingBean {
             }
         } catch (Throwable t) {
             log.error("[invokeRpcMethod] Method {} throws error", methodId, t);
+            try {
+                MessageUtil.grpcExceptionToFile(
+                        config.getOutDir() + File.separator + "error.txt",
+                        t
+                );
+            } catch (Exception e) {
+            }
         }
     }
 }

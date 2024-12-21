@@ -2,8 +2,10 @@ package org.grpctest.java.server.generated;
 
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
+import io.grpc.ServerInterceptors;
 import lombok.extern.slf4j.Slf4j;
 import org.grpctest.java.server.config.Config;
+import org.grpctest.java.server.generated.interceptor.MetadataInterceptor;
 import org.grpctest.java.server.generated.service.*;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +23,7 @@ public class JavaServer implements InitializingBean {
 
     @Autowired
     public JavaServer(Config config,
+                      MetadataInterceptor metadataInterceptor,
 <#list registry.getAllServices() as service>
                       ${service.name} ${service.name?uncap_first}<#sep>,
 </#list>
@@ -29,7 +32,7 @@ public class JavaServer implements InitializingBean {
         this.server = ServerBuilder
                 .forPort(config.getServerPort())
 <#list registry.getAllServices() as service>
-                .addService(${service.name?uncap_first})
+                .addService(ServerInterceptors.intercept(${service.name?uncap_first}, metadataInterceptor))
 </#list>
                 .build();
     }

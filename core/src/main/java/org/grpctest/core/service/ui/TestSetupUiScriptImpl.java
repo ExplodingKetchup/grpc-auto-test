@@ -2,7 +2,8 @@ package org.grpctest.core.service.ui;
 
 import lombok.extern.slf4j.Slf4j;
 import org.grpctest.core.config.Config;
-import org.grpctest.core.pojo.TestConfig;
+import org.grpctest.core.enums.MetadataType;
+import org.grpctest.core.pojo.RuntimeConfig;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
@@ -14,7 +15,7 @@ public class TestSetupUiScriptImpl implements TestSetupUi {
     private final SetupScriptInterpreter interpreter;
     private final Config config;
 
-    private TestConfig testConfig;
+    private RuntimeConfig runtimeConfig;
 
     public TestSetupUiScriptImpl(SetupScriptInterpreter interpreter, Config config) {
         this.interpreter = interpreter;
@@ -22,10 +23,10 @@ public class TestSetupUiScriptImpl implements TestSetupUi {
     }
 
     @Override
-    public TestConfig setupEverything() throws Exception {
+    public RuntimeConfig setupEverything() throws Exception {
         printHelloMessage();
-        testConfig = interpreter.interpretScript(config.getSetupScriptFilePath());
-        return testConfig;
+        runtimeConfig = interpreter.interpretScript(config.getSetupScriptFilePath());
+        return runtimeConfig;
     }
 
     @Override
@@ -34,13 +35,33 @@ public class TestSetupUiScriptImpl implements TestSetupUi {
     }
 
     @Override
-    public TestConfig.Language chooseServer() throws Exception {
-        return testConfig.getServer();
+    public RuntimeConfig.Language chooseServer() throws Exception {
+        return runtimeConfig.getServer();
     }
 
     @Override
-    public TestConfig.Language chooseClient() throws Exception {
-        return testConfig.getClient();
+    public RuntimeConfig.Language chooseClient() throws Exception {
+        return runtimeConfig.getClient();
+    }
+
+    @Override
+    public MetadataType chooseServerToClientMetadataType() throws Exception {
+        return runtimeConfig.getServerToClientMetadataType();
+    }
+
+    @Override
+    public MetadataType chooseClientToServerMetadataType() throws Exception {
+        return runtimeConfig.getClientToServerMetadataType();
+    }
+
+    @Override
+    public boolean chooseEnableException() throws Exception {
+        return runtimeConfig.getEnableException();
+    }
+
+    @Override
+    public boolean chooseEnableAllRandomTestcase() throws Exception {
+        return runtimeConfig.getEnableAllRandomTestcase();
     }
 
 

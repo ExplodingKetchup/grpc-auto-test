@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.grpctest.core.data.RpcModelRegistry;
+import org.grpctest.core.data.TestcaseRegistry;
 import org.grpctest.core.pojo.RpcService;
 
 @Data
@@ -12,4 +13,5 @@ import org.grpctest.core.pojo.RpcService;
 public class ServiceImplDataModel implements DataModel {
     private String serviceId;
     private RpcModelRegistry registry;
+    private TestcaseRegistry testcaseRegistry;
 }

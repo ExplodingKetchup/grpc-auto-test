@@ -20,8 +20,10 @@ public class PeopleService extends PeopleServiceGrpc.PeopleServiceImplBase {
     @Override
     public void getPerson(GetPersonRequest request, StreamObserver<GetPersonResponse> responseObserver) {
         try {
+            log.info("[getPerson] Received request {}", request);
             MessageUtil.messageToFile(request, config.getOutDir() + File.separator + "person_PeopleService_getPerson_param.bin");
-            responseObserver.onNext(getPersonImpl(request));
+            responseObserver.onNext(MessageUtil.messageFromFile(config.getTestcaseDir() + File.separator + "person_PeopleService_getPerson_return_0.bin", GetPersonResponse.class));
+
             responseObserver.onCompleted();
         } catch (Throwable t) {
             log.error("[getPerson] An error occurred", t);
@@ -29,7 +31,6 @@ public class PeopleService extends PeopleServiceGrpc.PeopleServiceImplBase {
     }
 
     private GetPersonResponse getPersonImpl(GetPersonRequest request) {
-        log.info("[getPersonImpl] Received request {}", request);
-        return MessageUtil.messageFromFile(config.getTestcaseDir() + File.separator + "person_PeopleService_getPerson_return.bin", GetPersonResponse.class);
+
     }
 }

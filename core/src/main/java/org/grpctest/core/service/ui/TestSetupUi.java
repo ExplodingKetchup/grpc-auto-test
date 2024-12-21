@@ -1,18 +1,32 @@
 package org.grpctest.core.service.ui;
 
-import org.grpctest.core.pojo.TestConfig;
+import org.grpctest.core.enums.MetadataType;
+import org.grpctest.core.pojo.RuntimeConfig;
 
 public interface TestSetupUi {
-    default TestConfig setupEverything() throws Exception {
+    default RuntimeConfig setupEverything() throws Exception {
         printHelloMessage();
-        TestConfig.Language serverLanguage = chooseServer();
-        TestConfig.Language clientLanguage = chooseClient();
-        return new TestConfig(serverLanguage, clientLanguage);
+        return RuntimeConfig.builder()
+                .server(chooseServer())
+                .client(chooseClient())
+                .serverToClientMetadataType(chooseServerToClientMetadataType())
+                .serverToClientMetadataType(chooseClientToServerMetadataType())
+                .enableException(chooseEnableException())
+                .enableAllRandomTestcase(chooseEnableAllRandomTestcase())
+                .build();
     }
 
     void printHelloMessage();
 
-    TestConfig.Language chooseServer() throws Exception;
+    RuntimeConfig.Language chooseServer() throws Exception;
 
-    TestConfig.Language chooseClient() throws Exception;
+    RuntimeConfig.Language chooseClient() throws Exception;
+
+    MetadataType chooseServerToClientMetadataType() throws Exception;
+
+    MetadataType chooseClientToServerMetadataType() throws Exception;
+
+    boolean chooseEnableException() throws Exception;
+
+    boolean chooseEnableAllRandomTestcase() throws Exception;
 }

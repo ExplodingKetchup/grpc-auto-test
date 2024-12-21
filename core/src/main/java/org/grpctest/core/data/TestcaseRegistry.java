@@ -3,6 +3,7 @@ package org.grpctest.core.data;
 import lombok.extern.slf4j.Slf4j;
 import org.grpctest.core.pojo.RpcService;
 import org.grpctest.core.pojo.TestCase;
+import org.grpctest.core.util.CollectionUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -22,7 +23,8 @@ public class TestcaseRegistry {
      */
     private final Map<String, List<TestCase>> methodTestCaseMap = new HashMap<>();
 
-    /** methodTestCaseMap */
+    // methodTestCaseMap
+
     public void addMethod(RpcService.RpcMethod method) {
         methodTestCaseMap.putIfAbsent(method.getId(), new ArrayList<>());
     }
@@ -33,7 +35,7 @@ public class TestcaseRegistry {
             if (!methodTestCaseMap.containsKey(targetMethod.getId())) {
                 addMethod(targetMethod);
             }
-            methodTestCaseMap.get(targetMethod.getId()).add(testCase);
+            methodTestCaseMap.get(targetMethod.getId()).add(preprocessTestcase(testCase, targetMethod));
         } else {
             log.warn("[addTestCase] Cannot add test case for method [{}]. Reason: method not found", testCase.getMethodId());
         }
@@ -70,5 +72,34 @@ public class TestcaseRegistry {
 
     public List<TestCase> getAllTestCases() {
         return methodTestCaseMap.values().stream().flatMap(Collection::stream).toList();
+    }
+
+    public TestCase.RpcException getExceptionForMethod(String methodId) {
+        if (Objects.isNull(getMethodTestCases(methodId)) || getMethodTestCases(methodId).isEmpty()) return null;
+        return getMethodTestCases(methodId).get(0).getException();
+    }
+
+    public TestCase.RpcException getExceptionForMethod(RpcService.RpcMethod rpcMethod) {
+        return getExceptionForMethod(rpcMethod.getId());
+    }
+
+    private TestCase preprocessTestcase(TestCase testCase, RpcService.RpcMethod rpcMethod) {
+        switch (rpcMethod.getType()) {
+            case UNARY -> {
+                testCase.setReturnValueDynMsg(
+                        CollectionUtil.trimAllExceptFirstElement(testCase.getReturnValueDynMsg())
+                );
+                testCase.setParamValueDynMsg(
+                        CollectionUtil.trimAllExceptFirstElement(testCase.getParamValueDynMsg())
+                );
+            }
+            case CLIENT_STREAMING -> testCase.setReturnValueDynMsg(
+                    CollectionUtil.trimAllExceptFirstElement(testCase.getReturnValueDynMsg())
+            );
+            case SERVER_STREAMING -> testCase.setParamValueDynMsg(
+                    CollectionUtil.trimAllExceptFirstElement(testCase.getParamValueDynMsg())
+            );
+        }
+        return testCase;
     }
 }

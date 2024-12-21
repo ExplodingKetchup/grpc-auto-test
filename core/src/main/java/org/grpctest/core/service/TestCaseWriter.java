@@ -10,6 +10,7 @@ import org.grpctest.core.service.util.DynamicMessageUtilService;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
+import java.util.List;
 
 /** Write test cases to proto messages and store in files for client and server to read later */
 @Slf4j
@@ -27,10 +28,16 @@ public class TestCaseWriter {
     }
 
     private void writeTestCaseToFile(TestCase testCase) throws Throwable {
-        String paramFileName = "client" + File.separator + testCase.getMethodId().replace(".", "_") + "_param.bin";
-        String returnFileName = "server" + File.separator + testCase.getMethodId().replace(".", "_") + "_return.bin";
-        writeDynMsgToFile(testCase.getParamValueDynMsg(), paramFileName);
-        writeDynMsgToFile(testCase.getReturnValueDynMsg(), returnFileName);
+        List<DynamicMessage> params = testCase.getParamValueDynMsg();
+        for (int i = 0; i < params.size(); i++) {
+            String paramFileName = "client" + File.separator + testCase.getMethodId().replace(".", "_") + "_param_" + i + ".bin";
+            writeDynMsgToFile(params.get(i), paramFileName);
+        }
+        List<DynamicMessage> returns = testCase.getReturnValueDynMsg();
+        for (int i = 0; i < returns.size(); i++) {
+            String returnFileName = "server" + File.separator + testCase.getMethodId().replace(".", "_") + "_return_" + i + ".bin";
+            writeDynMsgToFile(returns.get(i), returnFileName);
+        }
     }
 
     private void writeDynMsgToFile(DynamicMessage dynamicMessage, String filename) throws Throwable {

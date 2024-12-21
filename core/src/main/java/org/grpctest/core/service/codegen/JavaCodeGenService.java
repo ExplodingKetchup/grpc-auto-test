@@ -5,6 +5,7 @@ import freemarker.template.Template;
 import lombok.extern.slf4j.Slf4j;
 import org.grpctest.core.config.Config;
 import org.grpctest.core.data.RpcModelRegistry;
+import org.grpctest.core.data.TestcaseRegistry;
 import org.grpctest.core.freemarker.datamodels.ConfigDataModel;
 import org.grpctest.core.freemarker.datamodels.ServerDataModel;
 import org.grpctest.core.pojo.RpcService;
@@ -25,21 +26,25 @@ public class JavaCodeGenService extends BaseCodeGenService {
     private static final String JAVA_CLIENT_FILE = "./java/java-client/src/main/java/org/grpctest/java/client/generated/JavaClient.java";
     private static final String JAVA_CLIENT_CONFIG_FTL = "java-client-config.ftl";
     private static final String JAVA_CLIENT_CONFIG_FILE = "./java/java-client/src/main/resources/application.properties";
+    private static final String JAVA_CLIENT_INTERCEPTOR_FTL = "java-client-interceptor.ftl";
+    private static final String JAVA_CLIENT_INTERCEPTOR_FILE = "./java/java-client/src/main/java/org/grpctest/java/client/generated/interceptor/MetadataInterceptor.java";
     private static final String JAVA_SERVER_FTL = "java-server.ftl";
     private static final String JAVA_SERVER_FILE = "./java/java-server/src/main/java/org/grpctest/java/server/generated/JavaServer.java";
     private static final String JAVA_SERVER_CONFIG_FTL = "java-server-config.ftl";
     private static final String JAVA_SERVER_CONFIG_FILE = "./java/java-server/src/main/resources/application.properties";
+    private static final String JAVA_SERVER_INTERCEPTOR_FTL = "java-server-interceptor.ftl";
+    private static final String JAVA_SERVER_INTERCEPTOR_FILE = "./java/java-server/src/main/java/org/grpctest/java/server/generated/interceptor/MetadataInterceptor.java";
     private static final String JAVA_FILE_EXT = ".java";
 
     @Autowired
-    public JavaCodeGenService(Configuration freemarkerConfig, Config config, RpcModelRegistry registry) {
-        super(freemarkerConfig, config, registry);
+    public JavaCodeGenService(Configuration freemarkerConfig, Config config, RpcModelRegistry registry, TestcaseRegistry testcaseRegistry) {
+        super(freemarkerConfig, config, registry, testcaseRegistry);
     }
 
     public void generateJavaService(RpcService service) throws Exception {
         generateFileFromFtl(
                 JAVA_SVC_FTL,
-                new ServiceImplDataModel(service.getId(), registry),
+                new ServiceImplDataModel(service.getId(), registry, testcaseRegistry),
                 JAVA_SVC_DIR + service.getName() + JAVA_FILE_EXT
         );
     }
@@ -55,7 +60,7 @@ public class JavaCodeGenService extends BaseCodeGenService {
     public void generateJavaServer() throws Exception {
         generateFileFromFtl(
                 JAVA_SERVER_FTL,
-                new ServerDataModel(registry),
+                new ServerDataModel(registry, testcaseRegistry),
                 JAVA_SERVER_FILE
         );
     }
@@ -76,18 +81,36 @@ public class JavaCodeGenService extends BaseCodeGenService {
         );
     }
 
+    public void generateJavaServerInterceptor() throws Exception {
+        generateFileFromFtl(
+                JAVA_SERVER_INTERCEPTOR_FTL,
+                new ServerDataModel(registry, testcaseRegistry),
+                JAVA_SERVER_INTERCEPTOR_FILE
+        );
+    }
+
+    public void generateJavaClientInterceptor() throws Exception {
+        generateFileFromFtl(
+                JAVA_CLIENT_INTERCEPTOR_FTL,
+                new ClientDataModel(registry),
+                JAVA_CLIENT_INTERCEPTOR_FILE
+        );
+    }
+
     @Override
     public void generateServer() throws Exception {
         generateJavaServer();
         for (RpcService service : registry.getAllServices()) {
             generateJavaService(service);
         }
+        generateJavaServerInterceptor();
         generateJavaServerConfig();
     }
 
     @Override
     public void generateClient() throws Exception {
         generateJavaClient();
+        generateJavaClientInterceptor();
         generateJavaClientConfig();
     }
 }

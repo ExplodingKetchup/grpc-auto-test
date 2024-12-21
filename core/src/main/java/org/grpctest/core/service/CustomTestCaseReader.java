@@ -59,24 +59,26 @@ public class CustomTestCaseReader {
     public void loadTestCasesToRegistry() throws Throwable {
         List<TestCase> testCases = loadTestCases();
         for (TestCase testCase : testCases) {
-            testCase.setParamValueJson(generateParamValueJson(testCase));
-            testCase.setParamValueDynMsg(
-                    dynamicMessageUtilService.objectToDynamicMessage(
-                            testCase.getParamValue(),
-                            rpcModelRegistry.lookupMessage(
-                                    rpcModelRegistry.lookupMethod(testCase.getMethodId()).getInType()
-                            )
-                    )
-            );
-            testCase.setReturnValueJson(generateReturnValueJson(testCase));
-            testCase.setReturnValueDynMsg(
-                    dynamicMessageUtilService.objectToDynamicMessage(
-                            testCase.getReturnValue(),
-                            rpcModelRegistry.lookupMessage(
-                                    rpcModelRegistry.lookupMethod(testCase.getMethodId()).getOutType()
-                            )
-                    )
-            );
+            for (Object param : testCase.getParamValue()) {
+                testCase.getParamValueDynMsg().add(
+                        dynamicMessageUtilService.objectToDynamicMessage(
+                                param,
+                                rpcModelRegistry.lookupMessage(
+                                        rpcModelRegistry.lookupMethod(testCase.getMethodId()).getInType()
+                                )
+                        )
+                );
+            }
+            for (Object returnVal : testCase.getReturnValue()) {
+                testCase.getReturnValueDynMsg().add(
+                        dynamicMessageUtilService.objectToDynamicMessage(
+                                returnVal,
+                                rpcModelRegistry.lookupMessage(
+                                        rpcModelRegistry.lookupMethod(testCase.getMethodId()).getOutType()
+                                )
+                        )
+                );
+            }
             testcaseRegistry.addTestCase(testCase);
         }
         log.info("[loadTestCasesToRegistry] Finished loading test cases");
@@ -86,6 +88,7 @@ public class CustomTestCaseReader {
      * Note: this json string is the string directly written into Java source code.
      * Therefore, the double quotes have to be preceded by "\".
      */
+    @Deprecated
     private String generateReturnValueJson(TestCase testCase) {
         String json = null;
         try {
@@ -103,6 +106,7 @@ public class CustomTestCaseReader {
      * Note: this json string is the string directly written into Java source code.
      * Therefore, the double quotes have to be preceded by "\".
      */
+    @Deprecated
     private String generateParamValueJson(TestCase testCase) {
         String json = null;
         try {

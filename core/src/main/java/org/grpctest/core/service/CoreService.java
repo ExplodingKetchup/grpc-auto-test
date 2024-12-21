@@ -5,10 +5,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.grpctest.core.config.Config;
 import org.grpctest.core.data.RpcModelRegistry;
 import org.grpctest.core.data.TestcaseRegistry;
-import org.grpctest.core.pojo.CleanupMode;
+import org.grpctest.core.enums.CleanupMode;
+import org.grpctest.core.enums.MetadataType;
 import org.grpctest.core.pojo.TestCase;
 import org.grpctest.core.pojo.RpcService;
-import org.grpctest.core.pojo.TestConfig;
+import org.grpctest.core.pojo.RuntimeConfig;
 import org.grpctest.core.service.codegen.JavaCodeGenService;
 import org.grpctest.core.service.codegen.NodejsCodeGenService;
 import org.grpctest.core.service.ui.TestSetupUi;
@@ -17,7 +18,6 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -50,7 +50,7 @@ public class CoreService implements InitializingBean {
 
     private final NodejsCodeGenService nodejsCodeGenService;
 
-    private final CustomTestCaseReader customTestCaseReader;    // Although not used, we need the reader to run its init code before core service
+    private final CustomTestCaseReader customTestCaseReader;
 
     private final TestCaseGenerator testCaseGenerator;
     
@@ -106,6 +106,10 @@ public class CoreService implements InitializingBean {
                 genericFileService.cleanup();
             }
 
+            // Read user's runtimeConfig
+            RuntimeConfig runtimeConfig = testSetupUi.setupEverything();
+            log.info("runtimeConfig: {}", runtimeConfig);
+
             // Copy predefined .proto files to destination
             genericFileService.copyProtos();
             log.info("[Step 1 of 9] Finished copy predefined files for Java");
@@ -119,39 +123,39 @@ public class CoreService implements InitializingBean {
             log.info("[Step 3 of 9] Finished reading content of .proto files");
 
             // Load test cases
-            customTestCaseReader.loadTestCasesToRegistry();
+            if (!runtimeConfig.getEnableAllRandomTestcase()) {
+                customTestCaseReader.loadTestCasesToRegistry();
+            }
 
             // Generate random test cases for services without custom test cases
-            generateRandomTestcases();
+            generateRandomTestcases(runtimeConfig);
             log.info("[Step 4 of 9] Finished loading test cases");
 
             // Write all test cases to binary file
             testCaseWriter.writeAllTestCases();
             log.info("[Step 5 of 9] Finished writing test cases to file");
 
-            // Ask user which languages to test
-            TestConfig testConfig = testSetupUi.setupEverything();
-            setServerInConfig(testConfig);
-            log.info("Finished reading user input. Server: [{}]. Client: [{}]", testConfig.getServer().getDisplayName(), testConfig.getClient().getDisplayName());
+            setServerInConfig(runtimeConfig);
+            addMetadata(runtimeConfig);
 
             // Build and launch server
-            switch (testConfig.getServer()) {
+            switch (runtimeConfig.getServer()) {
                 case JAVA -> buildAndLaunchJavaServer();
                 case NODEJS -> buildAndLaunchNodejsServer();
             }
 
             // Wait for server to start properly
-            TimeUtil.pollForCondition(() -> checkServerRunning(testConfig.getServer()), 1000, config.getServerStartupTimeoutMillis());
+            TimeUtil.pollForCondition(() -> checkServerRunning(runtimeConfig.getServer()), 1000, config.getServerStartupTimeoutMillis());
             log.info("Server started, will start launching client...");
 
             // Build and launch client
-            switch (testConfig.getClient()) {
+            switch (runtimeConfig.getClient()) {
                 case JAVA -> buildAndLaunchJavaClient();
                 case NODEJS -> buildAndLaunchNodejsClient();
             }
 
             // Wait until all tests are finished
-            TimeUtil.pollForCondition(this::checkTestsFinished, 1000, config.getTestTimeoutMillis());
+            TimeUtil.pollForCondition(() -> checkTestsFinished(runtimeConfig), 1000, config.getTestTimeoutMillis());
 
         } catch (Throwable t) {
             log.error("An error occurred, terminating test", t);
@@ -191,33 +195,26 @@ public class CoreService implements InitializingBean {
         dockerService.dockerComposeUpSpecifyServices("node-client");
     }
 
-    private void generateRandomTestcases() {
+    private void generateRandomTestcases(RuntimeConfig runtimeConfig) {
         for (RpcService.RpcMethod method : testcaseRegistry.getAllMethodsWithoutTestCases()) {
-            DynamicMessage paramDynMsg = testCaseGenerator.generateRandomMessage(rpcModelRegistry.lookupMessage(method.getInType()));
-            DynamicMessage returnDynMsg = testCaseGenerator.generateRandomMessage(rpcModelRegistry.lookupMessage(method.getOutType()));
-            TestCase testCase = new TestCase(method.getId() + "_random",
-                    method.getId(),
-                    null,
-                    null,
-                    paramDynMsg,
-                    null,
-                    null,
-                    returnDynMsg
-            );
-            log.info("[generateRandomTestcases] Added test case {}", testCase);
-            testcaseRegistry.addTestCase(testCase);
+            testcaseRegistry.addTestCase(testCaseGenerator.generateRandomTestcase(method, runtimeConfig.getEnableException()));
         }
     }
 
-    private void setServerInConfig(TestConfig testConfig) {
-        String serverName = TestConfig.Language.SERVER_NAME.get(testConfig.getServer());
-        switch (testConfig.getClient()) {
+    private void setServerInConfig(RuntimeConfig runtimeConfig) {
+        String serverName = RuntimeConfig.Language.SERVER_NAME.get(runtimeConfig.getServer());
+        switch (runtimeConfig.getClient()) {
             case JAVA -> config.setJavaClientServerHost(serverName);
             case NODEJS -> config.setNodejsClientServerHost(serverName);
         }
     }
 
-    private boolean checkServerRunning(TestConfig.Language serverLanguage) {
+    private void addMetadata(RuntimeConfig runtimeConfig) {
+        rpcModelRegistry.addClientToServerMetadata(testCaseGenerator.generateRandomMetadata(runtimeConfig.getClientToServerMetadataType()));
+        rpcModelRegistry.addServerToClientMetadata(testCaseGenerator.generateRandomMetadata(runtimeConfig.getServerToClientMetadataType()));
+    }
+
+    private boolean checkServerRunning(RuntimeConfig.Language serverLanguage) {
         final int linesToRead = 5;
         String currentLogFile = "";
         switch (serverLanguage) {
@@ -241,11 +238,15 @@ public class CoreService implements InitializingBean {
         return false;
     }
 
-    private boolean checkTestsFinished() {
+    private boolean checkTestsFinished(RuntimeConfig runtimeConfig) {
         Path clientDir = Paths.get("out", "client");
         Path serverDir = Paths.get("out", "server");
         long fileCountClient;
         long fileCountServer;
+        long expectedFileCountClient = runtimeConfig.getEnableException() ? 1 : rpcModelRegistry.getAllMethods().size();
+        long expectedFileCountServer = rpcModelRegistry.getAllMethods().size();
+        if (runtimeConfig.getServerToClientMetadataType() != MetadataType.NONE) expectedFileCountClient++;
+        if (runtimeConfig.getClientToServerMetadataType() != MetadataType.NONE) expectedFileCountServer++;
         try {
             try (Stream<Path> pathStream = Files.list(clientDir)) {
                 fileCountClient = pathStream.filter(Files::isRegularFile).count();
@@ -253,8 +254,8 @@ public class CoreService implements InitializingBean {
             try (Stream<Path> pathStream = Files.list(serverDir)) {
                 fileCountServer = pathStream.filter(Files::isRegularFile).count();
             }
-            return (fileCountClient == (long) rpcModelRegistry.getAllMethods().size())
-                    && (fileCountServer == (long) rpcModelRegistry.getAllMethods().size());
+            return (fileCountClient == expectedFileCountClient)
+                    && (fileCountServer == expectedFileCountServer);
         } catch (IOException ioe) {
             log.error("[checkTestsFinished] File I/O Exception", ioe);
             return false;

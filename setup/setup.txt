@@ -1,2 +1,4 @@
 SERVER JAVA
-CLIENT NODEJS
+CLIENT JAVA
+TESTCASE --random
+METADATA --server-client:STRING --client-server:BIN
