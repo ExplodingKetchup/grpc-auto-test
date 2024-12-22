@@ -1,6 +1,22 @@
 import * as grpc from '@grpc/grpc-js';
 import { createLogger, loadProtosGrpc, loadProtosProtobufjs, messageFromFile, messageToFile } from './common.js';
 
+// Constants
+const BIN_SUFFIX = '-bin';
+<#assign metaMap = registry.getAllClientToServerMetadata()>
+<#list metaMap?keys as metaKey>
+    <#assign metaPair = metaMap[metaKey]>
+    <#assign metaType = metaPair.getLeft().name()> <#-- MetadataType -->
+    <#assign metaValue = metaPair.getRight()> <#-- Metadata value -->
+    <#if metaType == "STRING">
+const META_KEY_${metaKey} = '${metaKey}';
+const META_VALUE_${metaKey} = '${metaValue}';
+    <#elseif metaType == "BIN">
+const META_KEY_${metaKey} = '${metaKey}' + BIN_SUFFIX;
+const META_VALUE_${metaKey} = '${metaValue}';
+    </#if>
+</#list>
+
 // Load configs dynamically depending on environment
 const env = process.env.NODE_ENV || 'test';
 console.log("Using environment " + env);
@@ -36,14 +52,20 @@ console.log("Using environment " + env);
             logger.info(`[main] Connected to server at ${"$"}{config.server.host}:${"$"}{config.server.port}`);
 
     <#list registry.getAllMethods(service) as method>
+        <#assign method_id = method.id?replace(".", "_")>
             // METHOD ${method.name}
-            let param_${method.id?replace(".", "_")} = messageFromFile(
-                config.testcaseDir + "${method.id?replace(".", "_")}_param.bin",
+            const meta_${method_id} = new grpc.Metadata();
+            <#list metaMap?keys as metaKey>
+            meta_${method_id}.set(META_KEY_${metaKey}, META_VALUE_${metaKey});
+            </#list>
+            let param_${method_id} = messageFromFile(
+                config.testcaseDir + "${method_id}_param_0.bin",
                 root.lookupType("${method.inType}")
             );
-            logger.info(`[main] Invoke ${method.id}, param: ${"$"}{JSON.stringify(param_${method.id?replace(".", "_")}, null, 2)}`);
-            ${service.name?uncap_first}Stub.${method.name}(
-                param_${method.id?replace(".", "_")},
+            logger.info(`[main] Invoke ${method.id}, param: ${"$"}{JSON.stringify(param_${method_id}, null, 2)}`);
+            const call_${method_id} = ${service.name?uncap_first}Stub.${method.name}(
+                param_${method_id},
+                meta_${method_id},
                 (err, response) => {
                     genericClientRpcCallback(
                         err,
@@ -52,7 +74,11 @@ console.log("Using environment " + env);
                         "${method.id}"
                     )
                 }
-            )
+            );
+            call_${method_id}.on('metadata', metadata => {
+                logger.info(`[main] ${method_id} - Received metadata ${JSON.stringify(metadata, null, 2)}`);
+                metadataToFile(metadata, config.outDir + 'received_metadata.txt');
+            })
     </#list>
 
             // <<< SERVICE ${service.name}

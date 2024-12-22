@@ -1,6 +1,22 @@
 import * as grpc from '@grpc/grpc-js';
 import { createLogger, loadProtosGrpc, loadProtosProtobufjs, messageFromFile, messageToFile } from './common.js';
 
+// Constants
+const BIN_SUFFIX = '-bin';
+<#assign metaMap = registry.getAllClientToServerMetadata()>
+<#list metaMap?keys as metaKey>
+    <#assign metaPair = metaMap[metaKey]>
+    <#assign metaType = metaPair.getLeft().name()> <#-- MetadataType -->
+    <#assign metaValue = metaPair.getRight()> <#-- Metadata value -->
+    <#if metaType == "STRING">
+const META_KEY_${metaKey} = '${metaKey}';
+const META_VALUE_${metaKey} = '${metaValue}';
+    <#elseif metaType == "BIN">
+const META_KEY_${metaKey} = '${metaKey}' + BIN_SUFFIX;
+const META_VALUE_${metaKey} = '${metaValue}';
+    </#if>
+</#list>
+
 // Load configs dynamically depending on environment
 const env = process.env.NODE_ENV || 'test';
 console.log("Using environment " + env);
@@ -17,26 +33,33 @@ console.log("Using environment " + env);
 
     // BEGIN RPC methods implementation
 <#list registry.getAllMethods() as method>
-    function ${method.id?replace(".", "_")}(call, callback) {
+    <#assign method_id = method.id?replace(".", "_")>
+    function ${method_id}(call, callback) {
         try {
-            callback(null, ${method.id?replace(".", "_")}_impl(call.request));
+            logger.info(`[method_id] Received metadata ${"$"}{JSON.stringify(call.metadata, null, 2)}`);
+            metadataToFile(call.metadata, config.outDir + 'received_metadata.txt');
+
+            let requestMessageType = root.lookupType("${method.inType}");
+            let responseMessageType = root.lookupType("${method.outType}");
+
+            logger.info(`[${method_id}] Received request: ${"$"}{JSON.stringify(call.request, null, 2)}`);
+            messageToFile(requestMessageType.fromObject(call.request), requestMessageType, config.outDir + "${method_id}_param_0.bin");
+
+            const metadata = new grpc.Metadata();
+<#list metaMap?keys as metaKey>
+            metadata.set(META_KEY_${metaKey}, META_VALUE_${metaKey});
+</#list>
+            call.sendMetadata(metadata);
+
+            let retval = messageFromFile(
+                config.testcaseDir + "${method_id}_return_0.bin",
+                responseMessageType
+            );
+            logger.info(`[${method_id}] Response: ${"$"}{JSON.stringify(retval, null, 2)}`)
+            callback(null, retval);
         } catch (e) {
-            logger.error(`[${method.id?replace(".", "_")}] An error occurred: ${"$"}{e.message}\n${"$"}{e.stack}`);
+            logger.error(`[${method_id}] An error occurred: ${"$"}{e.message}\n${"$"}{e.stack}`);
         }
-    }
-
-    function ${method.id?replace(".", "_")}_impl(request) {
-        logger.info(`[${method.id?replace(".", "_")}_impl] Received request: ${"$"}{JSON.stringify(request, null, 2)}`);
-
-        let requestMessageType = root.lookupType("${method.inType}");
-        let responseMessageType = root.lookupType("${method.outType}");
-        messageToFile(requestMessageType.fromObject(request), requestMessageType, config.outDir + "${method.id?replace(".", "_")}_param.bin");
-        let retval = messageFromFile(
-            config.testcaseDir + "${method.id?replace(".", "_")}_return.bin",
-            responseMessageType
-        );
-        logger.info(`[${method.id?replace(".", "_")}_impl] Response: ${"$"}{JSON.stringify(retval, null, 2)}`)
-        return retval;
     }
 
 </#list>

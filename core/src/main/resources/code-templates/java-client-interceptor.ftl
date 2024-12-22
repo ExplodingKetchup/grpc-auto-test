@@ -25,7 +25,7 @@ public class MetadataInterceptor implements ClientInterceptor {
         <#-- Generate the Metadata Key -->
         <#if metaType == "BIN">
     private static final Metadata.Key<byte[]> META_KEY_${metaKey} =
-            Metadata.Key.of("${metaKey}", Metadata.BINARY_BYTE_MARSHALLER);
+            Metadata.Key.of("${metaKey}" + Metadata.BINARY_HEADER_SUFFIX, Metadata.BINARY_BYTE_MARSHALLER);
         <#else>
     private static final Metadata.Key<String> META_KEY_${metaKey} =
             Metadata.Key.of("${metaKey}", Metadata.ASCII_STRING_MARSHALLER);

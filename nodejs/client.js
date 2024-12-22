@@ -1,6 +1,11 @@
 import * as grpc from '@grpc/grpc-js';
 import { createLogger, loadProtosGrpc, loadProtosProtobufjs, messageFromFile, messageToFile } from './common.js';
 
+// Constants
+const BIN_SUFFIX = '-bin';
+const META_KEY_0 = '0';
+const META_VALUE_0 = 'ELIRFLWI';
+
 // Load configs dynamically depending on environment
 const env = process.env.NODE_ENV || 'test';
 console.log("Using environment " + env);
@@ -35,13 +40,16 @@ console.log("Using environment " + env);
             logger.info(`[main] Connected to server at ${config.server.host}:${config.server.port}`);
 
             // METHOD getPerson
+            const meta_person_PeopleService_getPerson = new grpc.Metadata();
+            meta_person_PeopleService_getPerson.set(META_KEY_0, META_VALUE_0);
             let param_person_PeopleService_getPerson = messageFromFile(
                 config.testcaseDir + "person_PeopleService_getPerson_param.bin",
                 root.lookupType("person.GetPersonRequest")
             );
             logger.info(`[main] Invoke person.PeopleService.getPerson, param: ${JSON.stringify(param_person_PeopleService_getPerson, null, 2)}`);
-            peopleServiceStub.getPerson(
+            const call_person_PeopleService_getPerson = peopleServiceStub.getPerson(
                 param_person_PeopleService_getPerson,
+                meta_person_PeopleService_getPerson,
                 (err, response) => {
                     genericClientRpcCallback(
                         err,
@@ -50,7 +58,11 @@ console.log("Using environment " + env);
                         "person.PeopleService.getPerson"
                     )
                 }
-            )
+            );
+            call_person_PeopleService_getPerson.on('metadata', metadata => {
+                logger.info(`[main] person_PeopleService_getPerson - Received metadata ${JSON.stringify(metadata, null, 2)}`);
+                metadataToFile(metadata, config.outDir + 'received_metadata.txt');
+            })
 
             // <<< SERVICE PeopleService
         } catch (e) {

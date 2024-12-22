@@ -1,5 +1,10 @@
 import * as grpc from '@grpc/grpc-js';
-import { createLogger, loadProtosGrpc, loadProtosProtobufjs, messageFromFile, messageToFile } from './common.js';
+import { createLogger, loadProtosGrpc, loadProtosProtobufjs, messageFromFile, messageToFile, metadataToFile } from './common.js';
+
+// Constants
+const BIN_SUFFIX = '-bin';
+const META_KEY_0 = '0';
+const META_VALUE_0 = 'ELIRFLWI';
 
 // Load configs dynamically depending on environment
 const env = process.env.NODE_ENV || 'test';
@@ -18,7 +23,24 @@ console.log("Using environment " + env);
     // BEGIN RPC methods implementation
     function person_PeopleService_getPerson(call, callback) {
         try {
-            callback(null, person_PeopleService_getPerson_impl(call.request));
+            logger.info(`[person_PeopleService_getPerson] Received metadata ${JSON.stringify(call.metadata, null, 2)}`);
+            metadataToFile(call.metadata, config.outDir + 'received_metadata.txt');
+
+            let requestMessageType = root.lookupType("person.GetPersonRequest");
+            let responseMessageType = root.lookupType("person.GetPersonResponse");
+            logger.info(`[person_PeopleService_getPerson] Received request: ${JSON.stringify(call.request, null, 2)}`);
+            messageToFile(requestMessageType.fromObject(request), requestMessageType, config.outDir + "person_PeopleService_getPerson_param.bin");
+
+            const metadata = new grpc.Metadata();
+            metadata.set(META_KEY_0, META_VALUE_0);
+            call.sendMetadata(metadata);
+
+            let retval = messageFromFile(
+                config.testcaseDir + "person_PeopleService_getPerson_return.bin",
+                responseMessageType
+            );
+            logger.info(`[person_PeopleService_getPerson] Response: ${JSON.stringify(retval, null, 2)}`);
+            callback(null, retval);
         } catch (e) {
             logger.error(`[person_PeopleService_getPerson] An error occurred: ${e.message}\n${e.stack}`);
         }

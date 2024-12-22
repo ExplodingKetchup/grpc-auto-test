@@ -135,5 +135,15 @@ function messageToFile(message, messageType, filepath) {
     fs.writeFileSync(filepath, buf);
 }
 
+function metadataToFile(metadata, filepath) {
+    // Convert metadata to a string format
+    const metadataString = metadata.getMap()
+        .map(([key, value]) => `${key}:${value}`)
+        .join('\n');
+
+    // Write the string to the specified file
+    fs.appendFileSync(filepath, metadataString);
+}
+
 // EXPORT
-export { createLogger, loadProtosGrpc, loadProtosProtobufjs, messageFromFile, messageToFile }
+export { createLogger, loadProtosGrpc, loadProtosProtobufjs, messageFromFile, messageToFile, metadataToFile }

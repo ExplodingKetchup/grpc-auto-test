@@ -69,7 +69,7 @@ public class MessageUtil {
 
     public static void metadataToFile(String filepath, Metadata metadata) throws IOException {
         try {
-            FileUtil.stringToFile(filepath, formatMetadataForOutput(metadata));
+            FileUtil.appendLineToFile(filepath, formatMetadataForOutput(metadata));
         } catch (IOException ioe) {
             log.error("[interceptCall] Error writing metadata to file {}", filepath, ioe);
             throw ioe;

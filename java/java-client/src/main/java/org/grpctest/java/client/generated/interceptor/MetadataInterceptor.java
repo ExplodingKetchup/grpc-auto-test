@@ -23,7 +23,7 @@ public class MetadataInterceptor implements ClientInterceptor {
 
 
     private static final Metadata.Key<byte[]> META_KEY_x406stC0I58 =
-            Metadata.Key.of("x406stC0I58", Metadata.BINARY_BYTE_MARSHALLER);
+            Metadata.Key.of("x406stC0I58" + Metadata.BINARY_HEADER_SUFFIX, Metadata.BINARY_BYTE_MARSHALLER);
 
     private static final byte[] META_VALUE_x406stC0I58 = HexFormat.of().parseHex("c21db49568bbebf31f1919ee69ef64829a");
 
