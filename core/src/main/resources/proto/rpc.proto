@@ -37,5 +37,12 @@ message GetPersonResponse {
 }
 
 service PeopleService {
+  // UNARY
   rpc GetPerson(GetPersonRequest) returns (GetPersonResponse);
+  // SERVER_STREAMING
+  rpc ListPerson(GetPersonRequest) returns (stream GetPersonResponse);
+  // CLIENT_STREAMING
+  rpc RegisterPerson(stream GetPersonRequest) returns (GetPersonResponse);
+  // BIDI_STREAMING
+  rpc StreamPerson(stream GetPersonRequest) returns (stream GetPersonResponse);
 }
