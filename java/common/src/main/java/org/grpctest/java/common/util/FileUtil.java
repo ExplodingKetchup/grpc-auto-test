@@ -38,6 +38,7 @@ public class FileUtil {
         int i = 0;
         while (Files.exists(Paths.get(buildNumberedFilepath(filepathPattern, i)))) {
             consumer.accept(buildNumberedFilepath(filepathPattern, i));
+            i++;
         }
     }
 

@@ -17,22 +17,10 @@ import java.util.HexFormat;
 public class MetadataInterceptor implements ServerInterceptor {
 
 
-    private static final Metadata.Key<String> META_KEY_84d =
-            Metadata.Key.of("84d", Metadata.ASCII_STRING_MARSHALLER);
+    private static final Metadata.Key<String> META_KEY_9C =
+            Metadata.Key.of("9C", Metadata.ASCII_STRING_MARSHALLER);
 
-    private static final String META_VALUE_84d = "5r0f271h";
-
-
-    private static final Metadata.Key<String> META_KEY_885L =
-            Metadata.Key.of("885L", Metadata.ASCII_STRING_MARSHALLER);
-
-    private static final String META_VALUE_885L = "D7L4Q3";
-
-
-    private static final Metadata.Key<String> META_KEY_Ul =
-            Metadata.Key.of("Ul", Metadata.ASCII_STRING_MARSHALLER);
-
-    private static final String META_VALUE_Ul = "K48Low2p859x85";
+    private static final String META_VALUE_9C = "8WI8JL6p42y7i";
 
 
     @Autowired
@@ -48,9 +36,8 @@ public class MetadataInterceptor implements ServerInterceptor {
         return next.startCall(new ForwardingServerCall.SimpleForwardingServerCall<ReqT, RespT>(call) {
             @Override
             public void sendHeaders(Metadata responseMetadata) {
-                responseMetadata.put(META_KEY_84d, META_VALUE_84d);
-                responseMetadata.put(META_KEY_885L, META_VALUE_885L);
-                responseMetadata.put(META_KEY_Ul, META_VALUE_Ul);
+                responseMetadata.put(META_KEY_9C, META_VALUE_9C);
+                log.info("[interceptCall] Server -> Client metadata:\n{}", MessageUtil.formatMetadataForOutput(responseMetadata));
                 super.sendHeaders(responseMetadata);
             }
         }, metadata);

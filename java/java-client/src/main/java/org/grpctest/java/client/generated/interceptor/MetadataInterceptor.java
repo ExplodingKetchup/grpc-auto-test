@@ -16,16 +16,16 @@ import java.util.HexFormat;
 public class MetadataInterceptor implements ClientInterceptor {
 
 
-    private static final Metadata.Key<byte[]> META_KEY_40 =
-            Metadata.Key.of("40", Metadata.BINARY_BYTE_MARSHALLER);
+    private static final Metadata.Key<byte[]> META_KEY_Q8I6P48a0f57 =
+            Metadata.Key.of("Q8I6P48a0f57" + Metadata.BINARY_HEADER_SUFFIX, Metadata.BINARY_BYTE_MARSHALLER);
 
-    private static final byte[] META_VALUE_40 = HexFormat.of().parseHex("2941c33a9cd4");
+    private static final byte[] META_VALUE_Q8I6P48a0f57 = HexFormat.of().parseHex("b1bf3c45c90a4a2480f2");
 
 
-    private static final Metadata.Key<byte[]> META_KEY_x406stC0I58 =
-            Metadata.Key.of("x406stC0I58" + Metadata.BINARY_HEADER_SUFFIX, Metadata.BINARY_BYTE_MARSHALLER);
+    private static final Metadata.Key<byte[]> META_KEY_7K7tj3P10c =
+            Metadata.Key.of("7K7tj3P10c" + Metadata.BINARY_HEADER_SUFFIX, Metadata.BINARY_BYTE_MARSHALLER);
 
-    private static final byte[] META_VALUE_x406stC0I58 = HexFormat.of().parseHex("c21db49568bbebf31f1919ee69ef64829a");
+    private static final byte[] META_VALUE_7K7tj3P10c = HexFormat.of().parseHex("5d890b60fb091ca4674f73eb67cb9f94ad");
 
 
     @Autowired
@@ -36,8 +36,9 @@ public class MetadataInterceptor implements ClientInterceptor {
         return new ForwardingClientCall.SimpleForwardingClientCall<ReqT, RespT>(channel.newCall(methodDescriptor, callOptions)) {
             @Override
             public void start(Listener<RespT> responseListener, Metadata headers) {
-                headers.put(META_KEY_40, META_VALUE_40);
-                headers.put(META_KEY_x406stC0I58, META_VALUE_x406stC0I58);
+                headers.put(META_KEY_Q8I6P48a0f57, META_VALUE_Q8I6P48a0f57);
+                headers.put(META_KEY_7K7tj3P10c, META_VALUE_7K7tj3P10c);
+                log.info("[interceptCall] Client -> Server metadata:\n{}", MessageUtil.formatMetadataForOutput(headers));
                 super.start(new ForwardingClientCallListener.SimpleForwardingClientCallListener<RespT>(responseListener) {
                     @Override
                     public void onHeaders(Metadata headers) {

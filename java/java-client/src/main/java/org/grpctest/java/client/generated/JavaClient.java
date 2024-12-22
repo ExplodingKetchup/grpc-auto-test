@@ -37,9 +37,20 @@ public class JavaClient implements InitializingBean {
     @Override
     public void afterPropertiesSet() throws Exception {
 
+        // Invoke test case: person.PeopleService.listPerson
+        invokeServerStreamingRpcMethod(peopleServiceBlockingStub::listPerson, MessageUtil.messageFromFile(config.getTestcaseDir() + File.separator + "person_PeopleService_listPerson_param_0.bin", GetPersonRequest.class), "person.PeopleService.listPerson");
+
+
+        // Invoke test case: person.PeopleService.registerPerson
+        invokeClientStreamingRpcMethod(peopleServiceAsyncStub::registerPerson, MessageUtil.messageListFromMultipleFiles(config.getTestcaseDir() + File.separator + "person_PeopleService_registerPerson_param.bin", GetPersonRequest.class), "person.PeopleService.registerPerson");
+
+
         // Invoke test case: person.PeopleService.getPerson
         invokeUnaryRpcMethod(peopleServiceBlockingStub::getPerson, MessageUtil.messageFromFile(config.getTestcaseDir() + File.separator + "person_PeopleService_getPerson_param_0.bin", GetPersonRequest.class), "person.PeopleService.getPerson");
-        invokeClientStreamingRpcMethod(peopleServiceAsyncStub::registerPerson, MessageUtil.messageListFromMultipleFiles(config.getTestcaseDir() + File.separator + "person_PeopleService_registerPerson.bin", GetPersonRequest.class), "person.PeopleService.registerPerson");
+
+
+        // Invoke test case: person.PeopleService.streamPerson
+        invokeBidiStreamingRpcMethod(peopleServiceAsyncStub::streamPerson, MessageUtil.messageListFromMultipleFiles(config.getTestcaseDir() + File.separator + "person_PeopleService_streamPerson_param.bin", GetPersonRequest.class), "person.PeopleService.streamPerson");
 
         while(true);
     }

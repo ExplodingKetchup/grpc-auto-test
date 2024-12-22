@@ -23,6 +23,7 @@ public class PeopleService extends PeopleServiceGrpc.PeopleServiceImplBase {
         try {
             log.info("[getPerson] Received request {}", request);
             MessageUtil.messageToFile(request, config.getOutDir() + File.separator + "person_PeopleService_getPerson_param_0.bin");
+
             FileUtil.loopMultipleFilesWithSamePrefix(
                     config.getTestcaseDir() + File.separator + "person_PeopleService_getPerson_return.bin",
                     (filepath) -> responseObserver.onNext(MessageUtil.messageFromFile(filepath, GetPersonResponse.class))
@@ -38,8 +39,12 @@ public class PeopleService extends PeopleServiceGrpc.PeopleServiceImplBase {
     public void listPerson(GetPersonRequest request, StreamObserver<GetPersonResponse> responseObserver) {
         try {
             log.info("[listPerson] Received request {}", request);
-            MessageUtil.messageToFile(request, config.getOutDir() + File.separator + "person_PeopleService_listPerson_param.bin");
-            responseObserver.onNext(MessageUtil.messageFromFile(config.getTestcaseDir() + File.separator + "person_PeopleService_getPerson_return_0.bin", GetPersonResponse.class));
+            MessageUtil.messageToFile(request, config.getOutDir() + File.separator + "person_PeopleService_listPerson_param_0.bin");
+
+            FileUtil.loopMultipleFilesWithSamePrefix(
+                    config.getTestcaseDir() + File.separator + "person_PeopleService_listPerson_return.bin",
+                    (filepath) -> responseObserver.onNext(MessageUtil.messageFromFile(filepath, GetPersonResponse.class))
+            );
 
             responseObserver.onCompleted();
         } catch (Throwable t) {
@@ -55,7 +60,7 @@ public class PeopleService extends PeopleServiceGrpc.PeopleServiceImplBase {
             public void onNext(GetPersonRequest request) {
                 try {
                     log.info("[registerPerson] Received request {}", request);
-                    MessageUtil.messageToFile(request, config.getOutDir() + File.separator + "person_PeopleService_listPerson_param_" + requestIdx + ".bin");
+                    MessageUtil.messageToFile(request, config.getOutDir() + File.separator + "person_PeopleService_registerPerson_param_" + requestIdx + ".bin");
                     requestIdx++;
                 } catch (Throwable t) {
                     log.error("[registerPerson] onNext: An exception occurred", t);
@@ -66,7 +71,7 @@ public class PeopleService extends PeopleServiceGrpc.PeopleServiceImplBase {
             public void onError(Throwable throwable) {
                 log.error("[registerPerson] Client throw error", throwable);
                 try {
-                    MessageUtil.grpcExceptionToFile(config.getOutDir() + File.separator + "person_PeopleService_regusterPerson_error.txt", throwable);
+                    MessageUtil.grpcExceptionToFile(config.getOutDir() + File.separator + "person_PeopleService_registerPerson_error.txt", throwable);
                 } catch (Exception e) {
                     log.error("[registerPerson] onError: An exception occurred", e);
                 }
@@ -75,7 +80,7 @@ public class PeopleService extends PeopleServiceGrpc.PeopleServiceImplBase {
             @Override
             public void onCompleted() {
                 FileUtil.loopMultipleFilesWithSamePrefix(
-                        config.getTestcaseDir() + File.separator + "person_PeopleService_getPerson_return.bin",
+                        config.getTestcaseDir() + File.separator + "person_PeopleService_registerPerson_return.bin",
                         (filepath) -> responseObserver.onNext(MessageUtil.messageFromFile(filepath, GetPersonResponse.class))
                 );
 
@@ -86,6 +91,39 @@ public class PeopleService extends PeopleServiceGrpc.PeopleServiceImplBase {
 
     @Override
     public StreamObserver<GetPersonRequest> streamPerson(StreamObserver<GetPersonResponse> responseObserver) {
-        return super.streamPerson(responseObserver);
+        return new StreamObserver<GetPersonRequest>() {
+            private int requestIdx = 0;
+            @Override
+            public void onNext(GetPersonRequest request) {
+                try {
+                    log.info("[streamPerson] Received request {}", request);
+                    MessageUtil.messageToFile(request, config.getOutDir() + File.separator + "person_PeopleService_streamPerson_param_" + requestIdx + ".bin");
+                    requestIdx++;
+                } catch (Throwable t) {
+                    log.error("[streamPerson] onNext: An exception occurred", t);
+                }
+            }
+
+            @Override
+            public void onError(Throwable throwable) {
+                log.error("[streamPerson] Client throw error", throwable);
+                try {
+                    MessageUtil.grpcExceptionToFile(config.getOutDir() + File.separator + "person_PeopleService_streamPerson_error.txt", throwable);
+                } catch (Exception e) {
+                    log.error("[streamPerson] onError: An exception occurred", e);
+                }
+            }
+
+            @Override
+            public void onCompleted() {
+                FileUtil.loopMultipleFilesWithSamePrefix(
+                        config.getTestcaseDir() + File.separator + "person_PeopleService_streamPerson_return.bin",
+                        (filepath) -> responseObserver.onNext(MessageUtil.messageFromFile(filepath, GetPersonResponse.class))
+                );
+
+                responseObserver.onCompleted();
+            }
+        };
     }
+
 }

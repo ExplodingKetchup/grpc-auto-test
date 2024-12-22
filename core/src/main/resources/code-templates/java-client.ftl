@@ -1,7 +1,8 @@
 package org.grpctest.java.client.generated;
 
 import com.google.protobuf.GeneratedMessageV3;
-import io.grpc.*
+import io.grpc.*;
+import io.grpc.stub.StreamObserver;
 import lombok.extern.slf4j.Slf4j;
 import org.grpctest.java.common.define.*;
 import org.grpctest.java.client.config.Config;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
+import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;
 

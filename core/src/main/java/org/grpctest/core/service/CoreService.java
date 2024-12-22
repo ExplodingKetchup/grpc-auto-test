@@ -26,6 +26,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -239,25 +240,10 @@ public class CoreService implements InitializingBean {
     }
 
     private boolean checkTestsFinished(RuntimeConfig runtimeConfig) {
-        Path clientDir = Paths.get("out", "client");
-        Path serverDir = Paths.get("out", "server");
-        long fileCountClient;
-        long fileCountServer;
-        long expectedFileCountClient = runtimeConfig.getEnableException() ? 1 : rpcModelRegistry.getAllMethods().size();
-        long expectedFileCountServer = rpcModelRegistry.getAllMethods().size();
-        if (runtimeConfig.getServerToClientMetadataType() != MetadataType.NONE) expectedFileCountClient++;
-        if (runtimeConfig.getClientToServerMetadataType() != MetadataType.NONE) expectedFileCountServer++;
         try {
-            try (Stream<Path> pathStream = Files.list(clientDir)) {
-                fileCountClient = pathStream.filter(Files::isRegularFile).count();
-            }
-            try (Stream<Path> pathStream = Files.list(serverDir)) {
-                fileCountServer = pathStream.filter(Files::isRegularFile).count();
-            }
-            return (fileCountClient == expectedFileCountClient)
-                    && (fileCountServer == expectedFileCountServer);
-        } catch (IOException ioe) {
-            log.error("[checkTestsFinished] File I/O Exception", ioe);
+            return dockerService.healthCheck(new String[] {RuntimeConfig.Language.CLIENT_NAME.get(runtimeConfig.getClient())});
+        } catch (Exception e) {
+            log.error("[checkTestsFinished] Exception occurred", e);
             return false;
         }
     }

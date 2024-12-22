@@ -34,9 +34,13 @@ public class RuntimeConfig {
         NODEJS("Node.JS");
 
         public static final HashMap<Language, String> SERVER_NAME = new HashMap<>();
+        public static final HashMap<Language, String> CLIENT_NAME = new HashMap<>();
         static {
             SERVER_NAME.put(JAVA, "java-server");
             SERVER_NAME.put(NODEJS, "node-server");
+
+            CLIENT_NAME.put(JAVA, "java-client");
+            CLIENT_NAME.put(NODEJS, "node-client");
         }
 
         private final String displayName;

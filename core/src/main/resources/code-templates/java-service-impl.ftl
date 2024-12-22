@@ -22,7 +22,6 @@ public class ${service.name} extends ${service.name}Grpc.${service.name}ImplBase
 <#list registry.getAllMethods(serviceId) as method>
 <#assign requestType = method.inType?split(".")?last>
 <#assign responseType = method.outType?split(".")?last>
-<#assign
     @Override
     <#if method.type == "UNARY" || method.type == "SERVER_STREAMING">
     public void ${method.name}(${requestType} request, StreamObserver<${responseType}> responseObserver) {
@@ -51,8 +50,7 @@ public class ${service.name} extends ${service.name}Grpc.${service.name}ImplBase
         }
     }
     <#elseif method.type == "CLIENT_STREAMING" || method.type == "BIDI_STREAMING">
-    @Override
-    public StreamObserver<requestType> ${method.name}(StreamObserver<${responseType}> responseObserver) {
+    public StreamObserver<${requestType}> ${method.name}(StreamObserver<${responseType}> responseObserver) {
         return new StreamObserver<${requestType}>() {
             private int requestIdx = 0;
             @Override

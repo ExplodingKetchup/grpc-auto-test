@@ -83,7 +83,7 @@ public class DockerService {
         }
     }
 
-    private boolean healthCheck(String[] services) throws Exception {
+    public boolean healthCheck(String[] services) throws Exception {
         try {
             List<String> runningServices = List.of(externalProcessUtilService.executeAndReturnOutput(WORKING_DIR, CMD_DOCKER_COMPOSE_PS).split("\n"));
             for (String service : services) {
