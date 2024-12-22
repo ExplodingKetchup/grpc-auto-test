@@ -135,15 +135,26 @@ function messageToFile(message, messageType, filepath) {
     fs.writeFileSync(filepath, buf);
 }
 
-function metadataToFile(metadata, filepath) {
-    // Convert metadata to a string format
-    const metadataString = metadata.getMap()
-        .map(([key, value]) => `${key}:${value}`)
-        .join('\n');
-
-    // Write the string to the specified file
-    fs.appendFileSync(filepath, metadataString);
+function formatMetadataForOutput(metadata) {
+    return metadata.getMap().map(([key, value]) => `${key}:${value}`).join('\n');
 }
 
+function metadataToFile(metadata, filepath) {
+    // Write the string to the specified file
+    fs.appendFileSync(filepath, formatMetadataForOutput(metadata));
+}
+
+function formatErrorForOutput(err) {
+    const statusName = Object.keys(grpc.status).find(
+        (key) => grpc.status[key] === err.code
+    );
+    return `${statusName}\n${err.message}\n${formatMetadataForOutput(err.metadata)}`;
+}
+
+function errorToFile(err, filepath) {
+    // Convert err to a string
+    fs.appendFileSync(filepath, formatErrorForOutput(err));
+} 
+
 // EXPORT
-export { createLogger, loadProtosGrpc, loadProtosProtobufjs, messageFromFile, messageToFile, metadataToFile }
+export { createLogger, loadProtosGrpc, loadProtosProtobufjs, messageFromFile, messageToFile, formatMetadataForOutput, metadataToFile, formatErrorForOutput, errorToFile }

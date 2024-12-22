@@ -35,7 +35,8 @@ console.log("Using environment " + env);
     // Client generic rpc callback
     function genericClientRpcCallback(err, response, responseType, methodId) {
         if (err) {
-            logger.error(`[genericClientRpcCallback] RPC invoke failed: ${"$"}{err.message}\n${"$"}{err.stack}`);
+            logger.error(`[genericClientRpcCallback] RPC invoke failed:\n ${"$"}{formatErrorForOutput(err)}`);
+            errorToFile(err, `${"$"}{config.outDir}${"$"}{methodId.replaceAll(".", "_")}_error.txt`;
         } else {
             logger.info(`[genericClientRpcCallback] Method ${"$"}{methodId} returns ${"$"}{JSON.stringify(responseType.fromObject(response), null, 2)}`);
             messageToFile(responseType.fromObject(response), responseType, config.outDir + methodId.replaceAll(".", "_") + "_return.bin");
