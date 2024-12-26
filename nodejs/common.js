@@ -140,6 +140,7 @@ function formatMetadataForOutput(metadata) {
 }
 
 function metadataToFile(metadata, filepath) {
+    if (metadata === null) return;
     // Write the string to the specified file
     fs.appendFileSync(filepath, formatMetadataForOutput(metadata));
 }
@@ -156,5 +157,26 @@ function errorToFile(err, filepath) {
     fs.appendFileSync(filepath, formatErrorForOutput(err));
 } 
 
+/**
+ * Loop over all files with the specified path: (prefix)_(i)(suffix), where i is from 0 to n where n+1 
+ * points to a nonexistent file. Returns the list of valid filepaths found.
+ * 
+ * @param {*} prefix 
+ * @param {*} suffix 
+ * 
+ * @returns Array of valid filepaths
+ */
+function loopMultipleFilesWithSamePrefix(prefix, suffix) {
+    let i = 0;
+    let filepath = `${prefix}_${i}${suffix}`;
+    const validFilepaths = new Array();
+    while (fs.existsSync(filepath)) {
+        validFilepaths.push(filepath);
+        i++;
+        filepath = `${prefix}_${i}${suffix}`;
+    }
+    return validFilepaths;
+}
+
 // EXPORT
-export { createLogger, loadProtosGrpc, loadProtosProtobufjs, messageFromFile, messageToFile, formatMetadataForOutput, metadataToFile, formatErrorForOutput, errorToFile }
+export { createLogger, loadProtosGrpc, loadProtosProtobufjs, messageFromFile, messageToFile, formatMetadataForOutput, metadataToFile, formatErrorForOutput, errorToFile, loopMultipleFilesWithSamePrefix }

@@ -1,5 +1,5 @@
 import * as grpc from '@grpc/grpc-js';
-import { createLogger, loadProtosGrpc, loadProtosProtobufjs, messageFromFile, messageToFile, metadataToFile } from './common.js';
+import { createLogger, loadProtosGrpc, loadProtosProtobufjs, loopMultipleFilesWithSamePrefix, messageFromFile, messageToFile, metadataToFile } from './common.js';
 
 // Constants
 const BIN_SUFFIX = '-bin';
@@ -46,18 +46,19 @@ console.log("Using environment " + env);
         }
     }
 
-    function person_PeopleService_getPerson_impl(request) {
-        logger.info(`[person_PeopleService_getPerson_impl] Received request: ${JSON.stringify(request, null, 2)}`);
-
+    function person_PeopleService_listPerson(call) {
         let requestMessageType = root.lookupType("person.GetPersonRequest");
         let responseMessageType = root.lookupType("person.GetPersonResponse");
-        messageToFile(requestMessageType.fromObject(request), requestMessageType, config.outDir + "person_PeopleService_getPerson_param.bin");
-        let retval = messageFromFile(
-            config.testcaseDir + "person_PeopleService_getPerson_return.bin",
-            responseMessageType
-        );
-        logger.info(`[person_PeopleService_getPerson_impl] Response: ${JSON.stringify(retval, null, 2)}`)
-        return retval;
+        logger.info(`[person_PeopleService_getPerson] Received request: ${JSON.stringify(call.request, null, 2)}`);
+        messageToFile(requestMessageType.fromObject(request), requestMessageType, config.outDir + "person_PeopleService_getPerson_param_0.bin");
+
+        loopMultipleFilesWithSamePrefix(config.testcaseDir + 'person_PeopleService_getPerson_return', '.bin')
+            .forEach(filepath => call.write(
+                messageFromFile(filepath, responseMessageType)
+            ));
+        
+        call.emit(''
+        
     }
 
     // END RPC methods implementation
