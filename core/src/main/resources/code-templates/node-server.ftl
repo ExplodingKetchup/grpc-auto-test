@@ -9,11 +9,11 @@ const rpcException = {code: grpc.status.${rpcException.statusCode.name()}, detai
 </#macro>
 
 import * as grpc from '@grpc/grpc-js';
-import { createLogger, loadProtosGrpc, loadProtosProtobufjs, messageFromFile, messageToFile } from './common.js';
+import { createLogger, loadProtosGrpc, loadProtosProtobufjs, messageFromFile, messageToFile, formatMetadataForOutput, metadataToFile, formatErrorForOutput, errorToFile, loopMultipleFilesWithSamePrefix } from './common.js';
 
 // Constants
 const BIN_SUFFIX = '-bin';
-<#assign metaMap = registry.getAllClientToServerMetadata()>
+<#assign metaMap = registry.getAllServerToClientMetadata()>
 <#list metaMap?keys as metaKey>
     <#assign metaPair = metaMap[metaKey]>
     <#assign metaType = metaPair.getLeft().name()> <#-- MetadataType -->
@@ -23,7 +23,7 @@ const META_KEY_${metaKey} = '${metaKey}';
 const META_VALUE_${metaKey} = '${metaValue}';
     <#elseif metaType == "BIN">
 const META_KEY_${metaKey} = '${metaKey}' + BIN_SUFFIX;
-const META_VALUE_${metaKey} = '${metaValue}';
+const META_VALUE_${metaKey} = Buffer.from('${metaValue}', 'hex');
     </#if>
 </#list>
 
@@ -150,7 +150,7 @@ console.log("Using environment " + env);
 <#list registry.getAllServices() as service>
         server.addService(protosGrpc.${service.id}.service, {
     <#list registry.getAllMethods(service) as method>
-            ${method.name}: ${method.id?replace(".", "_")}
+            ${method.name}: ${method.id?replace(".", "_")}<#sep>,
     </#list>
         });
 

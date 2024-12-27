@@ -1,10 +1,10 @@
 import * as grpc from '@grpc/grpc-js';
-import { createLogger, loadProtosGrpc, loadProtosProtobufjs, loopMultipleFilesWithSamePrefix, messageFromFile, messageToFile } from './common.js';
+import { createLogger, loadProtosGrpc, loadProtosProtobufjs, messageFromFile, messageToFile, formatMetadataForOutput, metadataToFile, formatErrorForOutput, errorToFile, loopMultipleFilesWithSamePrefix } from './common.js';
 
 // Constants
 const BIN_SUFFIX = '-bin';
-const META_KEY_0 = '0';
-const META_VALUE_0 = 'ELIRFLWI';
+const META_KEY_619zBFq6E56h = '619zBFq6E56h' + BIN_SUFFIX;
+const META_VALUE_619zBFq6E56h = Buffer.from('54edfe5fb8', 'hex');
 
 // Load configs dynamically depending on environment
 const env = process.env.NODE_ENV || 'test';
@@ -21,7 +21,7 @@ console.log("Using environment " + env);
     let protosGrpc = loadProtosGrpc(config.protoDir);
     let root = loadProtosProtobufjs(config.protoDir);
     const headers = new grpc.Metadata();
-    headers.set(META_KEY_0, META_VALUE_0);
+    headers.set(META_KEY_619zBFq6E56h, META_VALUE_619zBFq6E56h);
 
     function invokeUnaryRpc(method, requestType, responseType, methodId) {
         const rpcCallback = (err, response) => {
@@ -46,6 +46,7 @@ console.log("Using environment " + env);
     function invokeServerStreamingRpc(method, requestType, responseType, methodId) {
         let responseIdx = 0;
         const request = messageFromFile(config.testcaseDir + methodId.replaceAll(".", "_") + '_param_0.bin', requestType);
+        logger.info(`[invokeServerStreamingRpc] Invoke ${methodId}, param: ${JSON.stringify(request, null, 2)}`);
         const call = method(request, headers);
         call.on('metadata', (metadata) => {
             logger.info(`[invokeServerStreamingRpc] Received metadata ${JSON.stringify(metadata, null, 2)}`);
@@ -80,7 +81,7 @@ console.log("Using environment " + env);
             logger.info(`[invokeClientStreamingRpc] Received metadata ${JSON.stringify(metadata, null, 2)}`);
             metadataToFile(metadata, config.outDir + 'received_metadata.txt');
         });
-        loopMultipleFilesWithSamePrefix(`${methodId.replaceAll('.', '_')}_param`, '.bin')
+        loopMultipleFilesWithSamePrefix(`${config.testcaseDir}${methodId.replaceAll('.', '_')}_param`, '.bin')
                 .forEach((filepath) => {
                     const request = messageFromFile(filepath, requestType);
                     logger.info(`[invokeClientStreamingRpc] Invoke ${methodId}, param: ${JSON.stringify(request, null, 2)}`);
@@ -107,7 +108,7 @@ console.log("Using environment " + env);
         call.on('end', () => {
             logger.info('[invokeBidiStreamingRpc] RPC invoke finished without error');
         });
-        loopMultipleFilesWithSamePrefix(`${methodId.replaceAll('.', '_')}_param`, '.bin')
+        loopMultipleFilesWithSamePrefix(`${config.testcaseDir}${methodId.replaceAll('.', '_')}_param`, '.bin')
                 .forEach((filepath) => {
                     const request = messageFromFile(filepath, requestType);
                     logger.info(`[invokeBidiStreamingRpc] Invoke ${methodId}, param: ${JSON.stringify(request, null, 2)}`);
@@ -115,8 +116,6 @@ console.log("Using environment " + env);
                 });
         call.end();
     }
-
-    // 
 
     function main() {
 
@@ -127,7 +126,13 @@ console.log("Using environment " + env);
             logger.info(`[main] Connected to server at ${config.server.host}:${config.server.port}`);
 
             // METHOD getPerson
-            
+            invokeUnaryRpc((request, headers, callback) => peopleServiceStub.getPerson(request, headers, callback), root.lookupType('person.GetPersonRequest'), root.lookupType('person.GetPersonResponse'), 'person.PeopleService.getPerson');
+            // METHOD listPerson
+            invokeServerStreamingRpc((request, headers) => peopleServiceStub.listPerson(request, headers), root.lookupType('person.GetPersonRequest'), root.lookupType('person.GetPersonResponse'), 'person.PeopleService.listPerson');
+            // METHOD registerPerson
+            invokeClientStreamingRpc((headers, callback) => peopleServiceStub.registerPerson(headers, callback), root.lookupType('person.GetPersonRequest'), root.lookupType('person.GetPersonResponse'), 'person.PeopleService.registerPerson');
+            // METHOD streamPerson
+            invokeBidiStreamingRpc((headers) => peopleServiceStub.streamPerson(headers), root.lookupType('person.GetPersonRequest'), root.lookupType('person.GetPersonResponse'), 'person.PeopleService.streamPerson');
 
             // <<< SERVICE PeopleService
         } catch (e) {

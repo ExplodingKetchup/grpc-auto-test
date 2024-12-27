@@ -157,6 +157,7 @@ public class CoreService implements InitializingBean {
 
             // Wait until all tests are finished
             TimeUtil.pollForCondition(() -> checkTestsFinished(runtimeConfig), 1000, config.getTestTimeoutMillis());
+            Thread.sleep(5000);     // Wait for stuff to finish before shutting down
 
         } catch (Throwable t) {
             log.error("An error occurred, terminating test", t);

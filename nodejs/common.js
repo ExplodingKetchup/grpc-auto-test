@@ -136,7 +136,10 @@ function messageToFile(message, messageType, filepath) {
 }
 
 function formatMetadataForOutput(metadata) {
-    return metadata.getMap().map(([key, value]) => `${key}:${value}`).join('\n');
+    const metadataMap = metadata.getMap();
+    return Object.entries(metadataMap)
+        .map(([key, value]) => `${key}:${value}`)
+        .join('\n') + '\n';
 }
 
 function metadataToFile(metadata, filepath) {

@@ -5,7 +5,7 @@ config.log = {
     dir: '../log/',
     filename: 'node-client.log'
 };
-config.testcaseDir = '../test-cases/';
+config.testcaseDir = '../test-cases/client/';
 config.outDir = '../out/client/';
 config.server = {
     host : 'node-server',
