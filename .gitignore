@@ -11,6 +11,7 @@ TODO
 ~$*.xlsx
 cpp/
 python/venv/
+python/protoc_generated/
 
 ### IntelliJ IDEA ###
 .idea/modules.xml
