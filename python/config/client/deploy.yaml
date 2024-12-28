@@ -1,0 +1,9 @@
+log:
+  dir: log
+  file_prefix: py-client
+in:
+  dir: test-cases/client
+out:
+  dir: out/client
+server:
+  port: 50051

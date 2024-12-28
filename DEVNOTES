@@ -16,3 +16,7 @@ Limitations:
     - path-related configs should not be changed
 - Cross-import between different proto namespaces is not allowed
 
+Configs:
+Configs in these projects will vary based on the set environment variable
+- Nodejs: NODE_ENV -> ["test" / "deploy"]
+- Python: PY_ENV -> ["test" / "deploy"]

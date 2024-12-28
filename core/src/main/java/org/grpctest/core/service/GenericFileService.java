@@ -28,6 +28,7 @@ public class GenericFileService {
     // Target directory to put proto files in a Java test program
     private static final String PROTO_TARGET_JAVA = "java/common/src/main/proto";
     private static final String PROTO_TARGET_NODEJS = "nodejs/proto";
+    private static final String PROTO_TARGET_PYTHON = "python/proto";
 
     private final Config config;
     private final ResourceLoader resourceLoader;
@@ -35,6 +36,7 @@ public class GenericFileService {
     public void copyProtos() throws Throwable {
         copyResourceFiles(config.getProtoClasspath(), PROTO_TARGET_JAVA);
         copyResourceFiles(config.getProtoClasspath(), PROTO_TARGET_NODEJS);
+        copyResourceFiles(config.getProtoClasspath(), PROTO_TARGET_PYTHON);
     }
 
     /**

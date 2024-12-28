@@ -12,6 +12,9 @@ TODO
 cpp/
 python/venv/
 python/protoc_generated/
+*_pb2.py
+*_pb2.pyi
+*_pb2_grpc.py
 
 ### IntelliJ IDEA ###
 .idea/modules.xml
