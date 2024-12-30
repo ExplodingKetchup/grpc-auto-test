@@ -13,7 +13,9 @@ def message_from_file(filepath: str, message_class: type) -> Message | None:
         return None
     try:
         with open(filepath, "rb") as f:
-            return message_class().ParseFromString(f.read())
+            message = message_class()
+            message.ParseFromString(f.read())
+            return message
     except IOError as ioe:
         logging.error("[messageFromFile] Reading from file failed", exc_info=ioe)
 

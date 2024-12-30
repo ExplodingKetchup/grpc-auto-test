@@ -1,0 +1,40 @@
+FROM python:3.13-slim
+
+ENV HOME=/app
+ENV PY_ENV=deploy
+ARG PY_HOST_DIR=./python
+
+# Create a non-privileged user that the app will run under.
+# See https://docs.docker.com/go/dockerfile-user-best-practices/
+ARG UID=10001
+RUN adduser \
+    --disabled-password \
+    --gecos "" \
+    --home "/nonexistent" \
+    --shell "/sbin/nologin" \
+    --no-create-home \
+    --uid "${UID}" \
+    appuser
+
+RUN mkdir -p $HOME
+WORKDIR $HOME
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY --chown=$UID --chmod=770 "$PY_HOST_DIR/client.py" "$HOME/"
+COPY --chown=$UID --chmod=770 "$PY_HOST_DIR/*_utils.py" "$HOME/"
+
+COPY --chown=$UID --chmod=770 "$PY_HOST_DIR/proto/*.proto" "$HOME/proto/"
+RUN python -m grpc_tools.protoc --proto_path=proto --python_out=. --pyi_out=. --grpc_python_out=. proto/*.proto
+
+COPY --chown=$UID --chmod=770 "$PY_HOST_DIR/config/client/$PY_ENV.yaml" "$HOME/config/client/"
+
+RUN chown -R appuser $HOME
+RUN chmod -R 770 $HOME
+
+USER appuser
+
+EXPOSE 50051
+
+ENTRYPOINT ["sh", "-c", "python client.py"]

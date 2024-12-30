@@ -15,6 +15,7 @@ python/protoc_generated/
 *_pb2.py
 *_pb2.pyi
 *_pb2_grpc.py
+python/__pycache__/
 
 ### IntelliJ IDEA ###
 .idea/modules.xml

@@ -12,6 +12,7 @@ TEST_CLIENT_CONFIG_FILEPATH = "config/client/test.yaml"
 
 def load_config(is_server: bool) -> dict:
     env = os.getenv("PY_ENV", "test")
+    print(f"Running with environment {env}")
 
     if env == "deploy":
         if is_server:

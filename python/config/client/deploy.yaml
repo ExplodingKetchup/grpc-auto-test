@@ -6,4 +6,5 @@ in:
 out:
   dir: out/client
 server:
+  host: py-server
   port: 50051

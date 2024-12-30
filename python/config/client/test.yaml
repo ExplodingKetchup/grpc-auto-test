@@ -6,4 +6,5 @@ in:
 out:
   dir: ../out/client
 server:
+  host: localhost
   port: 50051
