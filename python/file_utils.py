@@ -2,15 +2,19 @@ import logging
 import os
 
 
-def string_to_file(filepath: str, content: str):
+def string_to_file(filepath: str, content: str, append: bool = False):
     """
     Write a string to a file. Creates a new file if it doesn't exist or overwrites if it does.
 
     :param filepath: Path to the file
     :param content: String content to write to the file
+    :param append: True if append, False if overwrite
     """
+    mode = "w"
+    if append:
+        mode = "a"
     try:
-        with open(filepath, "w", encoding="utf-8") as f:
+        with open(filepath, mode, encoding="utf-8") as f:
             f.write(content)
     except Exception as e:
         logging.error("[string_to_file] An error occurred:", exc_info=e)

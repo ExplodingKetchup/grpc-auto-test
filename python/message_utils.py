@@ -1,5 +1,9 @@
 import logging
+
+import grpc
 from google.protobuf.message import Message
+
+from file_utils import string_to_file
 
 
 def message_from_file(filepath: str, message_class: type) -> Message | None:
@@ -28,3 +32,17 @@ def message_to_file(filepath: str, message: Message):
     """
     with open(filepath, "wb") as f:
         f.write(message.SerializeToString())
+
+def format_metadata_as_string(metadata) -> str:
+    if metadata is None:
+        return ""
+    return "\n".join(f"{key}:{value}" for key, value in metadata)
+
+def format_grpc_error_as_string(rpc_error: grpc.RpcError) -> str:
+    return "\n".join([rpc_error.code().name, rpc_error.details(), format_metadata_as_string(rpc_error.trailing_metadata())])
+
+def metadata_to_file(filepath: str, metadata):
+    string_to_file(filepath, format_metadata_as_string(metadata) + "\n", append=True)
+
+def grpc_error_to_file(filepath: str, rpc_error: grpc.RpcError):
+    string_to_file(filepath, format_grpc_error_as_string(rpc_error))

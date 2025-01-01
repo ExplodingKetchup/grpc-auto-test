@@ -26,5 +26,4 @@ def configure_logger(log_file: str):
     logger.addHandler(file_handler)
 
 def get_log_file_for_this_instance(log_dir: str, log_file_prefix: str) -> str:
-    if log_dir.endswith(os.sep):
-        return log_dir + log_file_prefix + "_" + str(int(time.time())) + ".log"
+    return os.path.join(log_dir, log_file_prefix + "_" + str(int(time.time())) + ".log")

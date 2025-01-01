@@ -36,6 +36,7 @@ public class ProtobufReader {
             // Loop through each .proto files
             for (DescriptorProtos.FileDescriptorProto fileDescriptorProto : descriptorSet.getFileList()) {
                 log.info("[loadProtoContent] Reading content of [{}]", fileDescriptorProto.getName());
+                rpcModelRegistry.addProtoFilename(fileDescriptorProto.getName().substring(0, fileDescriptorProto.getName().length() - 6));
 
                 // Build Descriptor
                 Descriptors.FileDescriptor fileDescriptor = Descriptors.FileDescriptor.buildFrom(fileDescriptorProto, new Descriptors.FileDescriptor[]{});

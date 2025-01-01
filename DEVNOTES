@@ -20,3 +20,9 @@ Configs:
 Configs in these projects will vary based on the set environment variable
 - Nodejs: NODE_ENV -> ["test" / "deploy"]
 - Python: PY_ENV -> ["test" / "deploy"]
+
+Rpc Error:
+- Only work for server-raised exceptions
+- For unary and client streaming, the client cannot receive any responses when exception occurred
+- For server streaming and bidi streaming, the client can receive all responses up to the point the exception is raised
+on the server

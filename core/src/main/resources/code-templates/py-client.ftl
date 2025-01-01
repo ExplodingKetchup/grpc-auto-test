@@ -9,18 +9,31 @@ from file_utils import list_files_with_same_prefix
 from log_utils import configure_logger, get_log_file_for_this_instance
 from message_utils import message_from_file, message_to_file, format_grpc_error_as_string, grpc_error_to_file, \
     metadata_to_file, format_metadata_as_string
-from rpc_pb2 import *
-from rpc_pb2_grpc import *
+<#list registry.getProtoFiles() as proto_file>
+from ${proto_file}_pb2 import *
+from ${proto_file}_pb2_grpc import *
+</#list>
 
 
 # Constants
-META_KEY_0 = "clippy"
-META_VALUE_0 = "ob239rw"
-META_KEY_1 = "clippy-bin"
-META_VALUE_1 = bytes.fromhex("904a8b3f0de6")
+BIN_METADATA_SUFFIX = "-bin"
+<#assign metaMap = registry.getAllClientToServerMetadata()>
+<#list metaMap?keys as metaKey>
+    <#assign metaPair = metaMap[metaKey]>
+    <#assign metaType = metaPair.getLeft().name()> <#-- MetadataType -->
+    <#assign metaValue = metaPair.getRight()> <#-- Metadata value -->
+    <#if metaType == "STRING">
+META_KEY_${metaKey} = "${metaKey}";
+META_VALUE_${metaKey} = "${metaValue}";
+    <#elseif metaType == "BIN">
+META_KEY_${metaKey} = "${metaKey}" + BIN_SUFFIX;
+META_VALUE_${metaKey} = bytes.fromhex("${metaValue}")
+    </#if>
+</#list>
 OUTBOUND_HEADERS = (
-    (META_KEY_0, META_VALUE_0),
-    (META_KEY_1, META_VALUE_1)
+<#list metaMap?keys as metaKey>
+    (META_KEY_${metaKey}, META_VALUE_${metaKey})<#sep>,
+</#list>
 )
 
 # Configs
@@ -55,6 +68,7 @@ def get_received_metadata_file_path():
 def get_error_file_path(method_id: str):
     return os.path.join(configs["out"]["dir"], f"{method_id.replace(".", "_")}_error.txt")
 
+
 def receive_header_metadata(call):
     headers = call.initial_metadata()
     logging.info(f"[receive_header_metadata] Received metadata:\n{format_metadata_as_string(headers)}")
@@ -66,13 +80,17 @@ def receive_header_metadata(call):
 def invoke_unary_rpc(method, request: Message, method_id: str):
     try:
         logging.info(f"[invoke_unary_rpc] Invoke {method_id} with request {request}")
-        response, call = method.with_call(request, metadata=OUTBOUND_HEADERS)
+        response, call = method.with_call(request<#if registry.haveClientToServerMetadata()>, metadata=OUTBOUND_HEADERS</#if>)
+<#if registry.haveServerToClientMetadata()>
         receive_header_metadata(call)
+</#if>
         logging.info(f"[invoke_unary_rpc] Method {method_id} returns {response}")
         message_to_file(os.path.join(configs["out"]["dir"], f"{method_id.replace(".", "_")}_return_0.bin"),
                         response)
     except grpc.RpcError as rpc_error:
+<#if registry.haveServerToClientMetadata()>
         receive_header_metadata(rpc_error)
+</#if>
         logging.error(f"[invoke_unary_rpc] Received rpc error: {format_grpc_error_as_string(rpc_error)}")
         grpc_error_to_file(get_error_file_path(method_id), rpc_error)
 
@@ -81,8 +99,10 @@ def invoke_server_streaming_rpc(method, request: Message, method_id: str):
     try:
         logging.info(f"[invoke_server_streaming_rpc] Invoke {method_id} with request {request}")
         response_idx = 0
-        call = method(request, metadata=OUTBOUND_HEADERS)
+        call = method(request<#if registry.haveClientToServerMetadata()>, metadata=OUTBOUND_HEADERS</#if>)
+<#if registry.haveServerToClientMetadata()>
         receive_header_metadata(call)
+</#if>
         for response in call:
             logging.info(f"[invoke_server_streaming_rpc] Method {method_id} returns {response}")
             message_to_file(os.path.join(configs["out"]["dir"], f"{method_id.replace(".", "_")}_return_{response_idx}.bin"),
@@ -100,15 +120,19 @@ def invoke_client_streaming_rpc(method, request_iterator: Iterator[Message], met
                 request_iterator,
                 calling_method_name="invoke_client_streaming_rpc",
                 method_id=method_id
-            ),
-            metadata=OUTBOUND_HEADERS
+            )<#if registry.haveClientToServerMetadata()>,
+            metadata=OUTBOUND_HEADERS</#if>
         )
+<#if registry.haveServerToClientMetadata()>
         receive_header_metadata(call)
+</#if>
         logging.info(f"[invoke_server_streaming_rpc] Method {method_id} returns {response}")
         message_to_file(os.path.join(configs["out"]["dir"], f"{method_id.replace(".", "_")}_return_0.bin"),
                         response)
     except grpc.RpcError as rpc_error:
+<#if registry.haveServerToClientMetadata()>
         receive_header_metadata(rpc_error)
+</#if>
         logging.error(f"[invoke_client_streaming_rpc] Received rpc error: {format_grpc_error_as_string(rpc_error)}")
         grpc_error_to_file(get_error_file_path(method_id), rpc_error)
 
@@ -121,10 +145,12 @@ def invoke_bidi_streaming_rpc(method, request_iterator: Iterator[Message], metho
                 request_iterator,
                 calling_method_name="invoke_bidi_streaming_rpc",
                 method_id=method_id
-            ),
-            metadata=OUTBOUND_HEADERS
+            )<#if registry.haveClientToServerMetadata()>,
+            metadata=OUTBOUND_HEADERS</#if>
         )
+<#if registry.haveServerToClientMetadata()>
         receive_header_metadata(call)
+</#if>
         for response in call:
             logging.info(f"[invoke_bidi_streaming_rpc] Method {method_id} returns {response}")
             message_to_file(os.path.join(configs["out"]["dir"], f"{method_id.replace(".", "_")}_return_{response_idx}.bin"),
@@ -142,44 +168,52 @@ def main():
 
     channel = grpc.insecure_channel(f"{configs["server"]["host"]}:{configs["server"]["port"]}")
 
-    # >>> SERVICE PeopleService
-    people_service_stub = PeopleServiceStub(channel)
+<#list registry.getAllServices() as service>
+    # >>> SERVICE ${service.name}
+    ${service.name}_stub = ${service.name}Stub(channel)
 
-    # METHOD person.PeopleService.getPerson
-    invoke_unary_rpc(method=people_service_stub.GetPerson,
+    <#list registry.getAllMethods(service) as method>
+    <#assign request_class = method.inType?split(".")?last>
+    # METHOD ${method.id}
+        <#if method.type == "UNARY">
+    invoke_unary_rpc(method=${service.name}_stub.${method.name?cap_first},
                      request=read_request_from_file(
-                         method_id="person.PeopleService.getPerson",
-                         request_class=GetPersonRequest,
+                         method_id="${method.id}",
+                         request_class=${request_class},
                          read_multiple=False
                      ),
-                     method_id="person.PeopleService.getPerson")
+                     method_id="${method.id}")
 
-    # METHOD person.PeopleService.listPerson
-    invoke_server_streaming_rpc(method=people_service_stub.ListPerson,
+        <#elseif method.type == "SERVER_STREAMING">
+    invoke_server_streaming_rpc(method=${service.name}_stub.${method.name?cap_first},
                                 request=read_request_from_file(
-                                    method_id="person.PeopleService.listPerson",
-                                    request_class=GetPersonRequest,
+                                    method_id="${method.id}",
+                                    request_class=${request_class},
                                     read_multiple=False
                                 ),
-                                method_id="person.PeopleService.listPerson")
+                                method_id="${method.id}")
 
-    # METHOD person.PeopleService.registerPerson
-    invoke_client_streaming_rpc(method=people_service_stub.RegisterPerson,
+        <#elseif method.type == "CLIENT_STREAMING">
+    invoke_client_streaming_rpc(method=${service.name}_stub.${method.name?cap_first},
                                 request_iterator=read_request_from_file(
-                                    method_id="person.PeopleService.registerPerson",
-                                    request_class=GetPersonRequest,
+                                    method_id="${method.id}",
+                                    request_class=${request_class},
                                     read_multiple=True
                                 ),
-                                method_id="person.PeopleService.registerPerson")
+                                method_id="${method.id}")
 
-    # METHOD person.PeopleService.streamPerson
-    invoke_bidi_streaming_rpc(method=people_service_stub.StreamPerson,
+        <#elseif method.type == "BIDI_STREAMING">
+    invoke_bidi_streaming_rpc(method=${service.name}_stub.${method.name?cap_first},
                               request_iterator=read_request_from_file(
-                                  method_id="person.PeopleService.streamPerson",
-                                  request_class=GetPersonRequest,
+                                  method_id="${method.id}",
+                                  request_class=${request_class},
                                   read_multiple=True
                               ),
-                              method_id="person.PeopleService.streamPerson")
+                              method_id="${method.id}")
+
+        </#if>
+    </#list>
+</#list>
 
     channel.close()
 

@@ -17,3 +17,4 @@ TODO:
 - RPC cancellation inconsistencies
 - RPC status difference between server and client due to languages? (e.g. server: success, client: fail)
 - Python: protoc generate command: python3 -m grpc_tools.protoc --proto_path=proto --python_out=. --pyi_out=. --grpc_python_out=. proto/*.proto
+- Python: Are rpc_grpc_pb2.py generated if rpc.proto doesn't have service definition?

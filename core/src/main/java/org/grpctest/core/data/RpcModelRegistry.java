@@ -10,6 +10,7 @@ import org.grpctest.core.pojo.RpcService;
 import org.grpctest.core.util.StringUtil;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +39,10 @@ public class RpcModelRegistry {
     /** Server to Client metadata (fixed per run) */
     @Getter
     private final Map<String, Pair<MetadataType, String>> serverToClientMetadata = new HashMap<>();
+
+    /** List of all proto files */
+    @Getter
+    private final List<String> protoFiles = new ArrayList<>();
 
     // serviceLookupTable
 
@@ -128,6 +133,10 @@ public class RpcModelRegistry {
         return clientToServerMetadata;
     }
 
+    public boolean haveClientToServerMetadata() {
+        return !clientToServerMetadata.isEmpty();
+    }
+
     // serverToClientMetadata
 
     public void addServerToClientMetadata(Map<String, Pair<MetadataType, String>> metadata) {
@@ -140,5 +149,15 @@ public class RpcModelRegistry {
 
     public Map<String, Pair<MetadataType, String>> getAllServerToClientMetadata() {
         return serverToClientMetadata;
+    }
+
+    public boolean haveServerToClientMetadata() {
+        return !serverToClientMetadata.isEmpty();
+    }
+
+    // protoFiles
+
+    public void addProtoFilename(String protoFilename) {
+        protoFiles.add(protoFilename);
     }
 }

@@ -19,7 +19,7 @@ RUN adduser \
 RUN mkdir -p $HOME
 WORKDIR $HOME
 
-COPY requirements.txt .
+COPY --chown=$UID --chmod=770 "$PY_HOST_DIR/requirements.txt" "$HOME/"
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY --chown=$UID --chmod=770 "$PY_HOST_DIR/client.py" "$HOME/"
