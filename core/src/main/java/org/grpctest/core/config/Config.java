@@ -146,4 +146,48 @@ public class Config {
     @Value("${test.java.server.tests.dir:test-cases/server}")
     private String javaServerTestsDir;
 
+    /** Log directory for Python client */
+    @Value("${test.python.client.log.dir:log}")
+    private String pyClientLogDir;
+
+    /** Log file prefix for Python client */
+    @Value("${test.python.client.log.file:py-client}")
+    private String pyClientLogFile;
+
+    /** Output directory for Python client */
+    @Value("${test.python.client.out.dir:out/client}")
+    private String pyClientOutDir;
+
+    /** Hostname of the server to which Python client connects to */
+    @Value("${test.python.client.server.host:NOT_ASSIGNED}")
+    private String pyClientServerHost;
+
+    /** Port of the server to which Python client connects to */
+    @Value("${test.python.client.server.port:50051}")
+    private int pyClientServerPort;
+
+    /** Directory containing Python client .bin test cases */
+    @Value("${test.python.client.tests.dir:test-cases/client}")
+    private String pyClientTestsDir;
+
+    /** Log directory for Python server */
+    @Value("${test.python.server.log.dir:log}")
+    private String pyServerLogDir;
+
+    /** Log file prefix for Python server */
+    @Value("${test.python.server.log.file:py-server}")
+    private String pyServerLogFile;
+
+    /** Output directory for Python server */
+    @Value("${test.python.server.out.dir:out/server}")
+    private String pyServerOutDir;
+
+    /** Port of the Python server */
+    @Value("${test.python.server.server.port:50051}")
+    private int pyServerServerPort;
+
+    /** Directory containing Python server .bin test cases */
+    @Value("${test.python.server.tests.dir:test-cases/server}")
+    private String pyServerTestsDir;
+
 }

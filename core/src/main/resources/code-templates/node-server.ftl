@@ -1,11 +1,13 @@
-<#macro nodejsParseException>
-<#assign rpcException = testcaseRegistry.getExceptionForMethod(method)>
-<#assign trailers = rpcException.trailingMetadata>
+<#macro nodejsParseException method>
+    <#if testcaseRegistry.getExceptionForMethod(method)??>
+    <#assign rpcException = testcaseRegistry.getExceptionForMethod(method)>
+    <#assign trailers = rpcException.trailingMetadata>
 const trailers = new grpc.Metadata();
-    <#list trailers?keys as trailerKey>
+        <#list trailers?keys as trailerKey>
 trailers.set(${trailerKey}, ${trailers[trailerKey].getRight()});
-    </#list>
+        </#list>
 const rpcException = {code: grpc.status.${rpcException.statusCode.name()}, details: '${rpcException.description}', metadata: trailers};
+    </#if>
 </#macro>
 
 import * as grpc from '@grpc/grpc-js';
@@ -80,7 +82,7 @@ console.log("Using environment " + env);
 <#-- Send headers, then responses / exceptions -->
     <#if method.type == "UNARY">
         <#if testcaseRegistry.getExceptionForMethod(method)??>
-            <#call nodejsParseException>
+            <@nodejsParseException method=method />
             callback(rpcException);
         <#else>
             let retval = messageFromFile(
@@ -98,7 +100,7 @@ console.log("Using environment " + env);
                         call.write(response);
                     });
         <#if testcaseRegistry.getExceptionForMethod(method)??>
-            <#call nodejsParseException>
+            <@nodejsParseException method=method />
             call.emit('error', rpcException);
         <#else>
             call.end();
@@ -106,7 +108,7 @@ console.log("Using environment " + env);
     <#elseif method.type == "CLIENT_STREAMING">
             call.on('end', () => {
         <#if testcaseRegistry.getExceptionForMethod(method)??>
-                <#call nodejsParseException>
+                <@nodejsParseException method=method />
                 callback(rpcException);
         <#else>
                let retval = messageFromFile(
@@ -126,7 +128,7 @@ console.log("Using environment " + env);
                             call.write(response);
                         });
         <#if testcaseRegistry.getExceptionForMethod(method)??>
-                <#call nodejsParseException>
+                <@nodejsParseException method=method />
                 call.emit('error', rpcException);
         <#else>
                call.end();
