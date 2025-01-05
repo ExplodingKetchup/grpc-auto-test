@@ -138,7 +138,13 @@ function messageToFile(message, messageType, filepath) {
 function formatMetadataForOutput(metadata) {
     const metadataMap = metadata.getMap();
     return Object.entries(metadataMap)
-        .map(([key, value]) => `${key}:${value}`)
+        .map(([key, value]) => {
+            if (key.endsWith('-bin')) {
+                return `${key}:${Buffer.from(value).toString('hex')}`
+            } else {
+                return `${key}:${value}`;
+            }
+        })
         .join('\n') + '\n';
 }
 

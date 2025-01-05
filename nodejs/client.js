@@ -3,8 +3,8 @@ import { createLogger, loadProtosGrpc, loadProtosProtobufjs, messageFromFile, me
 
 // Constants
 const BIN_SUFFIX = '-bin';
-const META_KEY_619zBFq6E56h = '619zBFq6E56h' + BIN_SUFFIX;
-const META_VALUE_619zBFq6E56h = Buffer.from('54edfe5fb8', 'hex');
+const META_KEY_1o9bb5z = '1o9bb5z' + BIN_SUFFIX;
+const META_VALUE_1o9bb5z = Buffer.from('92e44137aba862a47c0840ba323255', 'hex');
 
 // Load configs dynamically depending on environment
 const env = process.env.NODE_ENV || 'test';
@@ -21,7 +21,7 @@ console.log("Using environment " + env);
     let protosGrpc = loadProtosGrpc(config.protoDir);
     let root = loadProtosProtobufjs(config.protoDir);
     const headers = new grpc.Metadata();
-    headers.set(META_KEY_619zBFq6E56h, META_VALUE_619zBFq6E56h);
+    headers.set(META_KEY_1o9bb5z, META_VALUE_1o9bb5z);
 
     function invokeUnaryRpc(method, requestType, responseType, methodId) {
         const rpcCallback = (err, response) => {
@@ -143,7 +143,8 @@ console.log("Using environment " + env);
 
     main();
 
-    // Keep running for 1 min (60000 ms)
-    setTimeout(() => {}, 60000);
-
+    // Add shutdown handler
+    process.on('exit', (code) => {
+        logger.info('Client shutting down...');
+    })
 })();

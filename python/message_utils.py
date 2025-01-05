@@ -36,7 +36,7 @@ def message_to_file(filepath: str, message: Message):
 def format_metadata_as_string(metadata) -> str:
     if metadata is None:
         return ""
-    return "\n".join(f"{key}:{value}" for key, value in metadata)
+    return "\n".join(f"{key}:{value.hex() if key.endswith("-bin") else value}" for key, value in metadata)
 
 def format_grpc_error_as_string(rpc_error: grpc.RpcError) -> str:
     return "\n".join([rpc_error.code().name, rpc_error.details(), format_metadata_as_string(rpc_error.trailing_metadata())])

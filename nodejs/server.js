@@ -4,12 +4,8 @@ import { createLogger, loadProtosGrpc, loadProtosProtobufjs, messageFromFile, me
 
 // Constants
 const BIN_SUFFIX = '-bin';
-const META_KEY_h08u3Bm3X7083V = 'h08u3Bm3X7083V';
-const META_VALUE_h08u3Bm3X7083V = 'j98';
-const META_KEY_6B6 = '6B6';
-const META_VALUE_6B6 = 'C';
-const META_KEY_K = 'K';
-const META_VALUE_K = '18SF11';
+const META_KEY_8NF3019d95G5J3 = '8NF3019d95G5J3';
+const META_VALUE_8NF3019d95G5J3 = '16sH650Fft7KI5BB';
 
 // Load configs dynamically depending on environment
 const env = process.env.NODE_ENV || 'test';
@@ -38,9 +34,7 @@ console.log("Using environment " + env);
             messageToFile(requestMessageType.fromObject(call.request), requestMessageType, config.outDir + "person_PeopleService_listPerson_param_0.bin");
 
             const metadata = new grpc.Metadata();
-            metadata.set(META_KEY_h08u3Bm3X7083V, META_VALUE_h08u3Bm3X7083V);
-            metadata.set(META_KEY_6B6, META_VALUE_6B6);
-            metadata.set(META_KEY_K, META_VALUE_K);
+            metadata.set(META_KEY_8NF3019d95G5J3, META_VALUE_8NF3019d95G5J3);
             call.sendMetadata(metadata);
 
             loopMultipleFilesWithSamePrefix(config.testcaseDir + 'person_PeopleService_listPerson_return', '.bin')
@@ -71,9 +65,7 @@ console.log("Using environment " + env);
             });
 
             const metadata = new grpc.Metadata();
-            metadata.set(META_KEY_h08u3Bm3X7083V, META_VALUE_h08u3Bm3X7083V);
-            metadata.set(META_KEY_6B6, META_VALUE_6B6);
-            metadata.set(META_KEY_K, META_VALUE_K);
+            metadata.set(META_KEY_8NF3019d95G5J3, META_VALUE_8NF3019d95G5J3);
             call.sendMetadata(metadata);
 
             call.on('end', () => {
@@ -102,9 +94,7 @@ console.log("Using environment " + env);
             messageToFile(requestMessageType.fromObject(call.request), requestMessageType, config.outDir + "person_PeopleService_getPerson_param_0.bin");
 
             const metadata = new grpc.Metadata();
-            metadata.set(META_KEY_h08u3Bm3X7083V, META_VALUE_h08u3Bm3X7083V);
-            metadata.set(META_KEY_6B6, META_VALUE_6B6);
-            metadata.set(META_KEY_K, META_VALUE_K);
+            metadata.set(META_KEY_8NF3019d95G5J3, META_VALUE_8NF3019d95G5J3);
             call.sendMetadata(metadata);
 
             let retval = messageFromFile(
@@ -134,9 +124,7 @@ console.log("Using environment " + env);
             });
 
             const metadata = new grpc.Metadata();
-            metadata.set(META_KEY_h08u3Bm3X7083V, META_VALUE_h08u3Bm3X7083V);
-            metadata.set(META_KEY_6B6, META_VALUE_6B6);
-            metadata.set(META_KEY_K, META_VALUE_K);
+            metadata.set(META_KEY_8NF3019d95G5J3, META_VALUE_8NF3019d95G5J3);
             call.sendMetadata(metadata);
 
             call.on('end', () => {

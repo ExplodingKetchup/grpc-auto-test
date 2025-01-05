@@ -1,6 +1,7 @@
 package org.grpctest.core.service.codegen;
 
 import freemarker.template.Configuration;
+import lombok.extern.slf4j.Slf4j;
 import org.grpctest.core.config.Config;
 import org.grpctest.core.data.RpcModelRegistry;
 import org.grpctest.core.data.TestcaseRegistry;
@@ -8,7 +9,12 @@ import org.grpctest.core.freemarker.datamodels.ClientDataModel;
 import org.grpctest.core.freemarker.datamodels.ConfigDataModel;
 import org.grpctest.core.freemarker.datamodels.ServerDataModel;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Service;
 
+@Service
+@Qualifier("PythonCodeGenService")
+@Slf4j
 public class PythonCodeGenService extends BaseCodeGenService {
 
     private static final String PYTHON_CLIENT_FTL = "py-client.ftl";

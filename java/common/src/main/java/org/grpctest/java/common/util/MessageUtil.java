@@ -13,6 +13,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HexFormat;
 import java.util.List;
 import java.util.Objects;
 import java.util.regex.Pattern;
@@ -83,7 +84,7 @@ public class MessageUtil {
             if (key.endsWith(Metadata.BINARY_HEADER_SUFFIX)) {
                 byte[] value = metadata.get(Metadata.Key.of(key, Metadata.BINARY_BYTE_MARSHALLER));
                 if (value != null) {
-                    metaContent.append(key).append(":").append(new String(value)).append("\n");
+                    metaContent.append(key).append(":").append(HexFormat.of().formatHex(value)).append("\n");
                 }
             } else {
                 String value = metadata.get(Metadata.Key.of(key, Metadata.ASCII_STRING_MARSHALLER));

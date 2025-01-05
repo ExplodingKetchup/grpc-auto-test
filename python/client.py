@@ -1,3 +1,4 @@
+import atexit
 import logging
 import os.path
 from typing import Iterator
@@ -14,13 +15,17 @@ from rpc_pb2_grpc import *
 
 
 # Constants
-META_KEY_0 = "clippy"
-META_VALUE_0 = "ob239rw"
-META_KEY_1 = "clippy-bin"
-META_VALUE_1 = bytes.fromhex("904a8b3f0de6")
+BIN_METADATA_SUFFIX = "-bin"
+META_KEY_vr0te2t50833xy4x92p = "vr0te2t50833xy4x92p" + BIN_METADATA_SUFFIX;
+META_VALUE_vr0te2t50833xy4x92p = bytes.fromhex("476cfe")
+META_KEY_ka = "ka" + BIN_METADATA_SUFFIX;
+META_VALUE_ka = bytes.fromhex("c3")
+META_KEY_w42u = "w42u" + BIN_METADATA_SUFFIX;
+META_VALUE_w42u = bytes.fromhex("5a4191d178")
 OUTBOUND_HEADERS = (
-    (META_KEY_0, META_VALUE_0),
-    (META_KEY_1, META_VALUE_1)
+    (META_KEY_vr0te2t50833xy4x92p, META_VALUE_vr0te2t50833xy4x92p),
+    (META_KEY_ka, META_VALUE_ka),
+    (META_KEY_w42u, META_VALUE_w42u),
 )
 
 # Configs
@@ -54,6 +59,7 @@ def get_received_metadata_file_path():
 
 def get_error_file_path(method_id: str):
     return os.path.join(configs["out"]["dir"], f"{method_id.replace(".", "_")}_error.txt")
+
 
 def receive_header_metadata(call):
     headers = call.initial_metadata()
@@ -143,10 +149,10 @@ def main():
     channel = grpc.insecure_channel(f"{configs["server"]["host"]}:{configs["server"]["port"]}")
 
     # >>> SERVICE PeopleService
-    people_service_stub = PeopleServiceStub(channel)
+    PeopleService_stub = PeopleServiceStub(channel)
 
     # METHOD person.PeopleService.getPerson
-    invoke_unary_rpc(method=people_service_stub.GetPerson,
+    invoke_unary_rpc(method=PeopleService_stub.GetPerson,
                      request=read_request_from_file(
                          method_id="person.PeopleService.getPerson",
                          request_class=GetPersonRequest,
@@ -155,7 +161,7 @@ def main():
                      method_id="person.PeopleService.getPerson")
 
     # METHOD person.PeopleService.listPerson
-    invoke_server_streaming_rpc(method=people_service_stub.ListPerson,
+    invoke_server_streaming_rpc(method=PeopleService_stub.ListPerson,
                                 request=read_request_from_file(
                                     method_id="person.PeopleService.listPerson",
                                     request_class=GetPersonRequest,
@@ -164,7 +170,7 @@ def main():
                                 method_id="person.PeopleService.listPerson")
 
     # METHOD person.PeopleService.registerPerson
-    invoke_client_streaming_rpc(method=people_service_stub.RegisterPerson,
+    invoke_client_streaming_rpc(method=PeopleService_stub.RegisterPerson,
                                 request_iterator=read_request_from_file(
                                     method_id="person.PeopleService.registerPerson",
                                     request_class=GetPersonRequest,
@@ -173,7 +179,7 @@ def main():
                                 method_id="person.PeopleService.registerPerson")
 
     # METHOD person.PeopleService.streamPerson
-    invoke_bidi_streaming_rpc(method=people_service_stub.StreamPerson,
+    invoke_bidi_streaming_rpc(method=PeopleService_stub.StreamPerson,
                               request_iterator=read_request_from_file(
                                   method_id="person.PeopleService.streamPerson",
                                   request_class=GetPersonRequest,
@@ -182,6 +188,14 @@ def main():
                               method_id="person.PeopleService.streamPerson")
 
     channel.close()
+
+
+def at_shutdown():
+    logging.info("Client shutting down...")
+
+
+atexit.register(at_shutdown)
+
 
 if __name__ == '__main__':
     main()

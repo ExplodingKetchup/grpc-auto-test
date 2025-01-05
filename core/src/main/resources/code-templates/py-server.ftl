@@ -1,23 +1,35 @@
-<#macro pyParseException method>
+<#function generateTabs indent>
+    <#local tabs = "" />
+    <#if (indent > 0)>
+        <#list 1..indent as i>
+            <#local tabs = tabs + "    " />
+        </#list>
+    </#if>
+    <#return tabs>
+</#function>
+<#macro pyParseException method indent=0>
+    <#assign tabs = generateTabs(indent)>
     <#if testcaseRegistry.getExceptionForMethod(method)??>
     <#assign rpcException = testcaseRegistry.getExceptionForMethod(method)>
     <#assign trailers = rpcException.trailingMetadata>
-trailers = (
+${tabs}trailers = (
         <#list trailers?keys as trailerKey>
-    ("${trailerKey}", "${trailers[trailerKey].getRight()}")<#sep>,
+${tabs}    ("${trailerKey}", "${trailers[trailerKey].getRight()}"),
         </#list>
-)
-raise_grpc_exception(context, grpc.StatusCode.${rpcException.statusCode.name()}, "${rpcException.description}", trailers)
+${tabs})
+${tabs}raise_grpc_exception(context, grpc.StatusCode.${rpcException.statusCode.name()}, "${rpcException.description}", trailers)
     </#if>
 </#macro>
-<#macro pyReceiveHeaders>
+<#macro pyReceiveHeaders indent=0>
+    <#assign tabs = generateTabs(indent)>
     <#if registry.haveClientToServerMetadata()>
-receive_header_metadata(context)
+${tabs}receive_header_metadata(context)
     </#if>
 </#macro>
-<#macro pySendHeaders>
+<#macro pySendHeaders indent=0>
+    <#assign tabs = generateTabs(indent)>
     <#if registry.haveServerToClientMetadata()>
-send_header_metadata(context)
+${tabs}send_header_metadata(context)
     </#if>
 </#macro>
 import logging
@@ -38,7 +50,7 @@ from ${proto_file}_pb2_grpc import *
 
 # Constants
 BIN_METADATA_SUFFIX = "-bin"
-<#assign metaMap = registry.getAllClientToServerMetadata()>
+<#assign metaMap = registry.getAllServerToClientMetadata()>
 <#list metaMap?keys as metaKey>
     <#assign metaPair = metaMap[metaKey]>
     <#assign metaType = metaPair.getLeft().name()> <#-- MetadataType -->
@@ -47,13 +59,13 @@ BIN_METADATA_SUFFIX = "-bin"
 META_KEY_${metaKey} = "${metaKey}";
 META_VALUE_${metaKey} = "${metaValue}";
     <#elseif metaType == "BIN">
-META_KEY_${metaKey} = "${metaKey}" + BIN_SUFFIX;
+META_KEY_${metaKey} = "${metaKey}" + BIN_METADATA_SUFFIX;
 META_VALUE_${metaKey} = bytes.fromhex("${metaValue}")
     </#if>
 </#list>
 OUTBOUND_HEADERS = (
 <#list metaMap?keys as metaKey>
-    (META_KEY_${metaKey}, META_VALUE_${metaKey})<#sep>,
+    (META_KEY_${metaKey}, META_VALUE_${metaKey}),
 </#list>
 )
 
@@ -124,10 +136,10 @@ class ${service.name}Servicer(${service.name}Servicer):
         method_id = "${method.id}"
         response_class = ${response_class}
 
-        <@pyReceiveHeaders/>
+        <@pyReceiveHeaders indent=2/>
         handle_single_request(request, method_id)
-        <@pySendHeaders/>
-        <@pyParseException method=method />
+        <@pySendHeaders indent=2/>
+        <@pyParseException method=method indent=2 />
         return get_single_response(method_id, response_class)
 
         <#elseif method.type == "SERVER_STREAMING">
@@ -135,35 +147,34 @@ class ${service.name}Servicer(${service.name}Servicer):
         method_id = "${method.id}"
         response_class = ${response_class}
 
-        <@pyReceiveHeaders/>
+        <@pyReceiveHeaders indent=2/>
         handle_single_request(request, method_id)
-        <@pySendHeaders/>
+        <@pySendHeaders indent=2/>
         for response in get_streaming_response(method_id, response_class):
             yield response
-        <@pyParseException method=method />
+        <@pyParseException method=method indent=2 />
 
         <#elseif method.type == "CLIENT_STREAMING">
     def ${method.name?cap_first}(self, request_iterator, context):
         method_id = "${method.id}"
         response_class = ${response_class}
 
-        <@pyReceiveHeaders/>
+        <@pyReceiveHeaders indent=2/>
         handle_streaming_request(request_iterator, method_id)
-        <@pySendHeaders/>
-        <@pyParseException method=method />
+        <@pySendHeaders indent=2/>
+        <@pyParseException method=method indent=2 />
         return get_single_response(method_id, response_class)
 
         <#elseif method.type == "BIDI_STREAMING">
     def ${method.name?cap_first}(self, request_iterator, context):
         method_id = "${method.id}"
         response_class = ${response_class}
-
-        <@pyReceiveHeaders/>
+        <@pyReceiveHeaders indent=2/>
         handle_streaming_request(request_iterator, method_id)
-        <@pySendHeaders/>
+        <@pySendHeaders indent=2/>
         for response in get_streaming_response(method_id, response_class):
             yield response
-        <@pyParseException method=method />
+        <@pyParseException method=method indent=2 />
 
         </#if>
     </#list>

@@ -155,7 +155,7 @@ public class TestCaseGenerator {
     }
 
     private Pair<String, String> generateSingleRandomMetadata(MetadataType metadataType) {
-        String metadataKey = randomString();
+        String metadataKey = randomString(false, true, true);
         while (metadataKey.endsWith(Metadata.BINARY_HEADER_SUFFIX)) {
             metadataKey = randomString();
         }
@@ -197,11 +197,20 @@ public class TestCaseGenerator {
     }
 
     private String randomString() {
+        return randomString(true, true, true);
+    }
+
+    private String randomString(boolean includeUppercase, boolean includeLowercase, boolean includeNumber) {
         int length = random.nextInt(1, 20);
         StringBuilder sb = new StringBuilder(length);
         for (int i = 0; i < length; i++) {
-            if (random.nextBoolean()) {
-                sb.append((char)(random.nextInt('A', 'Z' + 1) + random.nextInt(2) * ('a' - 'A')));
+            if ((!includeNumber) || (random.nextBoolean())) {
+                int uncapitalize = random.nextInt(2);
+                if (!includeLowercase) uncapitalize = 0;
+                if (!includeUppercase) uncapitalize = 1;
+                if (includeUppercase || includeLowercase) {
+                    sb.append((char) (random.nextInt('A', 'Z' + 1) + uncapitalize * ('a' - 'A')));
+                }
             } else {
                 sb.append(random.nextInt(0, 10));
             }

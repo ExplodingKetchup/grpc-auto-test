@@ -52,7 +52,7 @@ public class JavaClient implements InitializingBean {
         // Invoke test case: person.PeopleService.streamPerson
         invokeBidiStreamingRpcMethod(peopleServiceAsyncStub::streamPerson, MessageUtil.messageListFromMultipleFiles(config.getTestcaseDir() + File.separator + "person_PeopleService_streamPerson_param.bin", GetPersonRequest.class), "person.PeopleService.streamPerson");
 
-        while(true);
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> log.info("Client shutting down...")));
     }
 
     private <T, R> void invokeUnaryRpcMethod(Function<T, R> method, T parameter, String methodId) {

@@ -24,9 +24,6 @@ import java.util.Objects;
 @AllArgsConstructor
 public class DynamicMessageUtilService {
 
-    public static final String DIR_SERVER_OUT = "out/server/";
-    public static final String DIR_CLIENT_OUT = "out/client/";
-
     private final RpcModelRegistry rpcModelRegistry;
 
     public void dynMsgToFile(DynamicMessage dynamicMessage, String filepath) throws Throwable {

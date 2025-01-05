@@ -39,7 +39,7 @@ public class Config {
     private String setupScriptFilePath;
 
     /** Max waiting time for docker compose to build and launch server / client */
-    @Value("${core.docker.compose.timeout.ms:300000}")
+    @Value("${core.docker.compose.timeout.ms:180000}")
     private long dockerComposeTimeoutMillis;
 
     /** Max waiting time after successfully launch server + client before force quit */

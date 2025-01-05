@@ -1,3 +1,4 @@
+import atexit
 import logging
 import os.path
 from typing import Iterator
@@ -26,13 +27,13 @@ BIN_METADATA_SUFFIX = "-bin"
 META_KEY_${metaKey} = "${metaKey}";
 META_VALUE_${metaKey} = "${metaValue}";
     <#elseif metaType == "BIN">
-META_KEY_${metaKey} = "${metaKey}" + BIN_SUFFIX;
+META_KEY_${metaKey} = "${metaKey}" + BIN_METADATA_SUFFIX;
 META_VALUE_${metaKey} = bytes.fromhex("${metaValue}")
     </#if>
 </#list>
 OUTBOUND_HEADERS = (
 <#list metaMap?keys as metaKey>
-    (META_KEY_${metaKey}, META_VALUE_${metaKey})<#sep>,
+    (META_KEY_${metaKey}, META_VALUE_${metaKey}),
 </#list>
 )
 
@@ -214,8 +215,15 @@ def main():
         </#if>
     </#list>
 </#list>
-
     channel.close()
+
+
+def at_shutdown():
+    logging.info("Client shutting down...")
+
+
+atexit.register(at_shutdown)
+
 
 if __name__ == '__main__':
     main()

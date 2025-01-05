@@ -1,6 +1,7 @@
 package org.grpctest.core.pojo;
 
 import lombok.*;
+import org.apache.commons.compress.archivers.sevenz.CLI;
 import org.grpctest.core.enums.MetadataType;
 
 import java.util.HashMap;
@@ -31,16 +32,19 @@ public class RuntimeConfig {
     @Getter
     public enum Language {
         JAVA("Java"),
-        NODEJS("Node.JS");
+        NODEJS("Node.JS"),
+        PYTHON("Python");
 
         public static final HashMap<Language, String> SERVER_NAME = new HashMap<>();
         public static final HashMap<Language, String> CLIENT_NAME = new HashMap<>();
         static {
             SERVER_NAME.put(JAVA, "java-server");
             SERVER_NAME.put(NODEJS, "node-server");
+            SERVER_NAME.put(PYTHON, "py-server");
 
             CLIENT_NAME.put(JAVA, "java-client");
             CLIENT_NAME.put(NODEJS, "node-client");
+            CLIENT_NAME.put(PYTHON, "py-client");
         }
 
         private final String displayName;

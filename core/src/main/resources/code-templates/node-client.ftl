@@ -168,7 +168,8 @@ console.log("Using environment " + env);
 
     main();
 
-    // Keep running for 1 min (60000 ms)
-    setTimeout(() => {}, 60000);
-
+    // Add shutdown handler
+    process.on('exit', (code) => {
+        logger.info('Client shutting down...');
+    })
 })();

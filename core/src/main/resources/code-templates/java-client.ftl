@@ -54,7 +54,7 @@ public class JavaClient implements InitializingBean {
     </#if>
 
 </#list>
-        while(true);
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> log.info("Client shutting down...")));
     }
 
     private <T, R> void invokeUnaryRpcMethod(Function<T, R> method, T parameter, String methodId) {

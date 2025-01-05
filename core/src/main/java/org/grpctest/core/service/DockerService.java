@@ -3,7 +3,9 @@ package org.grpctest.core.service;
 import com.google.common.collect.Lists;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.grpctest.core.config.Config;
+import org.grpctest.core.pojo.RuntimeConfig;
 import org.grpctest.core.service.util.ExternalProcessUtilService;
 import org.springframework.stereotype.Service;
 
@@ -11,6 +13,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @Slf4j
@@ -22,7 +25,7 @@ public class DockerService {
     private static final String CMD_DOCKER_COMPOSE_UP = "docker compose -f compose.yaml -p grpc-auto-test up -d";
     private static final String CMD_DOCKER_COMPOSE_DOWN = "docker compose down --rmi all";
     private static final String CMD_DOCKER_COMPOSE_PS = "docker compose ps --services";
-    private static final List<String> SUPPORTED_SERVICES = Lists.newArrayList("java-client", "java-server", "node-client", "node-server");
+    private static final List<String> SUPPORTED_SERVICES = Stream.concat(RuntimeConfig.Language.CLIENT_NAME.values().stream(), RuntimeConfig.Language.SERVER_NAME.values().stream()).toList();
     private static final long CONTAINER_HEALTH_CHECK_INTERVAL_MS = 1000;
     private static final int STABLE_THRESHOLD_INTERVALS = 5;    // After this many consecutive successful health checks, service can be considered stable
 
@@ -39,12 +42,17 @@ public class DockerService {
         }
     }
 
-    public void dockerComposeUpSpecifyServices(String... services) throws Exception {
+    public void dockerComposeUpSpecifyServices(boolean monitorUntilStable, String... services) throws Exception {
         String validServices = Arrays.stream(services).filter(SUPPORTED_SERVICES::contains).collect(Collectors.joining(" "));
+        if (StringUtils.isBlank(validServices)) {
+            log.warn("[dockerComposeUpSpecifyServices] No known services are specified. Will do nothing.");
+            return;
+        }
         String cmd = String.join( " ", CMD_DOCKER_COMPOSE_UP, validServices);
         try {
             // Launch services
             externalProcessUtilService.execute(WORKING_DIR, cmd, LOG_FILE_PREFIX, false);
+            if (!monitorUntilStable) return;
 
             // Monitor services periodically
             long currentTime = System.currentTimeMillis();

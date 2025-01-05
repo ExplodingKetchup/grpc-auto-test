@@ -1,0 +1,9 @@
+1. Metadata keys in Java may accept UPPERCASE, but not in Python
+    - We'll just put lowercase as inputs
+    - In Python, putting UPPERCASE caused an error to occur and rpc terminated
+    ValueError: metadata was invalid: ('82T08O6W6cvuSo60h57-bin', b'\xd12a\xee\xd9\x07|\x91\x0e\x16\x9cN\x9e\x14\x96\xc7\xdd-')
+2. java-server: 2 types of exception thrown by server: exception and runtime exceptions.
+    - Client error handling is mostly the same between the 2
+    - Other languages only have 1 type of exception
+    - May want to check if exceptions from py and nodejs can be caught by runtime exception or exception in java-client
+    - ResultAnalyzer will ignore isRuntimeException for now
