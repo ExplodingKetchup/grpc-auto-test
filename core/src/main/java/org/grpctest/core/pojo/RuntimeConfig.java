@@ -1,10 +1,11 @@
 package org.grpctest.core.pojo;
 
 import lombok.*;
-import org.apache.commons.compress.archivers.sevenz.CLI;
 import org.grpctest.core.enums.MetadataType;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /** Configs that are better suited to be set at runtime (esp. if they vary between each run) */
 @Data
@@ -28,6 +29,12 @@ public class RuntimeConfig {
 
     @Builder.Default
     private Boolean enableAllRandomTestcase = false;
+
+    @Builder.Default
+    private int omitFieldsInRandomTestcases = 0;
+
+    @Builder.Default
+    private List<String> includedProtos = new ArrayList<>();
 
     @Getter
     public enum Language {

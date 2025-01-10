@@ -4,8 +4,6 @@ import { createLogger, loadProtosGrpc, loadProtosProtobufjs, messageFromFile, me
 
 // Constants
 const BIN_SUFFIX = '-bin';
-const META_KEY_8NF3019d95G5J3 = '8NF3019d95G5J3';
-const META_VALUE_8NF3019d95G5J3 = '16sH650Fft7KI5BB';
 
 // Load configs dynamically depending on environment
 const env = process.env.NODE_ENV || 'test';
@@ -22,123 +20,119 @@ console.log("Using environment " + env);
     let root = loadProtosProtobufjs(config.protoDir);
 
     // BEGIN RPC methods implementation
-    function person_PeopleService_listPerson(call) {
+    function repeated_hotpots_HotpotService_bidiStreamingPot(call) {
         try {
-            logger.info(`[person_PeopleService_listPerson] Received metadata ${JSON.stringify(call.metadata, null, 2)}`);
+            logger.info(`[repeated_hotpots_HotpotService_bidiStreamingPot] Received metadata ${JSON.stringify(call.metadata, null, 2)}`);
             metadataToFile(call.metadata, config.outDir + 'received_metadata.txt');
 
-            let requestMessageType = root.lookupType("person.GetPersonRequest");
-            let responseMessageType = root.lookupType("person.GetPersonResponse");
-
-            logger.info(`[person_PeopleService_listPerson] Received request: ${JSON.stringify(call.request, null, 2)}`);
-            messageToFile(requestMessageType.fromObject(call.request), requestMessageType, config.outDir + "person_PeopleService_listPerson_param_0.bin");
-
-            const metadata = new grpc.Metadata();
-            metadata.set(META_KEY_8NF3019d95G5J3, META_VALUE_8NF3019d95G5J3);
-            call.sendMetadata(metadata);
-
-            loopMultipleFilesWithSamePrefix(config.testcaseDir + 'person_PeopleService_listPerson_return', '.bin')
-                    .forEach((filepath) => {
-                        const response = messageFromFile(filepath, responseMessageType);
-                        logger.info(`[person_PeopleService_listPerson] Response: ${JSON.stringify(response, null, 2)}`);
-                        call.write(response);
-                    });
-            call.end();
-
-        } catch (e) {
-            logger.error(`[person_PeopleService_listPerson] An error occurred: ${e.message}\n${e.stack}`);
-        }
-    }
-
-    function person_PeopleService_registerPerson(call, callback) {
-        try {
-            logger.info(`[person_PeopleService_registerPerson] Received metadata ${JSON.stringify(call.metadata, null, 2)}`);
-            metadataToFile(call.metadata, config.outDir + 'received_metadata.txt');
-
-            let requestMessageType = root.lookupType("person.GetPersonRequest");
-            let responseMessageType = root.lookupType("person.GetPersonResponse");
+            let requestMessageType = root.lookupType("repeated_hotpots.RequestMessage");
+            let responseMessageType = root.lookupType("repeated_hotpots.ResponseMessage");
 
             let requestIdx = 0;
             call.on('data', (request) => {
-                logger.info(`[person_PeopleService_registerPerson] Received request: ${JSON.stringify(request, null, 2)}`);
-                messageToFile(requestMessageType.fromObject(request), requestMessageType, config.outDir + `person_PeopleService_registerPerson_param_${requestIdx++}.bin`);
+                logger.info(`[repeated_hotpots_HotpotService_bidiStreamingPot] Received request: ${JSON.stringify(request, null, 2)}`);
+                messageToFile(requestMessageType.fromObject(request), requestMessageType, config.outDir + `repeated_hotpots_HotpotService_bidiStreamingPot_param_${requestIdx++}.bin`);
             });
 
             const metadata = new grpc.Metadata();
-            metadata.set(META_KEY_8NF3019d95G5J3, META_VALUE_8NF3019d95G5J3);
             call.sendMetadata(metadata);
 
             call.on('end', () => {
-               let retval = messageFromFile(
-                   config.testcaseDir + "person_PeopleService_registerPerson_return_0.bin",
-                   responseMessageType
-               );
-               logger.info(`[person_PeopleService_registerPerson] Response: ${JSON.stringify(retval, null, 2)}`);
-               callback(null, retval);
-            });
-
-        } catch (e) {
-            logger.error(`[person_PeopleService_registerPerson] An error occurred: ${e.message}\n${e.stack}`);
-        }
-    }
-
-    function person_PeopleService_getPerson(call, callback) {
-        try {
-            logger.info(`[person_PeopleService_getPerson] Received metadata ${JSON.stringify(call.metadata, null, 2)}`);
-            metadataToFile(call.metadata, config.outDir + 'received_metadata.txt');
-
-            let requestMessageType = root.lookupType("person.GetPersonRequest");
-            let responseMessageType = root.lookupType("person.GetPersonResponse");
-
-            logger.info(`[person_PeopleService_getPerson] Received request: ${JSON.stringify(call.request, null, 2)}`);
-            messageToFile(requestMessageType.fromObject(call.request), requestMessageType, config.outDir + "person_PeopleService_getPerson_param_0.bin");
-
-            const metadata = new grpc.Metadata();
-            metadata.set(META_KEY_8NF3019d95G5J3, META_VALUE_8NF3019d95G5J3);
-            call.sendMetadata(metadata);
-
-            let retval = messageFromFile(
-                config.testcaseDir + "person_PeopleService_getPerson_return_0.bin",
-                responseMessageType
-            );
-            logger.info(`[person_PeopleService_getPerson] Response: ${JSON.stringify(retval, null, 2)}`);
-            callback(null, retval);
-
-        } catch (e) {
-            logger.error(`[person_PeopleService_getPerson] An error occurred: ${e.message}\n${e.stack}`);
-        }
-    }
-
-    function person_PeopleService_streamPerson(call) {
-        try {
-            logger.info(`[person_PeopleService_streamPerson] Received metadata ${JSON.stringify(call.metadata, null, 2)}`);
-            metadataToFile(call.metadata, config.outDir + 'received_metadata.txt');
-
-            let requestMessageType = root.lookupType("person.GetPersonRequest");
-            let responseMessageType = root.lookupType("person.GetPersonResponse");
-
-            let requestIdx = 0;
-            call.on('data', (request) => {
-                logger.info(`[person_PeopleService_streamPerson] Received request: ${JSON.stringify(request, null, 2)}`);
-                messageToFile(requestMessageType.fromObject(request), requestMessageType, config.outDir + `person_PeopleService_streamPerson_param_${requestIdx++}.bin`);
-            });
-
-            const metadata = new grpc.Metadata();
-            metadata.set(META_KEY_8NF3019d95G5J3, META_VALUE_8NF3019d95G5J3);
-            call.sendMetadata(metadata);
-
-            call.on('end', () => {
-                loopMultipleFilesWithSamePrefix(config.testcaseDir + 'person_PeopleService_streamPerson_return', '.bin')
+                loopMultipleFilesWithSamePrefix(config.testcaseDir + 'repeated_hotpots_HotpotService_bidiStreamingPot_return', '.bin')
                         .forEach((filepath) => {
                             const response = messageFromFile(filepath, responseMessageType);
-                            logger.info(`[person_PeopleService_streamPerson] Response: ${JSON.stringify(response, null, 2)}`);
+                            logger.info(`[repeated_hotpots_HotpotService_bidiStreamingPot] Response: ${JSON.stringify(response, null, 2)}`);
                             call.write(response);
                         });
                call.end();
             });
 
         } catch (e) {
-            logger.error(`[person_PeopleService_streamPerson] An error occurred: ${e.message}\n${e.stack}`);
+            logger.error(`[repeated_hotpots_HotpotService_bidiStreamingPot] An error occurred: ${e.message}\n${e.stack}`);
+        }
+    }
+
+    function repeated_hotpots_HotpotService_serverStreamingPot(call) {
+        try {
+            logger.info(`[repeated_hotpots_HotpotService_serverStreamingPot] Received metadata ${JSON.stringify(call.metadata, null, 2)}`);
+            metadataToFile(call.metadata, config.outDir + 'received_metadata.txt');
+
+            let requestMessageType = root.lookupType("repeated_hotpots.RequestMessage");
+            let responseMessageType = root.lookupType("repeated_hotpots.ResponseMessage");
+
+            logger.info(`[repeated_hotpots_HotpotService_serverStreamingPot] Received request: ${JSON.stringify(call.request, null, 2)}`);
+            messageToFile(requestMessageType.fromObject(call.request), requestMessageType, config.outDir + "repeated_hotpots_HotpotService_serverStreamingPot_param_0.bin");
+
+            const metadata = new grpc.Metadata();
+            call.sendMetadata(metadata);
+
+            loopMultipleFilesWithSamePrefix(config.testcaseDir + 'repeated_hotpots_HotpotService_serverStreamingPot_return', '.bin')
+                    .forEach((filepath) => {
+                        const response = messageFromFile(filepath, responseMessageType);
+                        logger.info(`[repeated_hotpots_HotpotService_serverStreamingPot] Response: ${JSON.stringify(response, null, 2)}`);
+                        call.write(response);
+                    });
+            call.end();
+
+        } catch (e) {
+            logger.error(`[repeated_hotpots_HotpotService_serverStreamingPot] An error occurred: ${e.message}\n${e.stack}`);
+        }
+    }
+
+    function repeated_hotpots_HotpotService_clientStreamingPot(call, callback) {
+        try {
+            logger.info(`[repeated_hotpots_HotpotService_clientStreamingPot] Received metadata ${JSON.stringify(call.metadata, null, 2)}`);
+            metadataToFile(call.metadata, config.outDir + 'received_metadata.txt');
+
+            let requestMessageType = root.lookupType("repeated_hotpots.RequestMessage");
+            let responseMessageType = root.lookupType("repeated_hotpots.ResponseMessage");
+
+            let requestIdx = 0;
+            call.on('data', (request) => {
+                logger.info(`[repeated_hotpots_HotpotService_clientStreamingPot] Received request: ${JSON.stringify(request, null, 2)}`);
+                messageToFile(requestMessageType.fromObject(request), requestMessageType, config.outDir + `repeated_hotpots_HotpotService_clientStreamingPot_param_${requestIdx++}.bin`);
+            });
+
+            const metadata = new grpc.Metadata();
+            call.sendMetadata(metadata);
+
+            call.on('end', () => {
+               let retval = messageFromFile(
+                   config.testcaseDir + "repeated_hotpots_HotpotService_clientStreamingPot_return_0.bin",
+                   responseMessageType
+               );
+               logger.info(`[repeated_hotpots_HotpotService_clientStreamingPot] Response: ${JSON.stringify(retval, null, 2)}`);
+               callback(null, retval);
+            });
+
+        } catch (e) {
+            logger.error(`[repeated_hotpots_HotpotService_clientStreamingPot] An error occurred: ${e.message}\n${e.stack}`);
+        }
+    }
+
+    function repeated_hotpots_HotpotService_unaryPot(call, callback) {
+        try {
+            logger.info(`[repeated_hotpots_HotpotService_unaryPot] Received metadata ${JSON.stringify(call.metadata, null, 2)}`);
+            metadataToFile(call.metadata, config.outDir + 'received_metadata.txt');
+
+            let requestMessageType = root.lookupType("repeated_hotpots.RequestMessage");
+            let responseMessageType = root.lookupType("repeated_hotpots.ResponseMessage");
+
+            logger.info(`[repeated_hotpots_HotpotService_unaryPot] Received request: ${JSON.stringify(call.request, null, 2)}`);
+            messageToFile(requestMessageType.fromObject(call.request), requestMessageType, config.outDir + "repeated_hotpots_HotpotService_unaryPot_param_0.bin");
+
+            const metadata = new grpc.Metadata();
+            call.sendMetadata(metadata);
+
+            let retval = messageFromFile(
+                config.testcaseDir + "repeated_hotpots_HotpotService_unaryPot_return_0.bin",
+                responseMessageType
+            );
+            logger.info(`[repeated_hotpots_HotpotService_unaryPot] Response: ${JSON.stringify(retval, null, 2)}`);
+            callback(null, retval);
+
+        } catch (e) {
+            logger.error(`[repeated_hotpots_HotpotService_unaryPot] An error occurred: ${e.message}\n${e.stack}`);
         }
     }
 
@@ -148,11 +142,11 @@ console.log("Using environment " + env);
     function getServer() {
         let server = new grpc.Server();
 
-        server.addService(protosGrpc.person.PeopleService.service, {
-            getPerson: person_PeopleService_getPerson,
-            listPerson: person_PeopleService_listPerson,
-            registerPerson: person_PeopleService_registerPerson,
-            streamPerson: person_PeopleService_streamPerson        });
+        server.addService(protosGrpc.repeated_hotpots.HotpotService.service, {
+            unaryPot: repeated_hotpots_HotpotService_unaryPot,
+            serverStreamingPot: repeated_hotpots_HotpotService_serverStreamingPot,
+            clientStreamingPot: repeated_hotpots_HotpotService_clientStreamingPot,
+            bidiStreamingPot: repeated_hotpots_HotpotService_bidiStreamingPot        });
 
         return server;
     }

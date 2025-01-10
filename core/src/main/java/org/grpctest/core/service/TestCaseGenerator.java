@@ -49,31 +49,46 @@ public class TestCaseGenerator {
 
     private final RpcModelRegistry rpcModelRegistry;
 
+    @Deprecated
     public String generateRandomMessageJson(RpcMessage message) {
         try {
-            return JsonFormat.printer().includingDefaultValueFields().omittingInsignificantWhitespace().print(generateRandomMessage(message)).replace("\"", "\\\"");
+            return JsonFormat.printer().includingDefaultValueFields().omittingInsignificantWhitespace().print(generateRandomMessage(message, 0)).replace("\"", "\\\"");
         } catch (InvalidProtocolBufferException ipbe) {
             log.error("[generateRandomMessageJson] Failed to generate message as json", ipbe);
             return "";
         }
     }
 
-    public DynamicMessage generateRandomMessage(RpcMessage message) {
+    /**
+     * Create a message of a given type, and supplies message fields with random values.
+     * Can set omitFields to generate messages with unset fields.
+     * omitFields behaviour will be inherited by sub-messages.
+     *
+     * @param message
+     * @param omitFields 0 = no omit, 1 = partial omit, 2 = full omit (empty message)
+     * @return
+     */
+    public DynamicMessage generateRandomMessage(RpcMessage message, int omitFields) {
         DynamicMessage.Builder messageBuilder = DynamicMessage.newBuilder(message.getMessageDescriptor());
-        for (Descriptors.FieldDescriptor field : message.getMessageDescriptor().getFields()) {
-            if (field.isRepeated()) {
-                int repetitions = random.nextInt(8);
-                for (int i = 0; i < repetitions; i++) {
-                    messageBuilder.addRepeatedField(field, generateRandomSingleValue(field));
+        if (omitFields < 2) {
+            for (Descriptors.FieldDescriptor field : message.getMessageDescriptor().getFields()) {
+                if (omitFields == 1) {
+                    if (random.nextBoolean()) continue;
                 }
-            } else {
-                messageBuilder.setField(field, generateRandomSingleValue(field));
+                if (field.isRepeated()) {
+                    int repetitions = random.nextInt(8);
+                    for (int i = 0; i < repetitions; i++) {
+                        messageBuilder.addRepeatedField(field, generateRandomSingleValue(field, omitFields));
+                    }
+                } else {
+                    messageBuilder.setField(field, generateRandomSingleValue(field, omitFields));
+                }
             }
         }
         return messageBuilder.build();
     }
 
-    public TestCase generateRandomTestcase(RpcService.RpcMethod method, boolean hasException) {
+    public TestCase generateRandomTestcase(RpcService.RpcMethod method, int omitFields, boolean hasException) {
         int numberOfParams;
         int numberOfReturns;
         TestCase.RpcException rpcException = hasException ? generateRandomException() : null;
@@ -92,28 +107,28 @@ public class TestCaseGenerator {
             case SERVER_STREAMING -> {
                 if (hasException) {
                     numberOfParams = 1;
-                    numberOfReturns = random.nextInt(1, 4);
+                    numberOfReturns = random.nextInt(2, 4);
                 } else {
                     numberOfParams = 1;
-                    numberOfReturns = random.nextInt(1, 4);
+                    numberOfReturns = random.nextInt(2, 4);
                 }
             }
             case CLIENT_STREAMING -> {
                 if (hasException) {
-                    numberOfParams = random.nextInt(1, 4);
+                    numberOfParams = random.nextInt(2, 4);
                     numberOfReturns = 0;
                 } else {
-                    numberOfParams = random.nextInt(1, 4);
+                    numberOfParams = random.nextInt(2, 4);
                     numberOfReturns = 1;
                 }
             }
             case BIDI_STREAMING -> {
                 if (hasException) {
-                    numberOfParams = random.nextInt(1, 4);
-                    numberOfReturns = random.nextInt(1, 4);
+                    numberOfParams = random.nextInt(2, 4);
+                    numberOfReturns = random.nextInt(2, 4);
                 } else {
-                    numberOfParams = random.nextInt(1, 4);
-                    numberOfReturns = random.nextInt(1, 4);
+                    numberOfParams = random.nextInt(2, 4);
+                    numberOfReturns = random.nextInt(2, 4);
                 }
             }
             default -> {
@@ -125,11 +140,11 @@ public class TestCaseGenerator {
         // Generate a number of DynamicMessage as params / returns
         List<DynamicMessage> paramList = new ArrayList<>(numberOfParams);
         for (int i = 0; i < numberOfParams; i++) {
-            paramList.add(generateRandomMessage(rpcModelRegistry.lookupMessage(method.getInType())));
+            paramList.add(generateRandomMessage(rpcModelRegistry.lookupMessage(method.getInType()), omitFields));
         }
         List<DynamicMessage> returnList = new ArrayList<>(numberOfReturns);
         for (int i = 0; i < numberOfReturns; i++) {
-            returnList.add(generateRandomMessage(rpcModelRegistry.lookupMessage(method.getOutType())));
+            returnList.add(generateRandomMessage(rpcModelRegistry.lookupMessage(method.getOutType()), omitFields));
         }
 
         TestCase testCase = TestCase.builder()
@@ -179,7 +194,7 @@ public class TestCaseGenerator {
     /**
      * Generates a random single value for a message field
      */
-    private Object generateRandomSingleValue(Descriptors.FieldDescriptor field) {
+    private Object generateRandomSingleValue(Descriptors.FieldDescriptor field, int omitSubMsgFields) {
         return switch (field.getJavaType()) {
             case BOOLEAN -> random.nextBoolean();
             case BYTE_STRING -> ByteString.copyFrom(randomBytes());
@@ -191,7 +206,7 @@ public class TestCaseGenerator {
             case FLOAT -> random.nextFloat();
             case INT -> random.nextInt();
             case LONG -> random.nextLong();
-            case MESSAGE -> generateRandomMessage(rpcModelRegistry.lookupMessage(field.getMessageType().getFullName()));
+            case MESSAGE -> generateRandomMessage(rpcModelRegistry.lookupMessage(field.getMessageType().getFullName()), omitSubMsgFields);
             case STRING -> randomString();
         };
     }

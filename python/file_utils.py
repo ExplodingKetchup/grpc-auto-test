@@ -36,7 +36,7 @@ def file_to_string(filepath: str) -> str:
 
 def list_files_with_same_prefix(search_dir: str, prefix: str) -> list:
     """
-    Lists all files in the specified directory that start with the given prefix.
+    Lists all files in the specified directory that start with the given prefix, sorted alphabetically
 
     :param search_dir: str - Path to the directory to search in.
     :param prefix: str - Prefix to match file names against.
@@ -47,5 +47,7 @@ def list_files_with_same_prefix(search_dir: str, prefix: str) -> list:
 
     # Get all files in the directory with the matching prefix
     matching_files = [os.path.join(search_dir, f) for f in os.listdir(search_dir) if f.startswith(prefix)]
+
+    matching_files.sort()
 
     return matching_files

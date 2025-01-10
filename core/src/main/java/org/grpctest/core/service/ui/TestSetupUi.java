@@ -3,6 +3,8 @@ package org.grpctest.core.service.ui;
 import org.grpctest.core.enums.MetadataType;
 import org.grpctest.core.pojo.RuntimeConfig;
 
+import java.util.List;
+
 public interface TestSetupUi {
     default RuntimeConfig setupEverything() throws Exception {
         printHelloMessage();
@@ -13,6 +15,8 @@ public interface TestSetupUi {
                 .serverToClientMetadataType(chooseClientToServerMetadataType())
                 .enableException(chooseEnableException())
                 .enableAllRandomTestcase(chooseEnableAllRandomTestcase())
+                .includedProtos(chooseIncludedRpcFiles())
+                .omitFieldsInRandomTestcases(chooseOmitFieldsInRandomTestcases())
                 .build();
     }
 
@@ -29,4 +33,8 @@ public interface TestSetupUi {
     boolean chooseEnableException() throws Exception;
 
     boolean chooseEnableAllRandomTestcase() throws Exception;
+
+    List<String> chooseIncludedRpcFiles() throws Exception;
+
+    int chooseOmitFieldsInRandomTestcases() throws Exception;
 }

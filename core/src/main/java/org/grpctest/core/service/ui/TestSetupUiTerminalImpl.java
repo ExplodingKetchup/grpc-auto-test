@@ -6,6 +6,8 @@ import org.grpctest.core.enums.MetadataType;
 import org.grpctest.core.pojo.RuntimeConfig;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @AllArgsConstructor
 @Slf4j
@@ -46,5 +48,15 @@ public class TestSetupUiTerminalImpl implements TestSetupUi {
     @Override
     public boolean chooseEnableAllRandomTestcase() throws Exception {
         return false;
+    }
+
+    @Override
+    public List<String> chooseIncludedRpcFiles() throws Exception {
+        return null;
+    }
+
+    @Override
+    public int chooseOmitFieldsInRandomTestcases() throws Exception {
+        return 0;
     }
 }

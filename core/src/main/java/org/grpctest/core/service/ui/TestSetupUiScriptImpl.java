@@ -7,6 +7,8 @@ import org.grpctest.core.pojo.RuntimeConfig;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @Qualifier("script")
 @Slf4j
@@ -62,6 +64,16 @@ public class TestSetupUiScriptImpl implements TestSetupUi {
     @Override
     public boolean chooseEnableAllRandomTestcase() throws Exception {
         return runtimeConfig.getEnableAllRandomTestcase();
+    }
+
+    @Override
+    public List<String> chooseIncludedRpcFiles() throws Exception {
+        return runtimeConfig.getIncludedProtos();
+    }
+
+    @Override
+    public int chooseOmitFieldsInRandomTestcases() throws Exception {
+        return runtimeConfig.getOmitFieldsInRandomTestcases();
     }
 
 

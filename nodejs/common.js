@@ -99,7 +99,7 @@ function messageFromFile(filepath, messageType) {
     try {
         let message = messageType.decode(data);
 
-        return message;
+        return messageType.toObject(message);
 
     } catch (e) {
         if (e instanceof protobuf.util.ProtocolError) {
@@ -112,8 +112,6 @@ function messageFromFile(filepath, messageType) {
                 " from [" + filepath + "] failed: Invalid wire format");
           }
     }
-
-    return null;
 }
 
 /**

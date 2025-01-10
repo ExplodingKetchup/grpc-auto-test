@@ -1,0 +1,64 @@
+syntax = "proto3";
+
+package repeated_hotpots;
+
+option java_multiple_files = true;
+option java_package = "org.grpctest.java.common.define";
+option java_outer_classname = "BasicDataProto";
+
+message BigHotpotOfTerror {
+  repeated double double_values = 1;
+  repeated float float_values = 2;
+  repeated int32 int32_values = 3;
+  repeated int64 int64_values = 4;
+  repeated uint32 uint32_values = 5;
+  repeated uint64 uint64_values = 6;
+  repeated sint32 sint32_values = 7;
+  repeated sint64 sint64_values = 8;
+  repeated fixed32 fixed32_values = 9;
+  repeated fixed64 fixed64_values = 10;
+  repeated sfixed32 sfixed32_values = 11;
+  repeated sfixed64 sfixed64_values = 12;
+  repeated bool bool_values = 13;
+  repeated string string_values = 14;
+  repeated bytes bytes_values = 15;
+  repeated AnExampleEnum enum_values = 16;
+  repeated SmallHotpotOfRickeridoo message_values = 17;
+}
+
+message SmallHotpotOfRickeridoo {
+  repeated uint32 small_uint32_values = 1;
+  repeated string small_string_values = 2;
+}
+
+message RequestMessage {
+  repeated SmallHotpotOfRickeridoo small_hotpots = 1;
+  repeated float float_boats = 2;
+}
+
+message ResponseMessage {
+  repeated BigHotpotOfTerror big_hotpots = 1;
+  repeated sfixed64 flex_tapes = 2;
+}
+
+enum AnExampleEnum {
+  AEE_ZERO = 0;
+  AEE_ONE = 1;
+  AEE_TWO = 2;
+  AEE_THREE = 3;
+  AEE_FOUR = 4;
+  AEE_FIVE = 5;
+  AEE_SIX = 6;
+  AEE_SEVEN = 7;
+}
+
+service HotpotService {
+  // UNARY
+  rpc UnaryPot(RequestMessage) returns (ResponseMessage);
+  // SERVER_STREAMING
+  rpc ServerStreamingPot(RequestMessage) returns (stream ResponseMessage);
+  // CLIENT_STREAMING
+  rpc ClientStreamingPot(stream RequestMessage) returns (ResponseMessage);
+  // BIDI_STREAMING
+  rpc BidiStreamingPot(stream RequestMessage) returns (stream ResponseMessage);
+}

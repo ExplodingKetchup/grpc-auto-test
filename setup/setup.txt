@@ -1,5 +1,4 @@
+CLIENT NODEJS
 SERVER PYTHON
-CLIENT JAVA
 TESTCASE --random
-METADATA --server-client:BIN --client-server:BIN
-MOCK_EXCEPTION
+INCLUDE_PROTO basic_repeated_fields

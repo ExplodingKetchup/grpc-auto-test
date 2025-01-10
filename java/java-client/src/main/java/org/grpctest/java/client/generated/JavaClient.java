@@ -1,5 +1,6 @@
 package org.grpctest.java.client.generated;
 
+import ch.qos.logback.classic.LoggerContext;
 import com.google.protobuf.GeneratedMessageV3;
 import io.grpc.*;
 import io.grpc.stub.StreamObserver;
@@ -7,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.grpctest.java.common.define.*;
 import org.grpctest.java.client.config.Config;
 import org.grpctest.java.common.util.MessageUtil;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Component;
 
@@ -21,38 +23,42 @@ public class JavaClient implements InitializingBean {
 
     private final Config config;
 
-    private final PeopleServiceGrpc.PeopleServiceBlockingStub peopleServiceBlockingStub;
+    private final HotpotServiceGrpc.HotpotServiceBlockingStub hotpotServiceBlockingStub;
 
-    private final PeopleServiceGrpc.PeopleServiceStub peopleServiceAsyncStub;
+    private final HotpotServiceGrpc.HotpotServiceStub hotpotServiceAsyncStub;
 
     public JavaClient(Config config, ClientInterceptor clientInterceptor) {
         this.config = config;
         Channel originChannel = ManagedChannelBuilder.forAddress(config.getServiceHost(), config.getServicePort()).usePlaintext().build();
         Channel channel = ClientInterceptors.intercept(originChannel, clientInterceptor);
-        this.peopleServiceBlockingStub = PeopleServiceGrpc.newBlockingStub(channel);
-        this.peopleServiceAsyncStub = PeopleServiceGrpc.newStub(channel);
+        this.hotpotServiceBlockingStub = HotpotServiceGrpc.newBlockingStub(channel);
+        this.hotpotServiceAsyncStub = HotpotServiceGrpc.newStub(channel);
         log.info("Connected to server at {}:{}", config.getServiceHost(), config.getServicePort());
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            log.info("Client shutting down...");
+            LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+            loggerContext.stop();
+        }));
     }
 
     @Override
     public void afterPropertiesSet() throws Exception {
 
-        // Invoke test case: person.PeopleService.listPerson
-        invokeServerStreamingRpcMethod(peopleServiceBlockingStub::listPerson, MessageUtil.messageFromFile(config.getTestcaseDir() + File.separator + "person_PeopleService_listPerson_param_0.bin", GetPersonRequest.class), "person.PeopleService.listPerson");
+        // Invoke test case: repeated_hotpots.HotpotService.bidiStreamingPot
+        invokeBidiStreamingRpcMethod(hotpotServiceAsyncStub::bidiStreamingPot, MessageUtil.messageListFromMultipleFiles(config.getTestcaseDir() + File.separator + "repeated_hotpots_HotpotService_bidiStreamingPot_param.bin", RequestMessage.class), "repeated_hotpots.HotpotService.bidiStreamingPot");
 
 
-        // Invoke test case: person.PeopleService.registerPerson
-        invokeClientStreamingRpcMethod(peopleServiceAsyncStub::registerPerson, MessageUtil.messageListFromMultipleFiles(config.getTestcaseDir() + File.separator + "person_PeopleService_registerPerson_param.bin", GetPersonRequest.class), "person.PeopleService.registerPerson");
+        // Invoke test case: repeated_hotpots.HotpotService.serverStreamingPot
+        invokeServerStreamingRpcMethod(hotpotServiceBlockingStub::serverStreamingPot, MessageUtil.messageFromFile(config.getTestcaseDir() + File.separator + "repeated_hotpots_HotpotService_serverStreamingPot_param_0.bin", RequestMessage.class), "repeated_hotpots.HotpotService.serverStreamingPot");
 
 
-        // Invoke test case: person.PeopleService.getPerson
-        invokeUnaryRpcMethod(peopleServiceBlockingStub::getPerson, MessageUtil.messageFromFile(config.getTestcaseDir() + File.separator + "person_PeopleService_getPerson_param_0.bin", GetPersonRequest.class), "person.PeopleService.getPerson");
+        // Invoke test case: repeated_hotpots.HotpotService.clientStreamingPot
+        invokeClientStreamingRpcMethod(hotpotServiceAsyncStub::clientStreamingPot, MessageUtil.messageListFromMultipleFiles(config.getTestcaseDir() + File.separator + "repeated_hotpots_HotpotService_clientStreamingPot_param.bin", RequestMessage.class), "repeated_hotpots.HotpotService.clientStreamingPot");
 
 
-        // Invoke test case: person.PeopleService.streamPerson
-        invokeBidiStreamingRpcMethod(peopleServiceAsyncStub::streamPerson, MessageUtil.messageListFromMultipleFiles(config.getTestcaseDir() + File.separator + "person_PeopleService_streamPerson_param.bin", GetPersonRequest.class), "person.PeopleService.streamPerson");
+        // Invoke test case: repeated_hotpots.HotpotService.unaryPot
+        invokeUnaryRpcMethod(hotpotServiceBlockingStub::unaryPot, MessageUtil.messageFromFile(config.getTestcaseDir() + File.separator + "repeated_hotpots_HotpotService_unaryPot_param_0.bin", RequestMessage.class), "repeated_hotpots.HotpotService.unaryPot");
 
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> log.info("Client shutting down...")));
     }
 
     private <T, R> void invokeUnaryRpcMethod(Function<T, R> method, T parameter, String methodId) {
@@ -61,7 +67,7 @@ public class JavaClient implements InitializingBean {
             R result = method.apply(parameter);
             log.info("[invokeUnaryRpcMethod] Method {} returns {}", methodId, result);
             if (result instanceof GeneratedMessageV3) {
-                MessageUtil.messageToFile((GeneratedMessageV3) result, config.getOutDir() + File.separator + methodId.replace(".", "_") + "_return.bin");
+                MessageUtil.messageToFile((GeneratedMessageV3) result, config.getOutDir() + File.separator + methodId.replace(".", "_") + "_return_0.bin");
             } else {
                 log.error("[invokeUnaryRpcMethod] Method {} returns message of type [{}], incompatible with protobuf", methodId, result.getClass());
             }

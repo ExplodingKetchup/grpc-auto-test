@@ -10,6 +10,7 @@ import org.grpctest.core.data.RpcModelRegistry;
 import org.grpctest.core.data.TestcaseRegistry;
 import org.grpctest.core.pojo.RpcMessage;
 import org.grpctest.core.pojo.RpcService;
+import org.grpctest.core.pojo.RuntimeConfig;
 import org.grpctest.core.util.StringUtil;
 import org.springframework.stereotype.Component;
 
@@ -27,7 +28,7 @@ public class ProtobufReader {
 
     private final RpcModelRegistry rpcModelRegistry;
 
-    public void loadProtoContent() throws Throwable {
+    public void loadProtoContent(RuntimeConfig runtimeConfig) throws Throwable {
         try (FileInputStream inputStream = new FileInputStream(config.getProtoDescriptorPath())) {
 
             // Get content of descriptor set
@@ -35,6 +36,11 @@ public class ProtobufReader {
 
             // Loop through each .proto files
             for (DescriptorProtos.FileDescriptorProto fileDescriptorProto : descriptorSet.getFileList()) {
+                if (!runtimeConfig.getIncludedProtos().isEmpty()) {
+                    if (!runtimeConfig.getIncludedProtos().contains(fileDescriptorProto.getName())) {
+                        continue;
+                    }
+                }
                 log.info("[loadProtoContent] Reading content of [{}]", fileDescriptorProto.getName());
                 rpcModelRegistry.addProtoFilename(fileDescriptorProto.getName().substring(0, fileDescriptorProto.getName().length() - 6));
 

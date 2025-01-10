@@ -1,5 +1,6 @@
 package org.grpctest.java.client.generated;
 
+import ch.qos.logback.classic.LoggerContext;
 import com.google.protobuf.GeneratedMessageV3;
 import io.grpc.*;
 import io.grpc.stub.StreamObserver;
@@ -7,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.grpctest.java.common.define.*;
 import org.grpctest.java.client.config.Config;
 import org.grpctest.java.common.util.MessageUtil;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Component;
 
@@ -36,6 +38,11 @@ public class JavaClient implements InitializingBean {
         this.${service.name?uncap_first}AsyncStub = ${service.name}Grpc.newStub(channel);
 </#list>
         log.info("Connected to server at {}:{}", config.getServiceHost(), config.getServicePort());
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            log.info("Client shutting down...");
+            LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+            loggerContext.stop();
+        }));
     }
 
     @Override
@@ -54,7 +61,6 @@ public class JavaClient implements InitializingBean {
     </#if>
 
 </#list>
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> log.info("Client shutting down...")));
     }
 
     private <T, R> void invokeUnaryRpcMethod(Function<T, R> method, T parameter, String methodId) {
@@ -63,7 +69,7 @@ public class JavaClient implements InitializingBean {
             R result = method.apply(parameter);
             log.info("[invokeUnaryRpcMethod] Method {} returns {}", methodId, result);
             if (result instanceof GeneratedMessageV3) {
-                MessageUtil.messageToFile((GeneratedMessageV3) result, config.getOutDir() + File.separator + methodId.replace(".", "_") + "_return.bin");
+                MessageUtil.messageToFile((GeneratedMessageV3) result, config.getOutDir() + File.separator + methodId.replace(".", "_") + "_return_0.bin");
             } else {
                 log.error("[invokeUnaryRpcMethod] Method {} returns message of type [{}], incompatible with protobuf", methodId, result.getClass());
             }

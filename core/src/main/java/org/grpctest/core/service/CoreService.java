@@ -1,10 +1,13 @@
 package org.grpctest.core.service;
 
+import com.google.protobuf.Descriptors;
+import com.google.protobuf.DynamicMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.grpctest.core.config.Config;
 import org.grpctest.core.data.RpcModelRegistry;
 import org.grpctest.core.data.TestcaseRegistry;
 import org.grpctest.core.enums.CleanupMode;
+import org.grpctest.core.enums.MetadataType;
 import org.grpctest.core.pojo.RpcService;
 import org.grpctest.core.pojo.RuntimeConfig;
 import org.grpctest.core.service.codegen.JavaCodeGenService;
@@ -18,11 +21,13 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -114,7 +119,7 @@ public class CoreService implements InitializingBean {
             log.info("runtimeConfig: {}", runtimeConfig);
 
             // Copy predefined .proto files to destination
-            genericFileService.copyProtos();
+            genericFileService.copyProtos(runtimeConfig);
             log.info("[Step 1 of 9] Finished copy predefined files for Java");
 
             // Compile .proto files for Java
@@ -122,7 +127,7 @@ public class CoreService implements InitializingBean {
             log.info("[Step 2 of 9] Finished compiling .proto file for Java");
 
             // Read content of .proto files
-            protobufReader.loadProtoContent();
+            protobufReader.loadProtoContent(runtimeConfig);
             log.info("[Step 3 of 9] Finished reading content of .proto files");
 
             // Load test cases
@@ -221,7 +226,7 @@ public class CoreService implements InitializingBean {
 
     private void generateRandomTestcases(RuntimeConfig runtimeConfig) {
         for (RpcService.RpcMethod method : testcaseRegistry.getAllMethodsWithoutTestCases()) {
-            testcaseRegistry.addTestCase(testCaseGenerator.generateRandomTestcase(method, runtimeConfig.getEnableException()));
+            testcaseRegistry.addTestCase(testCaseGenerator.generateRandomTestcase(method, runtimeConfig.getOmitFieldsInRandomTestcases(), runtimeConfig.getEnableException()));
         }
     }
 
@@ -247,12 +252,44 @@ public class CoreService implements InitializingBean {
         );
     }
 
-    private boolean checkClientShutdown(RuntimeConfig.Language clientLanguage) throws IOException {
-        return searchLogContentInThisRun(
+    /**
+     * Check if client has finished its work, by 2 criteria:<br>
+     * 1. Expected output files are present in the output folder of both client and server<br>
+     * 2. Client program is not active (using {@link DockerService#healthCheck(String[])})
+     */
+    private boolean checkClientShutdown(RuntimeConfig.Language clientLanguage) throws Exception {
+        for (String file : resultAnalyzer.getExpectedClientOutputFiles()) {
+            if (Files.notExists(Paths.get(file))) {
+                return false;
+            }
+        }
+        for (String file : resultAnalyzer.getExpectedServerOutputFiles()) {
+            if (Files.notExists(Paths.get(file))) {
+                return false;
+            }
+        }
+        return !dockerService.healthCheck(new String[]{RuntimeConfig.Language.CLIENT_NAME.get(clientLanguage)});
+    }
+
+    @Deprecated
+    /** This way of checking for client shutdown is not reliable, because sometimes logs are not flushed before shutdown */
+    private boolean checkClientShutdownByLog(RuntimeConfig.Language clientLanguage) throws IOException {
+        boolean result = searchLogContentInThisRun(
                 getLatestLogFile(false, clientLanguage),
                 "Client shutting down",
                 clientLanguage
         );
+        // Java only, because for some reason the log line at shutdown hook sometimes doesn't appear
+        if (clientLanguage.equals(RuntimeConfig.Language.JAVA)) {
+            if (searchLogContentInThisRun(
+                    getLatestLogFile(false, clientLanguage),
+                    "[main] o.grpctest.java.client.Application - Started Application in",
+                    clientLanguage
+            )) {
+                return true;
+            }
+        }
+        return result;
     }
 
     private String getLatestLogFile(boolean isServer, RuntimeConfig.Language language) throws IOException {

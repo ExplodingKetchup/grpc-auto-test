@@ -17,12 +17,6 @@ import java.util.HexFormat;
 public class MetadataInterceptor implements ServerInterceptor {
 
 
-    private static final Metadata.Key<String> META_KEY_9C =
-            Metadata.Key.of("9C", Metadata.ASCII_STRING_MARSHALLER);
-
-    private static final String META_VALUE_9C = "8WI8JL6p42y7i";
-
-
     @Autowired
     private Config config;
 
@@ -36,7 +30,6 @@ public class MetadataInterceptor implements ServerInterceptor {
         return next.startCall(new ForwardingServerCall.SimpleForwardingServerCall<ReqT, RespT>(call) {
             @Override
             public void sendHeaders(Metadata responseMetadata) {
-                responseMetadata.put(META_KEY_9C, META_VALUE_9C);
                 log.info("[interceptCall] Server -> Client metadata:\n{}", MessageUtil.formatMetadataForOutput(responseMetadata));
                 super.sendHeaders(responseMetadata);
             }

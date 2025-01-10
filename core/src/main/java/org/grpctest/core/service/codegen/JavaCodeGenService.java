@@ -3,6 +3,7 @@ package org.grpctest.core.service.codegen;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
 import org.grpctest.core.config.Config;
 import org.grpctest.core.data.RpcModelRegistry;
 import org.grpctest.core.data.TestcaseRegistry;
@@ -14,6 +15,8 @@ import org.grpctest.core.freemarker.datamodels.ServiceImplDataModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+
+import java.io.File;
 
 @Service
 @Qualifier("javaCodeGenService")
@@ -99,6 +102,7 @@ public class JavaCodeGenService extends BaseCodeGenService {
 
     @Override
     public void generateServer() throws Exception {
+        FileUtils.cleanDirectory(new File(JAVA_SVC_DIR));
         generateJavaServer();
         for (RpcService service : registry.getAllServices()) {
             generateJavaService(service);

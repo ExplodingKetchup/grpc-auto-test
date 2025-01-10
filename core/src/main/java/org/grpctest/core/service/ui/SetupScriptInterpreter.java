@@ -51,6 +51,7 @@ public class SetupScriptInterpreter {
             case TESTCASE -> interpretTestcaseOpCode(Arrays.copyOfRange(words, 1, words.length));
             case METADATA -> interpretMetadataOpCode(Arrays.copyOfRange(words, 1, words.length));
             case MOCK_EXCEPTION -> interpretMockExceptionOpCode();
+            case INCLUDE_PROTO -> interpretIncludeProtoOpCode(Arrays.copyOfRange(words, 1, words.length));
         }
     }
 
@@ -80,6 +81,11 @@ public class SetupScriptInterpreter {
                 switch (flag.getLeft()) {
                     case "random" -> {
                         runtimeConfig.setEnableAllRandomTestcase(true);
+                        if (StringUtils.isNotBlank(flag.getRight())) {
+                            runtimeConfig.setOmitFieldsInRandomTestcases(Integer.parseInt(flag.getRight()));
+                        } else {
+                            runtimeConfig.setOmitFieldsInRandomTestcases(0);
+                        }
                     }
                     default -> {
                         log.warn("[interpretTestcaseOpCode] Invalid flag will be ignored: {}", flag.getLeft());
@@ -113,6 +119,16 @@ public class SetupScriptInterpreter {
         runtimeConfig.setEnableException(true);
     }
 
+    private void interpretIncludeProtoOpCode(String[] args) {
+        for (String arg : args) {
+            if (arg.endsWith(".proto")) {
+                runtimeConfig.getIncludedProtos().add(arg);
+            } else {
+                runtimeConfig.getIncludedProtos().add(arg + ".proto");
+            }
+        }
+    }
+
     /**
      * Extract information from a "flag" arg (in the form --(flag_key):(flag_value) or --(flag_key))
      * @param arg
@@ -124,7 +140,7 @@ public class SetupScriptInterpreter {
             String[] splitFlagArg = arg.substring(2).split(":");
             if (splitFlagArg.length > 2) return null;
             String flagKey = splitFlagArg[0];
-            String flagValue = null;
+            String flagValue = "";
             if (splitFlagArg.length > 1) flagValue = splitFlagArg[1];
             return Pair.of(flagKey, flagValue);
         } else {
@@ -137,11 +153,13 @@ public class SetupScriptInterpreter {
         SERVER,
         /** CLIENT {@link org.grpctest.core.pojo.RuntimeConfig.Language} */
         CLIENT,
-        /** TESTCASE (--random) */
+        /** TESTCASE (--random(:{0, 1, 2})) [Optional] */
         TESTCASE,
-        /** METADATA (--server-client:{@link org.grpctest.core.enums.MetadataType}) (--client-server:{@link org.grpctest.core.enums.MetadataType}) */
+        /** METADATA (--server-client:{@link org.grpctest.core.enums.MetadataType}) (--client-server:{@link org.grpctest.core.enums.MetadataType}) [Optional] */
         METADATA,
-        /** MOCK_EXCEPTION */
-        MOCK_EXCEPTION
+        /** MOCK_EXCEPTION [Optional] */
+        MOCK_EXCEPTION,
+        /** INCLUDE_PROTO rpc_1.proto rpc_2.proto [Optional] */
+        INCLUDE_PROTO
     }
 }

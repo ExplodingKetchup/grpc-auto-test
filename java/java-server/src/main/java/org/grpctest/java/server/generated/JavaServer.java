@@ -24,11 +24,11 @@ public class JavaServer implements InitializingBean {
     @Autowired
     public JavaServer(Config config,
                       MetadataInterceptor metadataInterceptor,
-                      PeopleService peopleService    ) {
+                      HotpotService hotpotService    ) {
         this.config = config;
         this.server = ServerBuilder
                 .forPort(config.getServerPort())
-                .addService(ServerInterceptors.intercept(peopleService, metadataInterceptor))
+                .addService(ServerInterceptors.intercept(hotpotService, metadataInterceptor))
                 .build();
     }
 

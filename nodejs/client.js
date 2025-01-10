@@ -3,8 +3,6 @@ import { createLogger, loadProtosGrpc, loadProtosProtobufjs, messageFromFile, me
 
 // Constants
 const BIN_SUFFIX = '-bin';
-const META_KEY_1o9bb5z = '1o9bb5z' + BIN_SUFFIX;
-const META_VALUE_1o9bb5z = Buffer.from('92e44137aba862a47c0840ba323255', 'hex');
 
 // Load configs dynamically depending on environment
 const env = process.env.NODE_ENV || 'test';
@@ -21,7 +19,6 @@ console.log("Using environment " + env);
     let protosGrpc = loadProtosGrpc(config.protoDir);
     let root = loadProtosProtobufjs(config.protoDir);
     const headers = new grpc.Metadata();
-    headers.set(META_KEY_1o9bb5z, META_VALUE_1o9bb5z);
 
     function invokeUnaryRpc(method, requestType, responseType, methodId) {
         const rpcCallback = (err, response) => {
@@ -121,20 +118,20 @@ console.log("Using environment " + env);
 
         try {
 
-            // >>> SERVICE PeopleService
-            let peopleServiceStub = new protosGrpc.person.PeopleService(config.server.host + ':' + config.server.port, grpc.credentials.createInsecure());
+            // >>> SERVICE HotpotService
+            let hotpotServiceStub = new protosGrpc.repeated_hotpots.HotpotService(config.server.host + ':' + config.server.port, grpc.credentials.createInsecure());
             logger.info(`[main] Connected to server at ${config.server.host}:${config.server.port}`);
 
-            // METHOD getPerson
-            invokeUnaryRpc((request, headers, callback) => peopleServiceStub.getPerson(request, headers, callback), root.lookupType('person.GetPersonRequest'), root.lookupType('person.GetPersonResponse'), 'person.PeopleService.getPerson');
-            // METHOD listPerson
-            invokeServerStreamingRpc((request, headers) => peopleServiceStub.listPerson(request, headers), root.lookupType('person.GetPersonRequest'), root.lookupType('person.GetPersonResponse'), 'person.PeopleService.listPerson');
-            // METHOD registerPerson
-            invokeClientStreamingRpc((headers, callback) => peopleServiceStub.registerPerson(headers, callback), root.lookupType('person.GetPersonRequest'), root.lookupType('person.GetPersonResponse'), 'person.PeopleService.registerPerson');
-            // METHOD streamPerson
-            invokeBidiStreamingRpc((headers) => peopleServiceStub.streamPerson(headers), root.lookupType('person.GetPersonRequest'), root.lookupType('person.GetPersonResponse'), 'person.PeopleService.streamPerson');
+            // METHOD unaryPot
+            invokeUnaryRpc((request, headers, callback) => hotpotServiceStub.unaryPot(request, headers, callback), root.lookupType('repeated_hotpots.RequestMessage'), root.lookupType('repeated_hotpots.ResponseMessage'), 'repeated_hotpots.HotpotService.unaryPot');
+            // METHOD serverStreamingPot
+            invokeServerStreamingRpc((request, headers) => hotpotServiceStub.serverStreamingPot(request, headers), root.lookupType('repeated_hotpots.RequestMessage'), root.lookupType('repeated_hotpots.ResponseMessage'), 'repeated_hotpots.HotpotService.serverStreamingPot');
+            // METHOD clientStreamingPot
+            invokeClientStreamingRpc((headers, callback) => hotpotServiceStub.clientStreamingPot(headers, callback), root.lookupType('repeated_hotpots.RequestMessage'), root.lookupType('repeated_hotpots.ResponseMessage'), 'repeated_hotpots.HotpotService.clientStreamingPot');
+            // METHOD bidiStreamingPot
+            invokeBidiStreamingRpc((headers) => hotpotServiceStub.bidiStreamingPot(headers), root.lookupType('repeated_hotpots.RequestMessage'), root.lookupType('repeated_hotpots.ResponseMessage'), 'repeated_hotpots.HotpotService.bidiStreamingPot');
 
-            // <<< SERVICE PeopleService
+            // <<< SERVICE HotpotService
         } catch (e) {
             logger.error(`[main] An error occurred: ${e.message}\n${e.stack}`);
         }

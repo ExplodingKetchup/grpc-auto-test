@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.grpctest.core.config.Config;
+import org.grpctest.core.pojo.RuntimeConfig;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -33,10 +34,10 @@ public class GenericFileService {
     private final Config config;
     private final ResourceLoader resourceLoader;
 
-    public void copyProtos() throws Throwable {
-        copyResourceFiles(config.getProtoClasspath(), PROTO_TARGET_JAVA);
-        copyResourceFiles(config.getProtoClasspath(), PROTO_TARGET_NODEJS);
-        copyResourceFiles(config.getProtoClasspath(), PROTO_TARGET_PYTHON);
+    public void copyProtos(RuntimeConfig runtimeConfig) throws Throwable {
+        copyResourceFiles(config.getProtoClasspath(), PROTO_TARGET_JAVA, runtimeConfig.getIncludedProtos());
+        copyResourceFiles(config.getProtoClasspath(), PROTO_TARGET_NODEJS, runtimeConfig.getIncludedProtos());
+        copyResourceFiles(config.getProtoClasspath(), PROTO_TARGET_PYTHON, runtimeConfig.getIncludedProtos());
     }
 
     /**
@@ -45,18 +46,24 @@ public class GenericFileService {
      * test-cases/*<br>
      * out/client/*<br>
      * out/server/*<br>
+     * java/common/src/main/proto/*<br>
+     * nodejs/proto/*<br>
+     * python/proto/*<br>
      */
     public void cleanup() throws IOException {
         FileUtils.cleanDirectory(new File("protobin/"));
         FileUtils.cleanDirectory(new File("test-cases/"));
         FileUtils.cleanDirectory(new File("out/client/"));
         FileUtils.cleanDirectory(new File("out/server/"));
+        FileUtils.cleanDirectory(new File(PROTO_TARGET_JAVA));
+        FileUtils.cleanDirectory(new File(PROTO_TARGET_NODEJS));
+        FileUtils.cleanDirectory(new File(PROTO_TARGET_PYTHON));
     }
 
     /**
      * Copy all files in a resource directory to a specified filesystem directory
      */
-    private void copyResourceFiles(String src, String dest) throws Throwable {
+    private void copyResourceFiles(String src, String dest, List<String> filenames) throws Throwable {
         ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver(resourceLoader);
         String classpath = "classpath:" + src + "/*";
         try {
@@ -65,7 +72,9 @@ public class GenericFileService {
                 Files.createDirectories(destPath);
             }
             for (Resource resource: resourcePatternResolver.getResources(classpath)) {
-                Files.copy(resource.getInputStream(), Paths.get(dest + "/" + resource.getFilename()), StandardCopyOption.REPLACE_EXISTING);
+                if (filenames.isEmpty() || filenames.contains(resource.getFilename())) {
+                    Files.copy(resource.getInputStream(), Paths.get(dest + "/" + resource.getFilename()), StandardCopyOption.REPLACE_EXISTING);
+                }
             }
         } catch (IOException ioe) {
             log.error("[copyResourceFiles] Failed to copy file from {} to {}", classpath, dest, ioe);
