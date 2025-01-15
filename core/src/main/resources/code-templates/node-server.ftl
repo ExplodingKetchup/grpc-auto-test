@@ -19,9 +19,27 @@ ${tabs}trailers.set(${trailerKey}, ${trailers[trailerKey].getRight()});
 ${tabs}const rpcException = {code: grpc.status.${rpcException.statusCode.name()}, details: '${rpcException.description}', metadata: trailers};
     </#if>
 </#macro>
+<#macro requestLogging method indent=0>
+    <#assign tabs = generateTabs(indent)>
+    <#if logRequests>
+${tabs}logger.info(`[${method.id}] Received request: ${"$"}{JSON.stringify(request, null, 2)}`);
+        <#if logRequestsPrintFields>
+${tabs}logFieldsOfObject(logger, request, "${method.id} - request", [<#list registry.getAllFieldNames(method.inType) as fieldname>"${fieldname}"<#sep>, </#list>]);
+        </#if>
+    </#if>
+</#macro>
+<#macro responseLogging method indent=0>
+    <#assign tabs = generateTabs(indent)>
+    <#if logResponses>
+${tabs}logger.info(`[${method.id}] Response: ${"$"}{JSON.stringify(response, null, 2)}`);
+        <#if logResponsesPrintFields>
+${tabs}logFieldsOfObject(logger, response, "${method.id} - response", [<#list registry.getAllFieldNames(method.outType) as fieldname>"${fieldname}"<#sep>, </#list>]);
+        </#if>
+    </#if>
+</#macro>
 
 import * as grpc from '@grpc/grpc-js';
-import { createLogger, loadProtosGrpc, loadProtosProtobufjs, messageFromFile, messageToFile, formatMetadataForOutput, metadataToFile, formatErrorForOutput, errorToFile, loopMultipleFilesWithSamePrefix } from './common.js';
+import { createLogger, loadProtosGrpc, loadProtosProtobufjs, messageFromFile, messageToFile, formatMetadataForOutput, metadataToFile, formatErrorForOutput, errorToFile, loopMultipleFilesWithSamePrefix, logFieldsOfObject } from './common.js';
 
 // Constants
 const BIN_SUFFIX = '-bin';
@@ -72,12 +90,13 @@ console.log("Using environment " + env);
 
 <#-- Process incoming requests -->
     <#if method.type == "UNARY" || method.type == "SERVER_STREAMING">
-            logger.info(`[${method_id}] Received request: ${"$"}{JSON.stringify(call.request, null, 2)}`);
-            messageToFile(requestMessageType.fromObject(call.request), requestMessageType, config.outDir + "${method_id}_param_0.bin");
+            const request = call.request;
+            <@requestLogging method=method indent=3/>
+            messageToFile(requestMessageType.fromObject(request), requestMessageType, config.outDir + "${method_id}_param_0.bin");
     <#elseif method.type == "CLIENT_STREAMING" || method.type =="BIDI_STREAMING">
             let requestIdx = 0;
             call.on('data', (request) => {
-                logger.info(`[${method_id}] Received request: ${"$"}{JSON.stringify(request, null, 2)}`);
+                <@requestLogging method=method indent=4/>
                 messageToFile(requestMessageType.fromObject(request), requestMessageType, config.outDir + `${method_id}_param_${"$"}{requestIdx++}.bin`);
             });
     </#if>
@@ -95,18 +114,18 @@ console.log("Using environment " + env);
             <@nodejsParseException method=method indent=3 />
             callback(rpcException);
         <#else>
-            let retval = messageFromFile(
+            const response = messageFromFile(
                 config.testcaseDir + "${method_id}_return_0.bin",
                 responseMessageType
             );
-            logger.info(`[${method_id}] Response: ${"$"}{JSON.stringify(retval, null, 2)}`);
-            callback(null, retval);
+            <@responseLogging method=method indent=3/>
+            callback(null, response);
         </#if>
     <#elseif method.type == "SERVER_STREAMING">
             loopMultipleFilesWithSamePrefix(config.testcaseDir + '${method_id}_return', '.bin')
                     .forEach((filepath) => {
                         const response = messageFromFile(filepath, responseMessageType);
-                        logger.info(`[${method_id}] Response: ${"$"}{JSON.stringify(response, null, 2)}`);
+                        <@responseLogging method=method indent=6/>
                         call.write(response);
                     });
         <#if testcaseRegistry.getExceptionForMethod(method)??>
@@ -121,12 +140,12 @@ console.log("Using environment " + env);
                 <@nodejsParseException method=method indent=4 />
                 callback(rpcException);
         <#else>
-               let retval = messageFromFile(
+               const response = messageFromFile(
                    config.testcaseDir + "${method_id}_return_0.bin",
                    responseMessageType
                );
-               logger.info(`[${method_id}] Response: ${"$"}{JSON.stringify(retval, null, 2)}`);
-               callback(null, retval);
+               <@responseLogging method=method indent=4/>
+               callback(null, response);
         </#if>
             });
     <#elseif method.type == "BIDI_STREAMING">
@@ -134,7 +153,7 @@ console.log("Using environment " + env);
                 loopMultipleFilesWithSamePrefix(config.testcaseDir + '${method_id}_return', '.bin')
                         .forEach((filepath) => {
                             const response = messageFromFile(filepath, responseMessageType);
-                            logger.info(`[${method_id}] Response: ${"$"}{JSON.stringify(response, null, 2)}`);
+                            <@responseLogging method=method indent=7/>
                             call.write(response);
                         });
         <#if testcaseRegistry.getExceptionForMethod(method)??>

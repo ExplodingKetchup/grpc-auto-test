@@ -58,6 +58,38 @@ public class Config {
     @Value("${core.dev.debug.enabled:false}")
     private boolean debugEnabled;
 
+    /** Log requests to be sent from the client (in the client log) */
+    @Value("${core.test.client.log.request:true}")
+    private boolean clientLogRequests;
+
+    /** Log each fields of the requests to be sent from the client (in the client log) */
+    @Value("${core.test.client.log.request.print-fields:true}")
+    private boolean clientLogRequestsPrintFields;
+
+    /** Log responses received by the client (in the client log) */
+    @Value("${core.test.client.log.response:true}")
+    private boolean clientLogResponses;
+
+    /** Log each fields of the responses received by the client (in the client log) */
+    @Value("${core.test.client.log.response.print-fields:true}")
+    private boolean clientLogResponsesPrintFields;
+
+    /** Log requests received by the server (in the server log) */
+    @Value("${core.test.server.log.request:true}")
+    private boolean serverLogRequests;
+
+    /** Log each fields of the requests received by the server(in the server log) */
+    @Value("${core.test.server.log.request.print-fields:true}")
+    private boolean serverLogRequestsPrintFields;
+
+    /** Log responses to be sent from the server (in the server log) */
+    @Value("${core.test.server.log.response:true}")
+    private boolean serverLogResponses;
+
+    /** Log each fields of the responses to be sent from the server (in the server log) */
+    @Value("${core.test.server.log.response.print-fields:true}")
+    private boolean serverLogResponsesPrintFields;
+
     // Nodejs Client
     /** Log directory for NodeJs client */
     @Value("${test.nodejs.client.log.dir:log/}")

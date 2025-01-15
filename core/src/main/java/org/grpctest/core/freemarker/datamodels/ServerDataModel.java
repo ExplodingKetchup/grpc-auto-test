@@ -12,4 +12,12 @@ import org.grpctest.core.data.TestcaseRegistry;
 public class ServerDataModel implements DataModel {
     private RpcModelRegistry registry;
     private TestcaseRegistry testcaseRegistry;
+
+    private boolean logRequests;
+
+    private boolean logRequestsPrintFields;
+
+    private boolean logResponses;
+
+    private boolean logResponsesPrintFields;
 }

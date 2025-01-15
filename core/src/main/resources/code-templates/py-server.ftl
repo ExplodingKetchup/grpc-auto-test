@@ -32,6 +32,24 @@ ${tabs}receive_header_metadata(context)
 ${tabs}send_header_metadata(context)
     </#if>
 </#macro>
+<#macro requestLogging indent=0>
+    <#assign tabs = generateTabs(indent)>
+    <#if logRequests>
+${tabs}logging.info(f"[{method_name}] Received request: {request}")
+        <#if logRequestsPrintFields>
+${tabs}log_fields_of_object(request, f"{method_id} - request", request_type_field_names)
+        </#if>
+    </#if>
+</#macro>
+<#macro responseLogging indent=0>
+    <#assign tabs = generateTabs(indent)>
+    <#if logResponses>
+${tabs}logging.info(f"[{method_name}] Response: {response}")
+        <#if logResponsesPrintFields>
+${tabs}log_fields_of_object(response, f"{method_id} - response", response_type_field_names)
+        </#if>
+    </#if>
+</#macro>
 import logging
 import os
 from concurrent import futures
@@ -40,7 +58,7 @@ from google.protobuf.message import Message
 
 from config_utils import load_config
 from file_utils import list_files_with_same_prefix
-from log_utils import configure_logger, get_log_file_for_this_instance
+from log_utils import configure_logger, get_log_file_for_this_instance, log_fields_of_object
 from message_utils import message_to_file, message_from_file, format_metadata_as_string, metadata_to_file
 <#list registry.getProtoFiles() as proto_file>
 from ${proto_file}_pb2 import *
@@ -56,10 +74,10 @@ BIN_METADATA_SUFFIX = "-bin"
     <#assign metaType = metaPair.getLeft().name()> <#-- MetadataType -->
     <#assign metaValue = metaPair.getRight()> <#-- Metadata value -->
     <#if metaType == "STRING">
-META_KEY_${metaKey} = "${metaKey}";
-META_VALUE_${metaKey} = "${metaValue}";
+META_KEY_${metaKey} = "${metaKey}"
+META_VALUE_${metaKey} = "${metaValue}"
     <#elseif metaType == "BIN">
-META_KEY_${metaKey} = "${metaKey}" + BIN_METADATA_SUFFIX;
+META_KEY_${metaKey} = "${metaKey}" + BIN_METADATA_SUFFIX
 META_VALUE_${metaKey} = bytes.fromhex("${metaValue}")
     </#if>
 </#list>
@@ -68,6 +86,10 @@ OUTBOUND_HEADERS = (
     (META_KEY_${metaKey}, META_VALUE_${metaKey}),
 </#list>
 )
+<#list registry.getAllMessages() as message>
+${message.id?replace(".", "_")}_fields = [<#list registry.getAllFieldNames(message.id) as fieldname>"${fieldname}"<#sep>, </#list>]
+</#list>
+
 
 # Configs
 configs = load_config(is_server=True)
@@ -75,39 +97,39 @@ print(f"Configs: {configs}")
 
 
 # >>> Helper functions
-def handle_single_request(request: Message, method_id: str) -> None:
+def handle_single_request(request: Message, method_id: str, request_type_field_names: list[str]) -> None:
     method_name = method_id.split(".")[-1]
     method_id_underscore = method_id.replace(".", "_")
-    logging.info(f"[{method_name}] Received request: {request}")
+    <@requestLogging indent=1/>
     message_to_file(os.path.join(configs["out"]["dir"], f"{method_id_underscore}_param_0.bin"), request)
 
-def handle_streaming_request(request_iterator, method_id):
+def handle_streaming_request(request_iterator, method_id, request_type_field_names: list[str]):
     request_idx = 0
     method_name = method_id.split(".")[-1]
     method_id_underscore = method_id.replace(".", "_")
     for request in request_iterator:
-        logging.info(f"[{method_name}] Received request: {request}")
+        <@requestLogging indent=2/>
         message_to_file(
             os.path.join(configs["out"]["dir"], f"{method_id_underscore}_param_{request_idx}.bin"),
             request)
         request_idx += 1
 
-def get_single_response(method_id, response_class):
+def get_single_response(method_id, response_class, response_type_field_names: list[str]):
     method_name = method_id.split(".")[-1]
     method_id_underscore = method_id.replace(".", "_")
     response = message_from_file(os.path.join(configs["in"]["dir"], f"{method_id_underscore}_return_0.bin"),
                                  response_class)
-    logging.info(f"[{method_name}] Response: {response}")
+    <@responseLogging indent=1/>
 
     return response
 
-def get_streaming_response(method_id, response_class):
+def get_streaming_response(method_id, response_class, response_type_field_names: list[str]):
     method_name = method_id.split(".")[-1]
     method_id_underscore = method_id.replace(".", "_")
     response_files = list_files_with_same_prefix(configs["in"]["dir"], f"{method_id_underscore}_return")
     for response_file in response_files:
         response = message_from_file(response_file, response_class)
-        logging.info(f"[{method_name}] Response: {response}")
+        <@responseLogging indent=2/>
         yield response
 
 def raise_grpc_exception(context, status_code, description, trailers):
@@ -131,16 +153,18 @@ class ${service.name}Servicer(${service.name}Servicer):
 
     <#list registry.getAllMethods(service) as method>
     <#assign response_class = method.outType?split(".")?last>
+    <#assign requestFields = method.inType?replace(".", "_") + "_fields">
+    <#assign responseFields = method.outType?replace(".", "_") + "_fields">
         <#if method.type == "UNARY">
     def ${method.name?cap_first}(self, request, context):
         method_id = "${method.id}"
         response_class = ${response_class}
 
         <@pyReceiveHeaders indent=2/>
-        handle_single_request(request, method_id)
+        handle_single_request(request, method_id, ${requestFields})
         <@pySendHeaders indent=2/>
         <@pyParseException method=method indent=2 />
-        return get_single_response(method_id, response_class)
+        return get_single_response(method_id, response_class, ${responseFields})
 
         <#elseif method.type == "SERVER_STREAMING">
     def ${method.name?cap_first}(self, request, context):
@@ -148,9 +172,9 @@ class ${service.name}Servicer(${service.name}Servicer):
         response_class = ${response_class}
 
         <@pyReceiveHeaders indent=2/>
-        handle_single_request(request, method_id)
+        handle_single_request(request, method_id, ${requestFields})
         <@pySendHeaders indent=2/>
-        for response in get_streaming_response(method_id, response_class):
+        for response in get_streaming_response(method_id, response_class, ${responseFields}):
             yield response
         <@pyParseException method=method indent=2 />
 
@@ -160,19 +184,19 @@ class ${service.name}Servicer(${service.name}Servicer):
         response_class = ${response_class}
 
         <@pyReceiveHeaders indent=2/>
-        handle_streaming_request(request_iterator, method_id)
+        handle_streaming_request(request_iterator, method_id, ${requestFields})
         <@pySendHeaders indent=2/>
         <@pyParseException method=method indent=2 />
-        return get_single_response(method_id, response_class)
+        return get_single_response(method_id, response_class, ${responseFields})
 
         <#elseif method.type == "BIDI_STREAMING">
     def ${method.name?cap_first}(self, request_iterator, context):
         method_id = "${method.id}"
         response_class = ${response_class}
         <@pyReceiveHeaders indent=2/>
-        handle_streaming_request(request_iterator, method_id)
+        handle_streaming_request(request_iterator, method_id, ${requestFields})
         <@pySendHeaders indent=2/>
-        for response in get_streaming_response(method_id, response_class):
+        for response in get_streaming_response(method_id, response_class, ${responseFields}):
             yield response
         <@pyParseException method=method indent=2 />
 

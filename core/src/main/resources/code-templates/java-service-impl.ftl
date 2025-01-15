@@ -1,3 +1,30 @@
+<#function generateTabs indent>
+    <#local tabs = "" />
+    <#if (indent > 0)>
+        <#list 1..indent as i>
+            <#local tabs = tabs + "    " />
+        </#list>
+    </#if>
+    <#return tabs>
+</#function>
+<#macro requestLogging method indent=0>
+    <#assign tabs = generateTabs(indent)>
+    <#if logRequests>
+${tabs}log.info("[${method.name}] Received request {}", request);
+        <#if logRequestsPrintFields>
+${tabs}ObjectUtil.logFieldsOfObject(request, "${method.id} - request", <#list registry.getAllFieldNamesAsCamelCase(method.inType) as fieldname>"${fieldname}"<#sep>, </#list>);
+        </#if>
+    </#if>
+</#macro>
+<#macro responseLogging method indent=0>
+    <#assign tabs = generateTabs(indent)>
+    <#if logResponses>
+${tabs}log.info("[${method.name}] Response: {}", response);
+        <#if logResponsesPrintFields>
+${tabs}ObjectUtil.logFieldsOfObject(response, "${method.id} - response", <#list registry.getAllFieldNamesAsCamelCase(method.outType) as fieldname>"${fieldname}"<#sep>, </#list>);
+        </#if>
+    </#if>
+</#macro>
 <#assign service = registry.lookupService(serviceId)>
 package org.grpctest.java.server.generated.service;
 
@@ -6,6 +33,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.grpctest.java.common.define.*;
 import org.grpctest.java.common.util.FileUtil;
 import org.grpctest.java.common.util.MessageUtil;
+import org.grpctest.java.common.util.ObjectUtil;
 import org.grpctest.java.server.config.Config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -26,12 +54,17 @@ public class ${service.name} extends ${service.name}Grpc.${service.name}ImplBase
     <#if method.type == "UNARY" || method.type == "SERVER_STREAMING">
     public void ${method.name}(${requestType} request, StreamObserver<${responseType}> responseObserver) {
         try {
-            log.info("[${method.name}] Received request {}", request);
+            <@requestLogging method=method indent=3/>
+
             MessageUtil.messageToFile(request, config.getOutDir() + File.separator + "${method.id?replace(".", "_")}_param_0.bin");
 
             FileUtil.loopMultipleFilesWithSamePrefix(
                     config.getTestcaseDir() + File.separator + "${method.id?replace(".", "_")}_return.bin",
-                    (filepath) -> responseObserver.onNext(MessageUtil.messageFromFile(filepath, ${responseType}.class))
+                    (filepath) -> {
+                        ${responseType} response = MessageUtil.messageFromFile(filepath, ${responseType}.class);
+                        <@responseLogging method=method indent=6/>
+                        responseObserver.onNext(response);
+                    }
             );
 
         <#if testcaseRegistry.getExceptionForMethod(method)??>
@@ -56,7 +89,7 @@ public class ${service.name} extends ${service.name}Grpc.${service.name}ImplBase
             @Override
             public void onNext(${requestType} request) {
                 try {
-                    log.info("[${method.name}] Received request {}", request);
+                    <@requestLogging method=method indent=5/>
                     MessageUtil.messageToFile(request, config.getOutDir() + File.separator + "${method.id?replace(".", "_")}_param_" + requestIdx + ".bin");
                     requestIdx++;
                 } catch (Throwable t) {
@@ -78,7 +111,11 @@ public class ${service.name} extends ${service.name}Grpc.${service.name}ImplBase
             public void onCompleted() {
                 FileUtil.loopMultipleFilesWithSamePrefix(
                         config.getTestcaseDir() + File.separator + "${method.id?replace(".", "_")}_return.bin",
-                        (filepath) -> responseObserver.onNext(MessageUtil.messageFromFile(filepath, ${responseType}.class))
+                        (filepath) -> {
+                            ${responseType} response = MessageUtil.messageFromFile(filepath, ${responseType}.class);
+                            <@responseLogging method=method indent=7/>
+                            responseObserver.onNext(response);
+                        }
                 );
 
         <#if testcaseRegistry.getExceptionForMethod(method)??>

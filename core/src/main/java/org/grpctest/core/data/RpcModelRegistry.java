@@ -1,5 +1,6 @@
 package org.grpctest.core.data;
 
+import com.google.protobuf.Descriptors;
 import io.grpc.Metadata;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -117,6 +118,14 @@ public class RpcModelRegistry {
 
     public List<RpcMessage> getAllMessages() {
         return messageLookupTable.values().stream().toList();
+    }
+
+    public List<String> getAllFieldNames(String messageId) {
+        return messageLookupTable.get(messageId).getMessageDescriptor().getFields().stream().map(Descriptors.FieldDescriptor::getName).toList();
+    }
+
+    public List<String> getAllFieldNamesAsCamelCase(String messageId) {
+        return getAllFieldNames(messageId).stream().map((fieldname) -> StringUtil.snakeCaseToCamelCase(fieldname, true)).toList();
     }
 
     // clientToServerMetadata

@@ -185,5 +185,19 @@ function loopMultipleFilesWithSamePrefix(prefix, suffix) {
     return validFilepaths;
 }
 
+function logFieldsOfObject(logger, obj, objName, fieldNames) {
+    fieldNames.forEach((fieldname) => {
+        let typeDisplayString = "";
+        if (obj[fieldname] === null) {
+            typeDisplayString = "null";
+        } else if (typeof obj[fieldname] === "object") {
+            typeDisplayString = obj.constructor.name;
+        } else {
+            typeDisplayString = typeof obj[fieldname];
+        }
+        logger.info(`[logFieldsOfObject] ${objName}: ${fieldname} (${typeDisplayString}) = ${obj[fieldname]}`);
+    });
+}
+
 // EXPORT
-export { createLogger, loadProtosGrpc, loadProtosProtobufjs, messageFromFile, messageToFile, formatMetadataForOutput, metadataToFile, formatErrorForOutput, errorToFile, loopMultipleFilesWithSamePrefix }
+export { createLogger, loadProtosGrpc, loadProtosProtobufjs, messageFromFile, messageToFile, formatMetadataForOutput, metadataToFile, formatErrorForOutput, errorToFile, loopMultipleFilesWithSamePrefix, logFieldsOfObject }

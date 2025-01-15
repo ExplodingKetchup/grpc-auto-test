@@ -34,7 +34,13 @@ public class NodejsCodeGenService extends BaseCodeGenService {
     public void generateNodeClient() throws Exception {
         generateFileFromFtl(
                 NODEJS_CLIENT_FTL,
-                new ClientDataModel(registry),
+                new ClientDataModel(
+                        registry,
+                        config.isClientLogRequests(),
+                        config.isClientLogRequestsPrintFields(),
+                        config.isClientLogResponses(),
+                        config.isClientLogResponsesPrintFields()
+                ),
                 NODEJS_CLIENT_FILE
         );
     }
@@ -42,7 +48,14 @@ public class NodejsCodeGenService extends BaseCodeGenService {
     public void generateNodeServer() throws Exception {
         generateFileFromFtl(
                 NODEJS_SERVER_FTL,
-                new ServerDataModel(registry, testcaseRegistry),
+                new ServerDataModel(
+                        registry,
+                        testcaseRegistry,
+                        config.isServerLogRequests(),
+                        config.isServerLogRequestsPrintFields(),
+                        config.isServerLogResponses(),
+                        config.isServerLogResponsesPrintFields()
+                ),
                 NODEJS_SERVER_FILE
         );
     }

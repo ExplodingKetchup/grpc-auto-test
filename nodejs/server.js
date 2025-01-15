@@ -1,6 +1,6 @@
 
 import * as grpc from '@grpc/grpc-js';
-import { createLogger, loadProtosGrpc, loadProtosProtobufjs, messageFromFile, messageToFile, formatMetadataForOutput, metadataToFile, formatErrorForOutput, errorToFile, loopMultipleFilesWithSamePrefix } from './common.js';
+import { createLogger, loadProtosGrpc, loadProtosProtobufjs, messageFromFile, messageToFile, formatMetadataForOutput, metadataToFile, formatErrorForOutput, errorToFile, loopMultipleFilesWithSamePrefix, logFieldsOfObject } from './common.js';
 
 // Constants
 const BIN_SUFFIX = '-bin';
@@ -20,119 +20,129 @@ console.log("Using environment " + env);
     let root = loadProtosProtobufjs(config.protoDir);
 
     // BEGIN RPC methods implementation
-    function repeated_hotpots_HotpotService_bidiStreamingPot(call) {
+    function single_hotpot_HotpotService_serverStreamingPot(call) {
         try {
-            logger.info(`[repeated_hotpots_HotpotService_bidiStreamingPot] Received metadata ${JSON.stringify(call.metadata, null, 2)}`);
+            logger.info(`[single_hotpot_HotpotService_serverStreamingPot] Received metadata ${JSON.stringify(call.metadata, null, 2)}`);
             metadataToFile(call.metadata, config.outDir + 'received_metadata.txt');
 
-            let requestMessageType = root.lookupType("repeated_hotpots.RequestMessage");
-            let responseMessageType = root.lookupType("repeated_hotpots.ResponseMessage");
+            let requestMessageType = root.lookupType("single_hotpot.RequestMessage");
+            let responseMessageType = root.lookupType("single_hotpot.ResponseMessage");
+
+            const request = call.request;
+            logger.info(`[single_hotpot.HotpotService.serverStreamingPot] Received request: ${JSON.stringify(request, null, 2)}`);
+            logFieldsOfObject(logger, request, "single_hotpot.HotpotService.serverStreamingPot - request", ["small_hotpot", "float_boat"]);
+            messageToFile(requestMessageType.fromObject(request), requestMessageType, config.outDir + "single_hotpot_HotpotService_serverStreamingPot_param_0.bin");
+
+            const metadata = new grpc.Metadata();
+            call.sendMetadata(metadata);
+
+            loopMultipleFilesWithSamePrefix(config.testcaseDir + 'single_hotpot_HotpotService_serverStreamingPot_return', '.bin')
+                    .forEach((filepath) => {
+                        const response = messageFromFile(filepath, responseMessageType);
+                        logger.info(`[single_hotpot.HotpotService.serverStreamingPot] Response: ${JSON.stringify(response, null, 2)}`);
+                        logFieldsOfObject(logger, response, "single_hotpot.HotpotService.serverStreamingPot - response", ["big_hotpot", "flex_tape"]);
+                        call.write(response);
+                    });
+            call.end();
+
+        } catch (e) {
+            logger.error(`[single_hotpot_HotpotService_serverStreamingPot] An error occurred: ${e.message}\n${e.stack}`);
+        }
+    }
+
+    function single_hotpot_HotpotService_clientStreamingPot(call, callback) {
+        try {
+            logger.info(`[single_hotpot_HotpotService_clientStreamingPot] Received metadata ${JSON.stringify(call.metadata, null, 2)}`);
+            metadataToFile(call.metadata, config.outDir + 'received_metadata.txt');
+
+            let requestMessageType = root.lookupType("single_hotpot.RequestMessage");
+            let responseMessageType = root.lookupType("single_hotpot.ResponseMessage");
 
             let requestIdx = 0;
             call.on('data', (request) => {
-                logger.info(`[repeated_hotpots_HotpotService_bidiStreamingPot] Received request: ${JSON.stringify(request, null, 2)}`);
-                messageToFile(requestMessageType.fromObject(request), requestMessageType, config.outDir + `repeated_hotpots_HotpotService_bidiStreamingPot_param_${requestIdx++}.bin`);
+                logger.info(`[single_hotpot.HotpotService.clientStreamingPot] Received request: ${JSON.stringify(request, null, 2)}`);
+                logFieldsOfObject(logger, request, "single_hotpot.HotpotService.clientStreamingPot - request", ["small_hotpot", "float_boat"]);
+                messageToFile(requestMessageType.fromObject(request), requestMessageType, config.outDir + `single_hotpot_HotpotService_clientStreamingPot_param_${requestIdx++}.bin`);
             });
 
             const metadata = new grpc.Metadata();
             call.sendMetadata(metadata);
 
             call.on('end', () => {
-                loopMultipleFilesWithSamePrefix(config.testcaseDir + 'repeated_hotpots_HotpotService_bidiStreamingPot_return', '.bin')
+               const response = messageFromFile(
+                   config.testcaseDir + "single_hotpot_HotpotService_clientStreamingPot_return_0.bin",
+                   responseMessageType
+               );
+                logger.info(`[single_hotpot.HotpotService.clientStreamingPot] Response: ${JSON.stringify(response, null, 2)}`);
+                logFieldsOfObject(logger, response, "single_hotpot.HotpotService.clientStreamingPot - response", ["big_hotpot", "flex_tape"]);
+               callback(null, response);
+            });
+
+        } catch (e) {
+            logger.error(`[single_hotpot_HotpotService_clientStreamingPot] An error occurred: ${e.message}\n${e.stack}`);
+        }
+    }
+
+    function single_hotpot_HotpotService_bidiStreamingPot(call) {
+        try {
+            logger.info(`[single_hotpot_HotpotService_bidiStreamingPot] Received metadata ${JSON.stringify(call.metadata, null, 2)}`);
+            metadataToFile(call.metadata, config.outDir + 'received_metadata.txt');
+
+            let requestMessageType = root.lookupType("single_hotpot.RequestMessage");
+            let responseMessageType = root.lookupType("single_hotpot.ResponseMessage");
+
+            let requestIdx = 0;
+            call.on('data', (request) => {
+                logger.info(`[single_hotpot.HotpotService.bidiStreamingPot] Received request: ${JSON.stringify(request, null, 2)}`);
+                logFieldsOfObject(logger, request, "single_hotpot.HotpotService.bidiStreamingPot - request", ["small_hotpot", "float_boat"]);
+                messageToFile(requestMessageType.fromObject(request), requestMessageType, config.outDir + `single_hotpot_HotpotService_bidiStreamingPot_param_${requestIdx++}.bin`);
+            });
+
+            const metadata = new grpc.Metadata();
+            call.sendMetadata(metadata);
+
+            call.on('end', () => {
+                loopMultipleFilesWithSamePrefix(config.testcaseDir + 'single_hotpot_HotpotService_bidiStreamingPot_return', '.bin')
                         .forEach((filepath) => {
                             const response = messageFromFile(filepath, responseMessageType);
-                            logger.info(`[repeated_hotpots_HotpotService_bidiStreamingPot] Response: ${JSON.stringify(response, null, 2)}`);
+                            logger.info(`[single_hotpot.HotpotService.bidiStreamingPot] Response: ${JSON.stringify(response, null, 2)}`);
+                            logFieldsOfObject(logger, response, "single_hotpot.HotpotService.bidiStreamingPot - response", ["big_hotpot", "flex_tape"]);
                             call.write(response);
                         });
                call.end();
             });
 
         } catch (e) {
-            logger.error(`[repeated_hotpots_HotpotService_bidiStreamingPot] An error occurred: ${e.message}\n${e.stack}`);
+            logger.error(`[single_hotpot_HotpotService_bidiStreamingPot] An error occurred: ${e.message}\n${e.stack}`);
         }
     }
 
-    function repeated_hotpots_HotpotService_serverStreamingPot(call) {
+    function single_hotpot_HotpotService_unaryPot(call, callback) {
         try {
-            logger.info(`[repeated_hotpots_HotpotService_serverStreamingPot] Received metadata ${JSON.stringify(call.metadata, null, 2)}`);
+            logger.info(`[single_hotpot_HotpotService_unaryPot] Received metadata ${JSON.stringify(call.metadata, null, 2)}`);
             metadataToFile(call.metadata, config.outDir + 'received_metadata.txt');
 
-            let requestMessageType = root.lookupType("repeated_hotpots.RequestMessage");
-            let responseMessageType = root.lookupType("repeated_hotpots.ResponseMessage");
+            let requestMessageType = root.lookupType("single_hotpot.RequestMessage");
+            let responseMessageType = root.lookupType("single_hotpot.ResponseMessage");
 
-            logger.info(`[repeated_hotpots_HotpotService_serverStreamingPot] Received request: ${JSON.stringify(call.request, null, 2)}`);
-            messageToFile(requestMessageType.fromObject(call.request), requestMessageType, config.outDir + "repeated_hotpots_HotpotService_serverStreamingPot_param_0.bin");
+            const request = call.request;
+            logger.info(`[single_hotpot.HotpotService.unaryPot] Received request: ${JSON.stringify(request, null, 2)}`);
+            logFieldsOfObject(logger, request, "single_hotpot.HotpotService.unaryPot - request", ["small_hotpot", "float_boat"]);
+            messageToFile(requestMessageType.fromObject(request), requestMessageType, config.outDir + "single_hotpot_HotpotService_unaryPot_param_0.bin");
 
             const metadata = new grpc.Metadata();
             call.sendMetadata(metadata);
 
-            loopMultipleFilesWithSamePrefix(config.testcaseDir + 'repeated_hotpots_HotpotService_serverStreamingPot_return', '.bin')
-                    .forEach((filepath) => {
-                        const response = messageFromFile(filepath, responseMessageType);
-                        logger.info(`[repeated_hotpots_HotpotService_serverStreamingPot] Response: ${JSON.stringify(response, null, 2)}`);
-                        call.write(response);
-                    });
-            call.end();
-
-        } catch (e) {
-            logger.error(`[repeated_hotpots_HotpotService_serverStreamingPot] An error occurred: ${e.message}\n${e.stack}`);
-        }
-    }
-
-    function repeated_hotpots_HotpotService_clientStreamingPot(call, callback) {
-        try {
-            logger.info(`[repeated_hotpots_HotpotService_clientStreamingPot] Received metadata ${JSON.stringify(call.metadata, null, 2)}`);
-            metadataToFile(call.metadata, config.outDir + 'received_metadata.txt');
-
-            let requestMessageType = root.lookupType("repeated_hotpots.RequestMessage");
-            let responseMessageType = root.lookupType("repeated_hotpots.ResponseMessage");
-
-            let requestIdx = 0;
-            call.on('data', (request) => {
-                logger.info(`[repeated_hotpots_HotpotService_clientStreamingPot] Received request: ${JSON.stringify(request, null, 2)}`);
-                messageToFile(requestMessageType.fromObject(request), requestMessageType, config.outDir + `repeated_hotpots_HotpotService_clientStreamingPot_param_${requestIdx++}.bin`);
-            });
-
-            const metadata = new grpc.Metadata();
-            call.sendMetadata(metadata);
-
-            call.on('end', () => {
-               let retval = messageFromFile(
-                   config.testcaseDir + "repeated_hotpots_HotpotService_clientStreamingPot_return_0.bin",
-                   responseMessageType
-               );
-               logger.info(`[repeated_hotpots_HotpotService_clientStreamingPot] Response: ${JSON.stringify(retval, null, 2)}`);
-               callback(null, retval);
-            });
-
-        } catch (e) {
-            logger.error(`[repeated_hotpots_HotpotService_clientStreamingPot] An error occurred: ${e.message}\n${e.stack}`);
-        }
-    }
-
-    function repeated_hotpots_HotpotService_unaryPot(call, callback) {
-        try {
-            logger.info(`[repeated_hotpots_HotpotService_unaryPot] Received metadata ${JSON.stringify(call.metadata, null, 2)}`);
-            metadataToFile(call.metadata, config.outDir + 'received_metadata.txt');
-
-            let requestMessageType = root.lookupType("repeated_hotpots.RequestMessage");
-            let responseMessageType = root.lookupType("repeated_hotpots.ResponseMessage");
-
-            logger.info(`[repeated_hotpots_HotpotService_unaryPot] Received request: ${JSON.stringify(call.request, null, 2)}`);
-            messageToFile(requestMessageType.fromObject(call.request), requestMessageType, config.outDir + "repeated_hotpots_HotpotService_unaryPot_param_0.bin");
-
-            const metadata = new grpc.Metadata();
-            call.sendMetadata(metadata);
-
-            let retval = messageFromFile(
-                config.testcaseDir + "repeated_hotpots_HotpotService_unaryPot_return_0.bin",
+            const response = messageFromFile(
+                config.testcaseDir + "single_hotpot_HotpotService_unaryPot_return_0.bin",
                 responseMessageType
             );
-            logger.info(`[repeated_hotpots_HotpotService_unaryPot] Response: ${JSON.stringify(retval, null, 2)}`);
-            callback(null, retval);
+            logger.info(`[single_hotpot.HotpotService.unaryPot] Response: ${JSON.stringify(response, null, 2)}`);
+            logFieldsOfObject(logger, response, "single_hotpot.HotpotService.unaryPot - response", ["big_hotpot", "flex_tape"]);
+            callback(null, response);
 
         } catch (e) {
-            logger.error(`[repeated_hotpots_HotpotService_unaryPot] An error occurred: ${e.message}\n${e.stack}`);
+            logger.error(`[single_hotpot_HotpotService_unaryPot] An error occurred: ${e.message}\n${e.stack}`);
         }
     }
 
@@ -142,11 +152,11 @@ console.log("Using environment " + env);
     function getServer() {
         let server = new grpc.Server();
 
-        server.addService(protosGrpc.repeated_hotpots.HotpotService.service, {
-            unaryPot: repeated_hotpots_HotpotService_unaryPot,
-            serverStreamingPot: repeated_hotpots_HotpotService_serverStreamingPot,
-            clientStreamingPot: repeated_hotpots_HotpotService_clientStreamingPot,
-            bidiStreamingPot: repeated_hotpots_HotpotService_bidiStreamingPot        });
+        server.addService(protosGrpc.single_hotpot.HotpotService.service, {
+            unaryPot: single_hotpot_HotpotService_unaryPot,
+            serverStreamingPot: single_hotpot_HotpotService_serverStreamingPot,
+            clientStreamingPot: single_hotpot_HotpotService_clientStreamingPot,
+            bidiStreamingPot: single_hotpot_HotpotService_bidiStreamingPot        });
 
         return server;
     }

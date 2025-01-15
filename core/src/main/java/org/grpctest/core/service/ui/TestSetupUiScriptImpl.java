@@ -62,8 +62,8 @@ public class TestSetupUiScriptImpl implements TestSetupUi {
     }
 
     @Override
-    public boolean chooseEnableAllRandomTestcase() throws Exception {
-        return runtimeConfig.getEnableAllRandomTestcase();
+    public boolean chooseEnableGeneratedTestcase() throws Exception {
+        return runtimeConfig.getEnableGeneratedTestcase();
     }
 
     @Override
@@ -74,6 +74,16 @@ public class TestSetupUiScriptImpl implements TestSetupUi {
     @Override
     public int chooseOmitFieldsInRandomTestcases() throws Exception {
         return runtimeConfig.getOmitFieldsInRandomTestcases();
+    }
+
+    @Override
+    public int chooseValueMode() throws Exception {
+        return runtimeConfig.getValueMode();
+    }
+
+    @Override
+    public List<String> chooseIncludedCustomTestcases() throws Exception {
+        return runtimeConfig.getIncludedCustomTestcases();
     }
 
 

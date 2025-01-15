@@ -27,3 +27,11 @@ def configure_logger(log_file: str):
 
 def get_log_file_for_this_instance(log_dir: str, log_file_prefix: str) -> str:
     return os.path.join(log_dir, log_file_prefix + "_" + str(int(time.time())) + ".log")
+
+def log_fields_of_object(obj: object, obj_name: str, field_names: list[str]) -> None:
+    for field_name in field_names:
+        try:
+            value = getattr(obj, field_name)
+            logging.info(f"[log_fields_of_object] {obj_name}: {field_name} ({type(value).__name__}) = {value}")
+        except AttributeError:
+            logging.warning(f"[log_fields_of_object] Field {field_name} is not defined in message")

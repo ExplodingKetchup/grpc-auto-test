@@ -1,0 +1,66 @@
+2025-01-10 22:25:15 2025-01-10 15:25:15,325 - INFO - [invoke_unary_rpc] Invoke single_hotpot.HotpotService.unaryPot with request small_hotpot {
+2025-01-10 22:25:15   small_uint32_value: 2841021807
+2025-01-10 22:25:15 }
+2025-01-10 22:25:15 float_boat: 0.383650661
+2025-01-10 22:25:15
+2025-01-10 22:25:15 2025-01-10 15:25:15,369 - INFO - [invoke_unary_rpc] Method single_hotpot.HotpotService.unaryPot returns big_hotpot {
+2025-01-10 22:25:15   float_value: 0.321237862
+2025-01-10 22:25:15   int32_value: 1931308010
+2025-01-10 22:25:15   int64_value: -6046363045115801338
+2025-01-10 22:25:15   sint32_value: 106281402
+2025-01-10 22:25:15   sint64_value: 7628845156032941763
+2025-01-10 22:25:15   fixed64_value: 15986212089238174241
+2025-01-10 22:25:15   sfixed64_value: 6017375068126026035
+2025-01-10 22:25:15   string_value: "gkM6s"
+2025-01-10 22:25:15   enum_value: AEE_THREE
+2025-01-10 22:25:15 }
+2025-01-10 22:25:15
+2025-01-10 22:25:15 2025-01-10 15:25:15,371 - INFO - [invoke_server_streaming_rpc] Invoke single_hotpot.HotpotService.serverStreamingPot with request small_hotpot {
+2025-01-10 22:25:15   small_uint32_value: 306242485
+2025-01-10 22:25:15   small_string_value: "h78q1y5scclooc"
+2025-01-10 22:25:15 }
+2025-01-10 22:25:15 float_boat: 0.8800776
+2025-01-10 22:25:15
+2025-01-10 22:25:15 2025-01-10 15:25:15,384 - INFO - [invoke_server_streaming_rpc] Method single_hotpot.HotpotService.serverStreamingPot returns flex_tape: 6023247404061896512
+2025-01-10 22:25:15
+2025-01-10 22:25:15 2025-01-10 15:25:15,385 - INFO - [invoke_server_streaming_rpc] Method single_hotpot.HotpotService.serverStreamingPot returns big_hotpot {
+2025-01-10 22:25:15   float_value: 0.108422518
+2025-01-10 22:25:15   int32_value: -2060374543
+2025-01-10 22:25:15   int64_value: -2271070802063366772
+2025-01-10 22:25:15   uint64_value: 448461483439869279
+2025-01-10 22:25:15   sint32_value: -791503029
+2025-01-10 22:25:15   sint64_value: 1677457428101987131
+2025-01-10 22:25:15   fixed64_value: 6280211968795806644
+2025-01-10 22:25:15   sfixed64_value: -8517691787950107171
+2025-01-10 22:25:15   bytes_value: "\022h"}[\205\001\tm\316"
+2025-01-10 22:25:15   enum_value: AEE_SIX
+2025-01-10 22:25:15   message_value {
+2025-01-10 22:25:15   }
+2025-01-10 22:25:15 }
+2025-01-10 22:25:15
+2025-01-10 22:25:15 Traceback (most recent call last):
+2025-01-10 22:25:15   File "/app/client.py", line 184, in <module>
+2025-01-10 22:25:15     main()
+2025-01-10 22:25:15     ~~~~^^
+2025-01-10 22:25:15   File "/app/client.py", line 147, in main
+2025-01-10 22:25:15 Running with environment deploy
+2025-01-10 22:25:15 Configs: {'log': {'dir': 'log', 'file_prefix': 'py-client'}, 'in': {'dir': 'test-cases/client'}, 'out': {'dir': 'out/client'}, 'server': {'host': 'node-server', 'port': 50051}}
+2025-01-10 22:25:15     invoke_server_streaming_rpc(method=HotpotService_stub.ServerStreamingPot,
+2025-01-10 22:25:15     ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2025-01-10 22:25:15                                 request=read_request_from_file(
+2025-01-10 22:25:15                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2025-01-10 22:25:15     ...<3 lines>...
+2025-01-10 22:25:15                                 ),
+2025-01-10 22:25:15                                 ^^
+2025-01-10 22:25:15                                 method_id="single_hotpot.HotpotService.serverStreamingPot")
+2025-01-10 22:25:15                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2025-01-10 22:25:15   File "/app/client.py", line 82, in invoke_server_streaming_rpc
+2025-01-10 22:25:15     message_to_file(os.path.join(configs["out"]["dir"], f"{method_id.replace(".", "_")}_return_{response_idx}.bin"),
+2025-01-10 22:25:15     ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2025-01-10 22:25:15                     response)
+2025-01-10 22:25:15                     ^^^^^^^^^
+2025-01-10 22:25:15   File "/app/message_utils.py", line 33, in message_to_file
+2025-01-10 22:25:15     with open(filepath, "wb") as f:
+2025-01-10 22:25:15          ~~~~^^^^^^^^^^^^^^^^
+2025-01-10 22:25:15 FileNotFoundError: [Errno 2] No such file or directory: 'out/client/single_hotpot_HotpotService_serverStreamingPot_return_1.bin'
+2025-01-10 22:25:15 2025-01-10 15:25:15,389 - INFO - Client shutting down...

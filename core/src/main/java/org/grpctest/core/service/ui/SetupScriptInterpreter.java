@@ -74,24 +74,46 @@ public class SetupScriptInterpreter {
     }
 
     private void interpretTestcaseOpCode(String[] args) {
+        boolean encounteredValueFlag = false;
         for (String arg: args) {
             // Flags
             Pair<String, String> flag = parseFlagArg(arg);
             if (Objects.nonNull(flag)) {
                 switch (flag.getLeft()) {
                     case "random" -> {
-                        runtimeConfig.setEnableAllRandomTestcase(true);
-                        if (StringUtils.isNotBlank(flag.getRight())) {
-                            runtimeConfig.setOmitFieldsInRandomTestcases(Integer.parseInt(flag.getRight()));
-                        } else {
-                            runtimeConfig.setOmitFieldsInRandomTestcases(0);
+                        if (!encounteredValueFlag) {
+                            runtimeConfig.setEnableGeneratedTestcase(true);
+                            runtimeConfig.setValueMode(1);
+                            if (StringUtils.isNotBlank(flag.getRight())) {
+                                runtimeConfig.setOmitFieldsInRandomTestcases(Integer.parseInt(flag.getRight()));
+                            } else {
+                                runtimeConfig.setOmitFieldsInRandomTestcases(0);
+                            }
+                            encounteredValueFlag = true;
+                        }
+                    }
+                    case "default" -> {
+                        if (!encounteredValueFlag) {
+                            runtimeConfig.setEnableGeneratedTestcase(true);
+                            runtimeConfig.setValueMode(0);
+                            if (StringUtils.isNotBlank(flag.getRight())) {
+                                runtimeConfig.setOmitFieldsInRandomTestcases(Integer.parseInt(flag.getRight()));
+                            } else {
+                                runtimeConfig.setOmitFieldsInRandomTestcases(0);
+                            }
+                            encounteredValueFlag = true;
                         }
                     }
                     default -> {
                         log.warn("[interpretTestcaseOpCode] Invalid flag will be ignored: {}", flag.getLeft());
                     }
                 }
+            } else {
+                runtimeConfig.getIncludedCustomTestcases().add(arg);
             }
+        }
+        if (!runtimeConfig.getIncludedCustomTestcases().isEmpty()) {
+            runtimeConfig.setEnableGeneratedTestcase(false);
         }
     }
 
@@ -153,7 +175,10 @@ public class SetupScriptInterpreter {
         SERVER,
         /** CLIENT {@link org.grpctest.core.pojo.RuntimeConfig.Language} */
         CLIENT,
-        /** TESTCASE (--random(:{0, 1, 2})) [Optional] */
+        /** TESTCASE (--{random, default}(:{0, 1, 2})) (custom_testcase1.json custom_testcase2.json) [Optional] <br>
+         * Note that if custom testcases are specified, "random" and "default" flags will be nullified. <br>
+         * "--random" and "--default" are mutually exclusive. If both are present, will interpret the 1st flag only.
+         */
         TESTCASE,
         /** METADATA (--server-client:{@link org.grpctest.core.enums.MetadataType}) (--client-server:{@link org.grpctest.core.enums.MetadataType}) [Optional] */
         METADATA,

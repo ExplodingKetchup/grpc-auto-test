@@ -24,6 +24,10 @@ import java.util.Objects;
 @AllArgsConstructor
 public class DynamicMessageUtilService {
 
+    private static final String NUMERIC_MAX = "MAX";
+    private static final String NUMERIC_MIN = "MIN";
+    private static final String NUMERIC_FLOAT_MIN_FRACTION = "MIN_FRACTION";
+
     private final RpcModelRegistry rpcModelRegistry;
 
     public void dynMsgToFile(DynamicMessage dynamicMessage, String filepath) throws Throwable {
@@ -96,21 +100,73 @@ public class DynamicMessageUtilService {
         return switch (field.getType()) {
             case BOOL -> (Boolean) value;
             case BYTES -> ByteString.copyFromUtf8((String) value);
-            case DOUBLE -> (Double) value;
+            case DOUBLE -> {
+                if (value instanceof String) {
+                    if (value.equals(NUMERIC_MAX)) {
+                        yield Double.MAX_VALUE;
+                    } else if (value.equals(NUMERIC_MIN)) {
+                        yield -Double.MAX_VALUE;
+                    } else if (value.equals(NUMERIC_FLOAT_MIN_FRACTION)) {
+                        yield Double.MIN_VALUE;
+                    }
+                }
+                yield (Double) value;
+            }
             case ENUM -> field.getEnumType().findValueByName((String) value);
-            case FIXED32 -> (Integer) value;
-            case FIXED64 -> (Long) value;
-            case FLOAT -> (Float) value;
-            case INT32 -> (Integer) value;
-            case INT64 -> (Long) value;
+            case FIXED32, UINT32 -> {
+                if (value instanceof String) {
+                    if (value.equals(NUMERIC_MAX)) {
+                        yield -1;
+                    } else if (value.equals(NUMERIC_MIN)) {
+                        yield 0;
+                    }
+                }
+                yield ((Long) value).intValue();
+            }
+            case FIXED64, UINT64 -> {
+                if (value instanceof String) {
+                    if (value.equals(NUMERIC_MAX)) {
+                        yield -1L;
+                    } else if (value.equals(NUMERIC_MIN)) {
+                        yield 0L;
+                    }
+                }
+                yield (Long) value;
+            }
+            case FLOAT -> {
+                if (value instanceof String) {
+                    if (value.equals(NUMERIC_MAX)) {
+                        yield Float.MAX_VALUE;
+                    } else if (value.equals(NUMERIC_MIN)) {
+                        yield -Float.MAX_VALUE;
+                    } else if (value.equals(NUMERIC_FLOAT_MIN_FRACTION)) {
+                        yield Float.MIN_VALUE;
+                    }
+                }
+                yield ((Double) value).floatValue();
+            }
+            case INT32, SFIXED32, SINT32 -> {
+                if (value instanceof String) {
+                    if (value.equals(NUMERIC_MAX)) {
+                        yield Integer.MAX_VALUE;
+                    } else if (value.equals(NUMERIC_MIN)) {
+                        yield Integer.MIN_VALUE;
+                    }
+                }
+                yield ((Long) value).intValue();
+            }
+            case INT64, SFIXED64, SINT64 -> {
+                if (value instanceof String) {
+                    if (value.equals(NUMERIC_MAX)) {
+                        yield Long.MAX_VALUE;
+                    } else if (value.equals(NUMERIC_MIN)) {
+                        yield Long.MIN_VALUE;
+                    }
+                }
+                yield (Long) value;
+            }
             case MESSAGE -> objectToDynamicMessage(value, rpcModelRegistry.lookupMessage(field.getMessageType().getFullName()));
-            case SFIXED32 -> (Integer) value;
-            case SFIXED64 -> (Long) value;
-            case SINT32 -> (Integer) value;
-            case SINT64 -> (Long) value;
             case STRING -> (String) value;
-            case UINT32 -> (Integer) value;
-            case UINT64 -> (Long) value;
             default -> throw new IllegalArgumentException("Field type not supported");
         };
     }

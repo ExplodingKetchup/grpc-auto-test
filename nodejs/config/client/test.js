@@ -8,7 +8,7 @@ config.log = {
 config.testcaseDir = '../test-cases/client/';
 config.outDir = '../out/client/';
 config.server = {
-    host : 'node-server',
+    host : 'localhost',
     port : 50051
 };
 

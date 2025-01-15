@@ -6,16 +6,21 @@ from google.protobuf.message import Message
 
 from config_utils import load_config
 from file_utils import list_files_with_same_prefix
-from log_utils import configure_logger, get_log_file_for_this_instance
+from log_utils import configure_logger, get_log_file_for_this_instance, log_fields_of_object
 from message_utils import message_to_file, message_from_file, format_metadata_as_string, metadata_to_file
-from basic_repeated_fields_pb2 import *
-from basic_repeated_fields_pb2_grpc import *
+from basic_single_fields_pb2 import *
+from basic_single_fields_pb2_grpc import *
 
 
 # Constants
 BIN_METADATA_SUFFIX = "-bin"
 OUTBOUND_HEADERS = (
 )
+single_hotpot_RequestMessage_fields = ["small_hotpot", "float_boat"]
+single_hotpot_BigHotpotOfTerror_fields = ["double_value", "float_value", "int32_value", "int64_value", "uint32_value", "uint64_value", "sint32_value", "sint64_value", "fixed32_value", "fixed64_value", "sfixed32_value", "sfixed64_value", "bool_value", "string_value", "bytes_value", "enum_value", "message_value"]
+single_hotpot_ResponseMessage_fields = ["big_hotpot", "flex_tape"]
+single_hotpot_SmallHotpotOfRickeridoo_fields = ["small_uint32_value", "small_string_value"]
+
 
 # Configs
 configs = load_config(is_server=True)
@@ -23,39 +28,43 @@ print(f"Configs: {configs}")
 
 
 # >>> Helper functions
-def handle_single_request(request: Message, method_id: str) -> None:
+def handle_single_request(request: Message, method_id: str, request_type_field_names: list[str]) -> None:
     method_name = method_id.split(".")[-1]
     method_id_underscore = method_id.replace(".", "_")
     logging.info(f"[{method_name}] Received request: {request}")
+    log_fields_of_object(request, f"{method_id} - request", request_type_field_names)
     message_to_file(os.path.join(configs["out"]["dir"], f"{method_id_underscore}_param_0.bin"), request)
 
-def handle_streaming_request(request_iterator, method_id):
+def handle_streaming_request(request_iterator, method_id, request_type_field_names: list[str]):
     request_idx = 0
     method_name = method_id.split(".")[-1]
     method_id_underscore = method_id.replace(".", "_")
     for request in request_iterator:
         logging.info(f"[{method_name}] Received request: {request}")
+        log_fields_of_object(request, f"{method_id} - request", request_type_field_names)
         message_to_file(
             os.path.join(configs["out"]["dir"], f"{method_id_underscore}_param_{request_idx}.bin"),
             request)
         request_idx += 1
 
-def get_single_response(method_id, response_class):
+def get_single_response(method_id, response_class, response_type_field_names: list[str]):
     method_name = method_id.split(".")[-1]
     method_id_underscore = method_id.replace(".", "_")
     response = message_from_file(os.path.join(configs["in"]["dir"], f"{method_id_underscore}_return_0.bin"),
                                  response_class)
     logging.info(f"[{method_name}] Response: {response}")
+    log_fields_of_object(response, f"{method_id} - response", response_type_field_names)
 
     return response
 
-def get_streaming_response(method_id, response_class):
+def get_streaming_response(method_id, response_class, response_type_field_names: list[str]):
     method_name = method_id.split(".")[-1]
     method_id_underscore = method_id.replace(".", "_")
     response_files = list_files_with_same_prefix(configs["in"]["dir"], f"{method_id_underscore}_return")
     for response_file in response_files:
         response = message_from_file(response_file, response_class)
         logging.info(f"[{method_name}] Response: {response}")
+        log_fields_of_object(response, f"{method_id} - response", response_type_field_names)
         yield response
 
 def raise_grpc_exception(context, status_code, description, trailers):
@@ -77,32 +86,32 @@ def send_header_metadata(context):
 class HotpotServiceServicer(HotpotServiceServicer):
 
     def UnaryPot(self, request, context):
-        method_id = "repeated_hotpots.HotpotService.unaryPot"
+        method_id = "single_hotpot.HotpotService.unaryPot"
         response_class = ResponseMessage
 
-        handle_single_request(request, method_id)
-        return get_single_response(method_id, response_class)
+        handle_single_request(request, method_id, single_hotpot_RequestMessage_fields)
+        return get_single_response(method_id, response_class, single_hotpot_ResponseMessage_fields)
 
     def ServerStreamingPot(self, request, context):
-        method_id = "repeated_hotpots.HotpotService.serverStreamingPot"
+        method_id = "single_hotpot.HotpotService.serverStreamingPot"
         response_class = ResponseMessage
 
-        handle_single_request(request, method_id)
-        for response in get_streaming_response(method_id, response_class):
+        handle_single_request(request, method_id, single_hotpot_RequestMessage_fields)
+        for response in get_streaming_response(method_id, response_class, single_hotpot_ResponseMessage_fields):
             yield response
 
     def ClientStreamingPot(self, request_iterator, context):
-        method_id = "repeated_hotpots.HotpotService.clientStreamingPot"
+        method_id = "single_hotpot.HotpotService.clientStreamingPot"
         response_class = ResponseMessage
 
-        handle_streaming_request(request_iterator, method_id)
-        return get_single_response(method_id, response_class)
+        handle_streaming_request(request_iterator, method_id, single_hotpot_RequestMessage_fields)
+        return get_single_response(method_id, response_class, single_hotpot_ResponseMessage_fields)
 
     def BidiStreamingPot(self, request_iterator, context):
-        method_id = "repeated_hotpots.HotpotService.bidiStreamingPot"
+        method_id = "single_hotpot.HotpotService.bidiStreamingPot"
         response_class = ResponseMessage
-        handle_streaming_request(request_iterator, method_id)
-        for response in get_streaming_response(method_id, response_class):
+        handle_streaming_request(request_iterator, method_id, single_hotpot_RequestMessage_fields)
+        for response in get_streaming_response(method_id, response_class, single_hotpot_ResponseMessage_fields):
             yield response
 
 

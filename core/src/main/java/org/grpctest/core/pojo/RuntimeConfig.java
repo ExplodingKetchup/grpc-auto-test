@@ -28,13 +28,19 @@ public class RuntimeConfig {
     private Boolean enableException = false;
 
     @Builder.Default
-    private Boolean enableAllRandomTestcase = false;
+    private Boolean enableGeneratedTestcase = false;
 
     @Builder.Default
     private int omitFieldsInRandomTestcases = 0;
 
     @Builder.Default
+    private int valueMode = 0;
+
+    @Builder.Default
     private List<String> includedProtos = new ArrayList<>();
+
+    @Builder.Default
+    private List<String> includedCustomTestcases = new ArrayList<>();
 
     @Getter
     public enum Language {

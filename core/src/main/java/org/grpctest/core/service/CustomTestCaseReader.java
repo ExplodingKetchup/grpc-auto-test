@@ -35,15 +35,17 @@ public class CustomTestCaseReader {
 
     private final DynamicMessageUtilService dynamicMessageUtilService;
 
-    private List<TestCase> loadTestCases() throws Throwable {
+    private List<TestCase> loadTestCases(List<String> includedFiles) throws Throwable {
         List<TestCase> testCases = new ArrayList<>();
         ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver(resourceLoader);
         String classpath = "classpath:" + config.getCustomTestsClasspath() + "/*";
         try {
             for (Resource resource : resourcePatternResolver.getResources(classpath)) {
-                try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8))) {
-                    String json = bufferedReader.lines().collect(Collectors.joining("\n"));
-                    testCases.add(JsonUtil.fromJson(json, TestCase.class));
+                if (includedFiles.isEmpty() || includedFiles.contains(resource.getFilename())) {
+                    try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8))) {
+                        String json = bufferedReader.lines().collect(Collectors.joining("\n"));
+                        testCases.add(JsonUtil.fromJson(json, TestCase.class));
+                    }
                 }
             }
             return testCases;
@@ -56,8 +58,8 @@ public class CustomTestCaseReader {
         }
     }
 
-    public void loadTestCasesToRegistry() throws Throwable {
-        List<TestCase> testCases = loadTestCases();
+    public void loadTestCasesToRegistry(List<String> includedFiles) throws Throwable {
+        List<TestCase> testCases = loadTestCases(includedFiles);
         for (TestCase testCase : testCases) {
             for (Object param : testCase.getParamValue()) {
                 testCase.getParamValueDynMsg().add(

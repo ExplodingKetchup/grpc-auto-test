@@ -14,9 +14,11 @@ public interface TestSetupUi {
                 .serverToClientMetadataType(chooseServerToClientMetadataType())
                 .serverToClientMetadataType(chooseClientToServerMetadataType())
                 .enableException(chooseEnableException())
-                .enableAllRandomTestcase(chooseEnableAllRandomTestcase())
+                .enableGeneratedTestcase(chooseEnableGeneratedTestcase())
                 .includedProtos(chooseIncludedRpcFiles())
                 .omitFieldsInRandomTestcases(chooseOmitFieldsInRandomTestcases())
+                .valueMode(chooseValueMode())
+                .includedCustomTestcases(chooseIncludedCustomTestcases())
                 .build();
     }
 
@@ -32,9 +34,13 @@ public interface TestSetupUi {
 
     boolean chooseEnableException() throws Exception;
 
-    boolean chooseEnableAllRandomTestcase() throws Exception;
+    boolean chooseEnableGeneratedTestcase() throws Exception;
 
     List<String> chooseIncludedRpcFiles() throws Exception;
 
     int chooseOmitFieldsInRandomTestcases() throws Exception;
+
+    int chooseValueMode() throws Exception;
+
+    List<String> chooseIncludedCustomTestcases() throws Exception;
 }

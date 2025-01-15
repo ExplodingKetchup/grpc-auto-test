@@ -10,4 +10,12 @@ import org.grpctest.core.data.RpcModelRegistry;
 @NoArgsConstructor
 public class ClientDataModel implements DataModel {
     private RpcModelRegistry registry;
+
+    private boolean logRequests;
+
+    private boolean logRequestsPrintFields;
+
+    private boolean logResponses;
+
+    private boolean logResponsesPrintFields;
 }

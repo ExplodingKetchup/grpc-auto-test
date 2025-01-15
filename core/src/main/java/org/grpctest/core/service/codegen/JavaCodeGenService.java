@@ -47,7 +47,15 @@ public class JavaCodeGenService extends BaseCodeGenService {
     public void generateJavaService(RpcService service) throws Exception {
         generateFileFromFtl(
                 JAVA_SVC_FTL,
-                new ServiceImplDataModel(service.getId(), registry, testcaseRegistry),
+                new ServiceImplDataModel(
+                        service.getId(),
+                        registry,
+                        testcaseRegistry,
+                        config.isServerLogRequests(),
+                        config.isServerLogRequestsPrintFields(),
+                        config.isServerLogResponses(),
+                        config.isServerLogResponsesPrintFields()
+                ),
                 JAVA_SVC_DIR + service.getName() + JAVA_FILE_EXT
         );
     }
@@ -55,7 +63,13 @@ public class JavaCodeGenService extends BaseCodeGenService {
     public void generateJavaClient() throws Exception {
         generateFileFromFtl(
                 JAVA_CLIENT_FTL,
-                new ClientDataModel(registry),
+                new ClientDataModel(
+                        registry,
+                        config.isClientLogRequests(),
+                        config.isClientLogRequestsPrintFields(),
+                        config.isClientLogResponses(),
+                        config.isClientLogResponsesPrintFields()
+                ),
                 JAVA_CLIENT_FILE
         );
     }
@@ -63,7 +77,14 @@ public class JavaCodeGenService extends BaseCodeGenService {
     public void generateJavaServer() throws Exception {
         generateFileFromFtl(
                 JAVA_SERVER_FTL,
-                new ServerDataModel(registry, testcaseRegistry),
+                new ServerDataModel(
+                        registry,
+                        testcaseRegistry,
+                        config.isServerLogRequests(),
+                        config.isServerLogRequestsPrintFields(),
+                        config.isServerLogResponses(),
+                        config.isServerLogResponsesPrintFields()
+                ),
                 JAVA_SERVER_FILE
         );
     }
@@ -87,7 +108,14 @@ public class JavaCodeGenService extends BaseCodeGenService {
     public void generateJavaServerInterceptor() throws Exception {
         generateFileFromFtl(
                 JAVA_SERVER_INTERCEPTOR_FTL,
-                new ServerDataModel(registry, testcaseRegistry),
+                new ServerDataModel(
+                        registry,
+                        testcaseRegistry,
+                        config.isServerLogRequests(),
+                        config.isServerLogRequestsPrintFields(),
+                        config.isServerLogResponses(),
+                        config.isServerLogResponsesPrintFields()
+                ),
                 JAVA_SERVER_INTERCEPTOR_FILE
         );
     }
@@ -95,7 +123,13 @@ public class JavaCodeGenService extends BaseCodeGenService {
     public void generateJavaClientInterceptor() throws Exception {
         generateFileFromFtl(
                 JAVA_CLIENT_INTERCEPTOR_FTL,
-                new ClientDataModel(registry),
+                new ClientDataModel(
+                        registry,
+                        config.isClientLogRequests(),
+                        config.isClientLogRequestsPrintFields(),
+                        config.isClientLogResponses(),
+                        config.isClientLogResponsesPrintFields()
+                ),
                 JAVA_CLIENT_INTERCEPTOR_FILE
         );
     }

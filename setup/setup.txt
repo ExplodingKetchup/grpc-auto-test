@@ -1,4 +1,4 @@
-CLIENT NODEJS
-SERVER PYTHON
+CLIENT PYTHON
+SERVER NODEJS
 TESTCASE --random
-INCLUDE_PROTO basic_repeated_fields
+INCLUDE_PROTO basic_single_fields.proto

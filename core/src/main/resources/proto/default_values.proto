@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+package default_hotpot;
+
+option java_multiple_files = true;
+option java_package = "org.grpctest.java.common.define";
+option java_outer_classname = "DefaultDataProto";
+
+message BigHotpotOfTerror {
+  optional double double_value = 1;
+  optional float float_value = 2;
+  optional int32 int32_value = 3;
+  optional int64 int64_value = 4;
+  optional uint32 uint32_value = 5;
+  optional uint64 uint64_value = 6;
+  optional sint32 sint32_value = 7;
+  optional sint64 sint64_value = 8;
+  optional fixed32 fixed32_value = 9;
+  optional fixed64 fixed64_value = 10;
+  optional sfixed32 sfixed32_value = 11;
+  optional sfixed64 sfixed64_value = 12;
+  optional bool bool_value = 13;
+  optional string string_value = 14;
+  optional bytes bytes_value = 15;
+  optional AnExampleEnum enum_value = 16;
+}
+
+enum AnExampleEnum {
+  AEE_ZERO = 0;
+  AEE_ONE = 1;
+  AEE_TWO = 2;
+  AEE_THREE = 3;
+  AEE_FOUR = 4;
+  AEE_FIVE = 5;
+  AEE_SIX = 6;
+  AEE_SEVEN = 7;
+}
+
+service HotpotService {
+  // UNARY
+  rpc UnaryPot(BigHotpotOfTerror) returns (BigHotpotOfTerror);
+  // SERVER_STREAMING
+  rpc ServerStreamingPot(BigHotpotOfTerror) returns (stream BigHotpotOfTerror);
+  // CLIENT_STREAMING
+  rpc ClientStreamingPot(stream BigHotpotOfTerror) returns (BigHotpotOfTerror);
+  // BIDI_STREAMING
+  rpc BidiStreamingPot(stream BigHotpotOfTerror) returns (stream BigHotpotOfTerror);
+}

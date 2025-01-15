@@ -1,5 +1,32 @@
+<#function generateTabs indent>
+    <#local tabs = "" />
+    <#if (indent > 0)>
+        <#list 1..indent as i>
+            <#local tabs = tabs + "    " />
+        </#list>
+    </#if>
+    <#return tabs>
+</#function>
+<#macro requestLogging invoker indent=0>
+    <#assign tabs = generateTabs(indent)>
+    <#if logRequests>
+${tabs}logger.info(`[${invoker}] Invoke ${"$"}{methodId}, param: ${"$"}{JSON.stringify(request, null, 2)}`);
+        <#if logRequestsPrintFields>
+${tabs}logFieldsOfObject(logger, request, methodId + " - request", requestTypeFieldNames);
+        </#if>
+    </#if>
+</#macro>
+<#macro responseLogging invoker indent=0>
+    <#assign tabs = generateTabs(indent)>
+    <#if logResponses>
+${tabs}logger.info(`[${invoker}] Method ${"$"}{methodId} returns ${"$"}{JSON.stringify(response, null, 2)}`);
+        <#if logResponsesPrintFields>
+${tabs}logFieldsOfObject(logger, response, methodId + " - response", responseTypeFieldNames);
+        </#if>
+    </#if>
+</#macro>
 import * as grpc from '@grpc/grpc-js';
-import { createLogger, loadProtosGrpc, loadProtosProtobufjs, messageFromFile, messageToFile, formatMetadataForOutput, metadataToFile, formatErrorForOutput, errorToFile, loopMultipleFilesWithSamePrefix } from './common.js';
+import { createLogger, loadProtosGrpc, loadProtosProtobufjs, messageFromFile, messageToFile, formatMetadataForOutput, metadataToFile, formatErrorForOutput, errorToFile, loopMultipleFilesWithSamePrefix, logFieldsOfObject } from './common.js';
 
 // Constants
 const BIN_SUFFIX = '-bin';
@@ -15,6 +42,10 @@ const META_VALUE_${metaKey} = '${metaValue}';
 const META_KEY_${metaKey} = '${metaKey}' + BIN_SUFFIX;
 const META_VALUE_${metaKey} = Buffer.from('${metaValue}', 'hex');
     </#if>
+</#list>
+
+<#list registry.getAllMessages() as message>
+const ${message.id?replace(".", "_")}_fields = [<#list registry.getAllFieldNames(message.id) as fieldname>"${fieldname}"<#sep>, </#list>];
 </#list>
 
 // Load configs dynamically depending on environment
@@ -36,19 +67,19 @@ console.log("Using environment " + env);
     headers.set(META_KEY_${metaKey}, META_VALUE_${metaKey});
 </#list>
 
-    function invokeUnaryRpc(method, requestType, responseType, methodId) {
+    function invokeUnaryRpc(method, requestType, responseType, methodId, requestTypeFieldNames, responseTypeFieldNames) {
         const rpcCallback = (err, response) => {
             if (err) {
                 logger.error(`[invokeUnaryRpc] RPC invoke failed: ${"$"}{err.message}\n${"$"}{err.stack}`);
                 errorToFile(err, `${"$"}{config.outDir}${"$"}{methodId.replaceAll(".", "_")}_error.txt`);
             } else {
-                logger.info(`[invokeUnaryRpc] Method ${"$"}{methodId} returns ${"$"}{JSON.stringify(responseType.fromObject(response), null, 2)}`);
+                <@responseLogging invoker="invokeUnaryRpc" indent=4/>
                 messageToFile(responseType.fromObject(response), responseType, config.outDir + methodId.replaceAll(".", "_") + "_return_0.bin");
             }
         }
 
         let request = messageFromFile(config.testcaseDir + methodId.replaceAll(".", "_") + '_param_0.bin', requestType);
-        logger.info(`[invokeUnaryRpc] Invoke ${"$"}{methodId}, param: ${"$"}{JSON.stringify(request, null, 2)}`);
+        <@requestLogging invoker="invokeUnaryRpc" indent=2/>
         const call = method(request, headers, rpcCallback);
         call.on('metadata', metadata => {
             logger.info(`[invokeUnaryRpc] Received metadata ${"$"}{JSON.stringify(metadata, null, 2)}`);
@@ -56,17 +87,17 @@ console.log("Using environment " + env);
         });
     }
 
-    function invokeServerStreamingRpc(method, requestType, responseType, methodId) {
+    function invokeServerStreamingRpc(method, requestType, responseType, methodId, requestTypeFieldNames, responseTypeFieldNames) {
         let responseIdx = 0;
         const request = messageFromFile(config.testcaseDir + methodId.replaceAll(".", "_") + '_param_0.bin', requestType);
-        logger.info(`[invokeServerStreamingRpc] Invoke ${"$"}{methodId}, param: ${"$"}{JSON.stringify(request, null, 2)}`);
+        <@requestLogging invoker="invokeServerStreamingRpc" indent=2/>
         const call = method(request, headers);
         call.on('metadata', (metadata) => {
             logger.info(`[invokeServerStreamingRpc] Received metadata ${"$"}{JSON.stringify(metadata, null, 2)}`);
             metadataToFile(metadata, config.outDir + 'received_metadata.txt');
         });
         call.on('data', (response) => {
-            logger.info(`[invokeServerStreamingRpc] Method ${"$"}{methodId} returns ${"$"}{JSON.stringify(responseType.fromObject(response), null, 2)}`);
+            <@responseLogging invoker="invokeServerStreamingRpc" indent=3/>
             messageToFile(responseType.fromObject(response), responseType, `${"$"}{config.outDir}${"$"}{methodId.replaceAll('.', '_')}_return_${"$"}{responseIdx++}.bin`);
         });
         call.on('error', (err) => {
@@ -78,13 +109,13 @@ console.log("Using environment " + env);
         });
     }
 
-    function invokeClientStreamingRpc(method, requestType, responseType, methodId) {
+    function invokeClientStreamingRpc(method, requestType, responseType, methodId, requestTypeFieldNames, responseTypeFieldNames) {
         const rpcCallback = (err, response) => {
             if (err) {
                 logger.error(`[invokeClientStreamingRpc] RPC invoke failed: ${"$"}{err.message}\n${"$"}{err.stack}`);
                 errorToFile(err, `${"$"}{config.outDir}${"$"}{methodId.replaceAll(".", "_")}_error.txt`);
             } else {
-                logger.info(`[invokeClientStreamingRpc] Method ${"$"}{methodId} returns ${"$"}{JSON.stringify(responseType.fromObject(response), null, 2)}`);
+                <@responseLogging invoker="invokeClientStreamingRpc" indent=4/>
                 messageToFile(responseType.fromObject(response), responseType, config.outDir + methodId.replaceAll(".", "_") + "_return_0.bin");
             }
         }
@@ -97,13 +128,13 @@ console.log("Using environment " + env);
         loopMultipleFilesWithSamePrefix(`${"$"}{config.testcaseDir}${"$"}{methodId.replaceAll('.', '_')}_param`, '.bin')
                 .forEach((filepath) => {
                     const request = messageFromFile(filepath, requestType);
-                    logger.info(`[invokeClientStreamingRpc] Invoke ${"$"}{methodId}, param: ${"$"}{JSON.stringify(request, null, 2)}`);
+                    <@requestLogging invoker="invokeClientStreamingRpc" indent=5/>
                     call.write(request);
                 });
         call.end();
     }
 
-    function invokeBidiStreamingRpc(method, requestType, responseType, methodId) {
+    function invokeBidiStreamingRpc(method, requestType, responseType, methodId, requestTypeFieldNames, responseTypeFieldNames) {
         let responseIdx = 0;
         const call = method(headers);
         call.on('metadata', (metadata) => {
@@ -111,7 +142,7 @@ console.log("Using environment " + env);
             metadataToFile(metadata, config.outDir + 'received_metadata.txt');
         });
         call.on('data', (response) => {
-            logger.info(`[invokeBidiStreamingRpc] Method ${"$"}{methodId} returns ${"$"}{JSON.stringify(responseType.fromObject(response), null, 2)}`);
+            <@responseLogging invoker="invokeBidiStreamingRpc" indent=3/>
             messageToFile(responseType.fromObject(response), responseType, `${"$"}{config.outDir}${"$"}{methodId.replaceAll('.', '_')}_return_${"$"}{responseIdx++}.bin`);
         });
         call.on('error', (err) => {
@@ -124,7 +155,7 @@ console.log("Using environment " + env);
         loopMultipleFilesWithSamePrefix(`${"$"}{config.testcaseDir}${"$"}{methodId.replaceAll('.', '_')}_param`, '.bin')
                 .forEach((filepath) => {
                     const request = messageFromFile(filepath, requestType);
-                    logger.info(`[invokeBidiStreamingRpc] Invoke ${"$"}{methodId}, param: ${"$"}{JSON.stringify(request, null, 2)}`);
+                    <@requestLogging invoker="invokeBidiStreamingRpc" indent=5/>
                     call.write(request);
                 });
         call.end();
@@ -142,19 +173,21 @@ console.log("Using environment " + env);
     <#list registry.getAllMethods(service) as method>
     <#assign requestTypeParam = "root.lookupType('" + method.inType + "')">
     <#assign responseTypeParam = "root.lookupType('" + method.outType + "')">
+    <#assign requestFields = method.inType?replace(".", "_") + "_fields">
+    <#assign responseFields = method.outType?replace(".", "_") + "_fields">
             // METHOD ${method.name}
         <#if method.type == "UNARY">
         <#assign methodParam = "(request, headers, callback) => " + service.name?uncap_first + "Stub." + method.name + "(request, headers, callback)">
-            invokeUnaryRpc(${methodParam}, ${requestTypeParam}, ${responseTypeParam}, '${method.id}');
+            invokeUnaryRpc(${methodParam}, ${requestTypeParam}, ${responseTypeParam}, '${method.id}', ${requestFields}, ${responseFields});
         <#elseif method.type == "SERVER_STREAMING">
         <#assign methodParam = "(request, headers) => " + service.name?uncap_first + "Stub." + method.name + "(request, headers)">
-            invokeServerStreamingRpc(${methodParam}, ${requestTypeParam}, ${responseTypeParam}, '${method.id}');
+            invokeServerStreamingRpc(${methodParam}, ${requestTypeParam}, ${responseTypeParam}, '${method.id}', ${requestFields}, ${responseFields});
         <#elseif method.type == "CLIENT_STREAMING">
         <#assign methodParam = "(headers, callback) => " + service.name?uncap_first + "Stub." + method.name + "(headers, callback)">
-            invokeClientStreamingRpc(${methodParam}, ${requestTypeParam}, ${responseTypeParam}, '${method.id}');
+            invokeClientStreamingRpc(${methodParam}, ${requestTypeParam}, ${responseTypeParam}, '${method.id}', ${requestFields}, ${responseFields});
         <#elseif method.type == "BIDI_STREAMING">
         <#assign methodParam = "(headers) => " + service.name?uncap_first + "Stub." + method.name + "(headers)">
-            invokeBidiStreamingRpc(${methodParam}, ${requestTypeParam}, ${responseTypeParam}, '${method.id}');
+            invokeBidiStreamingRpc(${methodParam}, ${requestTypeParam}, ${responseTypeParam}, '${method.id}', ${requestFields}, ${responseFields});
         </#if>
     </#list>
 

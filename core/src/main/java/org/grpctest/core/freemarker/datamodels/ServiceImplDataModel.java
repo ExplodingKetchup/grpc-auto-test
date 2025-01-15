@@ -14,4 +14,12 @@ public class ServiceImplDataModel implements DataModel {
     private String serviceId;
     private RpcModelRegistry registry;
     private TestcaseRegistry testcaseRegistry;
+
+    private boolean logRequests;
+
+    private boolean logRequestsPrintFields;
+
+    private boolean logResponses;
+
+    private boolean logResponsesPrintFields;
 }

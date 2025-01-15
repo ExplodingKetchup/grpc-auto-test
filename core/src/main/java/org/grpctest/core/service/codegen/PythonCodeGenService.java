@@ -34,7 +34,13 @@ public class PythonCodeGenService extends BaseCodeGenService {
     public void generatePyClient() throws Exception {
         generateFileFromFtl(
                 PYTHON_CLIENT_FTL,
-                new ClientDataModel(registry),
+                new ClientDataModel(
+                        registry,
+                        config.isClientLogRequests(),
+                        config.isClientLogRequestsPrintFields(),
+                        config.isClientLogResponses(),
+                        config.isClientLogResponsesPrintFields()
+                ),
                 PYTHON_CLIENT_FILE
         );
     }
@@ -50,7 +56,14 @@ public class PythonCodeGenService extends BaseCodeGenService {
     public void generatePyServer() throws Exception {
         generateFileFromFtl(
                 PYTHON_SERVER_FTL,
-                new ServerDataModel(registry, testcaseRegistry),
+                new ServerDataModel(
+                        registry,
+                        testcaseRegistry,
+                        config.isServerLogRequests(),
+                        config.isServerLogRequestsPrintFields(),
+                        config.isServerLogResponses(),
+                        config.isServerLogResponsesPrintFields()
+                ),
                 PYTHON_SERVER_FILE
         );
     }

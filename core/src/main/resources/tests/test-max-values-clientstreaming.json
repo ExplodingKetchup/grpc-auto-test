@@ -1,0 +1,49 @@
+{
+  "methodId": "numbered_hotpot.HotpotService.clientStreamingPot",
+  "paramValue": [
+    {
+      "double_value": "MAX",
+      "float_value": "MAX",
+      "int32_value": "MAX",
+      "int64_value": "MAX",
+      "uint32_value": "MAX",
+      "uint64_value": "MAX",
+      "sint32_value": "MAX",
+      "sint64_value": "MAX",
+      "fixed32_value": "MAX",
+      "fixed64_value": "MAX",
+      "sfixed32_value": "MAX",
+      "sfixed64_value": "MAX"
+    },
+    {
+      "double_value": "MAX",
+      "float_value": "MAX",
+      "int32_value": "MAX",
+      "int64_value": "MAX",
+      "uint32_value": "MAX",
+      "uint64_value": "MAX",
+      "sint32_value": "MAX",
+      "sint64_value": "MAX",
+      "fixed32_value": "MAX",
+      "fixed64_value": "MAX",
+      "sfixed32_value": "MAX",
+      "sfixed64_value": "MAX"
+    }
+  ],
+  "returnValue": [
+    {
+      "double_value": "MAX",
+      "float_value": "MAX",
+      "int32_value": "MAX",
+      "int64_value": "MAX",
+      "uint32_value": "MAX",
+      "uint64_value": "MAX",
+      "sint32_value": "MAX",
+      "sint64_value": "MAX",
+      "fixed32_value": "MAX",
+      "fixed64_value": "MAX",
+      "sfixed32_value": "MAX",
+      "sfixed64_value": "MAX"
+    }
+  ]
+}

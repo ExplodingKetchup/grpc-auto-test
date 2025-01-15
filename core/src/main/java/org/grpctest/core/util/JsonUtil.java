@@ -15,6 +15,7 @@ public class JsonUtil {
     static {
         OBJECT_MAPPER.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
         OBJECT_MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        OBJECT_MAPPER.configure(DeserializationFeature.USE_LONG_FOR_INTS, true);
         OBJECT_MAPPER.registerModule(new JavaTimeModule());
     }
 

@@ -7,7 +7,6 @@ import org.grpctest.core.config.Config;
 import org.grpctest.core.data.RpcModelRegistry;
 import org.grpctest.core.data.TestcaseRegistry;
 import org.grpctest.core.enums.CleanupMode;
-import org.grpctest.core.enums.MetadataType;
 import org.grpctest.core.pojo.RpcService;
 import org.grpctest.core.pojo.RuntimeConfig;
 import org.grpctest.core.service.codegen.JavaCodeGenService;
@@ -27,7 +26,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -131,9 +129,13 @@ public class CoreService implements InitializingBean {
             log.info("[Step 3 of 9] Finished reading content of .proto files");
 
             // Load test cases
-            if (!runtimeConfig.getEnableAllRandomTestcase()) {
-                customTestCaseReader.loadTestCasesToRegistry();
+            if (!runtimeConfig.getEnableGeneratedTestcase()) {
+                customTestCaseReader.loadTestCasesToRegistry(runtimeConfig.getIncludedCustomTestcases());
             }
+//
+//            Descriptors.Descriptor descriptor = rpcModelRegistry.lookupMessage("single_hotpot.BigHotpotOfTerror").getMessageDescriptor();
+//            DynamicMessage msg1 = DynamicMessage.newBuilder(descriptor).setField(descriptor.findFieldByName("message_value"), null).build();
+//            DynamicMessage msg2 = testCaseGenerator.generateMessage(rpcModelRegistry.lookupMessage("single_hotpot.SmallHotpotOfRickeridoo"), 0, 0);
 
             // Generate random test cases for services without custom test cases
             generateRandomTestcases(runtimeConfig);
@@ -226,7 +228,7 @@ public class CoreService implements InitializingBean {
 
     private void generateRandomTestcases(RuntimeConfig runtimeConfig) {
         for (RpcService.RpcMethod method : testcaseRegistry.getAllMethodsWithoutTestCases()) {
-            testcaseRegistry.addTestCase(testCaseGenerator.generateRandomTestcase(method, runtimeConfig.getOmitFieldsInRandomTestcases(), runtimeConfig.getEnableException()));
+            testcaseRegistry.addTestCase(testCaseGenerator.generateTestcase(method, runtimeConfig.getOmitFieldsInRandomTestcases(), runtimeConfig.getValueMode(), runtimeConfig.getEnableException()));
         }
     }
 

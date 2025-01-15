@@ -1,10 +1,7 @@
 package org.grpctest.java.common.util;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
+import java.nio.file.*;
 import java.util.Collections;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -21,7 +18,11 @@ public class FileUtil {
 
         // Ensure the file exists, create it if not
         if (!Files.exists(path)) {
-            Files.createFile(path);
+            try {
+                Files.createFile(path);
+            } catch (FileAlreadyExistsException faee) {
+
+            }
         }
 
         // Write the string with a new line appended
