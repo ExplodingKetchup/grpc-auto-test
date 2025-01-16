@@ -23,6 +23,12 @@ message BigHotpotOfTerror {
   optional string string_value = 14;
   optional bytes bytes_value = 15;
   optional AnExampleEnum enum_value = 16;
+  optional SmallHotpotOfRickeridoo message_value = 17;
+}
+
+message SmallHotpotOfRickeridoo {
+  optional uint32 small_uint32_value = 1;
+  optional string small_string_value = 2;
 }
 
 enum AnExampleEnum {

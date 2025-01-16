@@ -10,7 +10,7 @@
 <#macro requestLogging invoker indent=0>
     <#assign tabs = generateTabs(indent)>
     <#if logRequests>
-${tabs}logger.info(`[${invoker}] Invoke ${"$"}{methodId}, param: ${"$"}{JSON.stringify(request, null, 2)}`);
+${tabs}logger.info(`[${invoker}] ${"$"}{methodId} - Request: ${"$"}{JSON.stringify(request, null, 2)}`);
         <#if logRequestsPrintFields>
 ${tabs}logFieldsOfObject(logger, request, methodId + " - request", requestTypeFieldNames);
         </#if>
@@ -19,7 +19,7 @@ ${tabs}logFieldsOfObject(logger, request, methodId + " - request", requestTypeFi
 <#macro responseLogging invoker indent=0>
     <#assign tabs = generateTabs(indent)>
     <#if logResponses>
-${tabs}logger.info(`[${invoker}] Method ${"$"}{methodId} returns ${"$"}{JSON.stringify(response, null, 2)}`);
+${tabs}logger.info(`[${invoker}] ${"$"}{methodId} - Response: ${"$"}{JSON.stringify(response, null, 2)}`);
         <#if logResponsesPrintFields>
 ${tabs}logFieldsOfObject(logger, response, methodId + " - response", responseTypeFieldNames);
         </#if>
@@ -196,6 +196,8 @@ console.log("Using environment " + env);
         } catch (e) {
             logger.error(`[main] An error occurred: ${"$"}{e.message}\n${"$"}{e.stack}`);
         }
+
+        setTimeout(() => logger.info("[main] Shutdown delay timer elapsed"), 5000);
 
     }
 

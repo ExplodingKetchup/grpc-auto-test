@@ -1,4 +1,4 @@
-CLIENT PYTHON
-SERVER NODEJS
-TESTCASE --random
-INCLUDE_PROTO basic_single_fields.proto
+CLIENT NODEJS
+SERVER PYTHON
+TESTCASE --random:2
+INCLUDE_PROTO single_field_values.proto

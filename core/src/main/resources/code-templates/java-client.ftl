@@ -10,7 +10,7 @@
 <#macro requestLogging invoker indent=0>
     <#assign tabs = generateTabs(indent)>
     <#if logRequests>
-${tabs}log.info("[${invoker}] Received request {}", parameter);
+${tabs}log.info("[${invoker}] {} - Request: {}", methodId, parameter);
         <#if logRequestsPrintFields>
 ${tabs}ObjectUtil.logFieldsOfObject(parameter, methodId + " - request", requestTypeFieldNames);
         </#if>
@@ -19,7 +19,7 @@ ${tabs}ObjectUtil.logFieldsOfObject(parameter, methodId + " - request", requestT
 <#macro responseLogging invoker indent=0>
     <#assign tabs = generateTabs(indent)>
     <#if logResponses>
-${tabs}log.info("[${invoker}] Response: {}", response);
+${tabs}log.info("[${invoker}] {} - Response: {}", methodId, response);
         <#if logResponsesPrintFields>
 ${tabs}ObjectUtil.logFieldsOfObject(response, methodId + " - response", responseTypeFieldNames);
         </#if>
@@ -94,6 +94,7 @@ public class JavaClient implements InitializingBean {
     </#if>
 
 </#list>
+        for (int i = 0; i < 10000000; i++);
     }
 
     private <T, R> void invokeUnaryRpcMethod(Function<T, R> method, T parameter, String methodId, String[] requestTypeFieldNames, String[] responseTypeFieldNames) {

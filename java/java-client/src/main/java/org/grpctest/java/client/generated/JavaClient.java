@@ -28,10 +28,8 @@ public class JavaClient implements InitializingBean {
 
     private final HotpotServiceGrpc.HotpotServiceStub hotpotServiceAsyncStub;
 
-    private final String[] single_hotpot_RequestMessage_fields = new String[]{"SmallHotpot", "FloatBoat"};
-    private final String[] single_hotpot_BigHotpotOfTerror_fields = new String[]{"DoubleValue", "FloatValue", "Int32Value", "Int64Value", "Uint32Value", "Uint64Value", "Sint32Value", "Sint64Value", "Fixed32Value", "Fixed64Value", "Sfixed32Value", "Sfixed64Value", "BoolValue", "StringValue", "BytesValue", "EnumValue", "MessageValue"};
-    private final String[] single_hotpot_ResponseMessage_fields = new String[]{"BigHotpot", "FlexTape"};
-    private final String[] single_hotpot_SmallHotpotOfRickeridoo_fields = new String[]{"SmallUint32Value", "SmallStringValue"};
+    private final String[] default_hotpot_SmallHotpotOfRickeridoo_fields = new String[]{"SmallUint32Value", "SmallStringValue"};
+    private final String[] default_hotpot_BigHotpotOfTerror_fields = new String[]{"DoubleValue", "FloatValue", "Int32Value", "Int64Value", "Uint32Value", "Uint64Value", "Sint32Value", "Sint64Value", "Fixed32Value", "Fixed64Value", "Sfixed32Value", "Sfixed64Value", "BoolValue", "StringValue", "BytesValue", "EnumValue", "MessageValue"};
 
     public JavaClient(Config config, ClientInterceptor clientInterceptor) {
         this.config = config;
@@ -49,26 +47,27 @@ public class JavaClient implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        // Invoke test case: single_hotpot.HotpotService.serverStreamingPot
-        invokeServerStreamingRpcMethod(hotpotServiceBlockingStub::serverStreamingPot, MessageUtil.messageFromFile(config.getTestcaseDir() + File.separator + "single_hotpot_HotpotService_serverStreamingPot_param_0.bin", RequestMessage.class), "single_hotpot.HotpotService.serverStreamingPot", single_hotpot_RequestMessage_fields, single_hotpot_ResponseMessage_fields);
+        // Invoke test case: default_hotpot.HotpotService.bidiStreamingPot
+        invokeBidiStreamingRpcMethod(hotpotServiceAsyncStub::bidiStreamingPot, MessageUtil.messageListFromMultipleFiles(config.getTestcaseDir() + File.separator + "default_hotpot_HotpotService_bidiStreamingPot_param.bin", BigHotpotOfTerror.class), "default_hotpot.HotpotService.bidiStreamingPot", default_hotpot_BigHotpotOfTerror_fields, default_hotpot_BigHotpotOfTerror_fields);
 
-        // Invoke test case: single_hotpot.HotpotService.clientStreamingPot
-        invokeClientStreamingRpcMethod(hotpotServiceAsyncStub::clientStreamingPot, MessageUtil.messageListFromMultipleFiles(config.getTestcaseDir() + File.separator + "single_hotpot_HotpotService_clientStreamingPot_param.bin", RequestMessage.class), "single_hotpot.HotpotService.clientStreamingPot", single_hotpot_RequestMessage_fields, single_hotpot_ResponseMessage_fields);
+        // Invoke test case: default_hotpot.HotpotService.unaryPot
+        invokeUnaryRpcMethod(hotpotServiceBlockingStub::unaryPot, MessageUtil.messageFromFile(config.getTestcaseDir() + File.separator + "default_hotpot_HotpotService_unaryPot_param_0.bin", BigHotpotOfTerror.class), "default_hotpot.HotpotService.unaryPot", default_hotpot_BigHotpotOfTerror_fields, default_hotpot_BigHotpotOfTerror_fields);
 
-        // Invoke test case: single_hotpot.HotpotService.bidiStreamingPot
-        invokeBidiStreamingRpcMethod(hotpotServiceAsyncStub::bidiStreamingPot, MessageUtil.messageListFromMultipleFiles(config.getTestcaseDir() + File.separator + "single_hotpot_HotpotService_bidiStreamingPot_param.bin", RequestMessage.class), "single_hotpot.HotpotService.bidiStreamingPot", single_hotpot_RequestMessage_fields, single_hotpot_ResponseMessage_fields);
+        // Invoke test case: default_hotpot.HotpotService.serverStreamingPot
+        invokeServerStreamingRpcMethod(hotpotServiceBlockingStub::serverStreamingPot, MessageUtil.messageFromFile(config.getTestcaseDir() + File.separator + "default_hotpot_HotpotService_serverStreamingPot_param_0.bin", BigHotpotOfTerror.class), "default_hotpot.HotpotService.serverStreamingPot", default_hotpot_BigHotpotOfTerror_fields, default_hotpot_BigHotpotOfTerror_fields);
 
-        // Invoke test case: single_hotpot.HotpotService.unaryPot
-        invokeUnaryRpcMethod(hotpotServiceBlockingStub::unaryPot, MessageUtil.messageFromFile(config.getTestcaseDir() + File.separator + "single_hotpot_HotpotService_unaryPot_param_0.bin", RequestMessage.class), "single_hotpot.HotpotService.unaryPot", single_hotpot_RequestMessage_fields, single_hotpot_ResponseMessage_fields);
+        // Invoke test case: default_hotpot.HotpotService.clientStreamingPot
+        invokeClientStreamingRpcMethod(hotpotServiceAsyncStub::clientStreamingPot, MessageUtil.messageListFromMultipleFiles(config.getTestcaseDir() + File.separator + "default_hotpot_HotpotService_clientStreamingPot_param.bin", BigHotpotOfTerror.class), "default_hotpot.HotpotService.clientStreamingPot", default_hotpot_BigHotpotOfTerror_fields, default_hotpot_BigHotpotOfTerror_fields);
 
+        for (int i = 0; i < 10000000; i++);
     }
 
     private <T, R> void invokeUnaryRpcMethod(Function<T, R> method, T parameter, String methodId, String[] requestTypeFieldNames, String[] responseTypeFieldNames) {
-        log.info("[invokeUnaryRpcMethod] Received request {}", parameter);
+        log.info("[invokeUnaryRpcMethod] {} - Request: {}", methodId, parameter);
         ObjectUtil.logFieldsOfObject(parameter, methodId + " - request", requestTypeFieldNames);
         try {
             R response = method.apply(parameter);
-            log.info("[invokeUnaryRpcMethod] Response: {}", response);
+            log.info("[invokeUnaryRpcMethod] {} - Response: {}", methodId, response);
             ObjectUtil.logFieldsOfObject(response, methodId + " - response", responseTypeFieldNames);
             if (response instanceof GeneratedMessageV3) {
                 MessageUtil.messageToFile((GeneratedMessageV3) response, config.getOutDir() + File.separator + methodId.replace(".", "_") + "_return_0.bin");
@@ -88,14 +87,14 @@ public class JavaClient implements InitializingBean {
     }
 
     private <T, R> void invokeServerStreamingRpcMethod(Function<T, Iterator<R>> method, T parameter, String methodId, String[] requestTypeFieldNames, String[] responseTypeFieldNames) {
-        log.info("[invokeServerStreamingRpcMethod] Received request {}", parameter);
+        log.info("[invokeServerStreamingRpcMethod] {} - Request: {}", methodId, parameter);
         ObjectUtil.logFieldsOfObject(parameter, methodId + " - request", requestTypeFieldNames);
         try {
             Iterator<R> responses = method.apply(parameter);
             int i = 0;
             while (responses.hasNext()) {
                 R response = responses.next();
-                log.info("[invokeServerStreamingRpcMethod] Response: {}", response);
+                log.info("[invokeServerStreamingRpcMethod] {} - Response: {}", methodId, response);
                 ObjectUtil.logFieldsOfObject(response, methodId + " - response", responseTypeFieldNames);
                 if (response instanceof GeneratedMessageV3) {
                     MessageUtil.messageToFile((GeneratedMessageV3) response, config.getOutDir() + File.separator + methodId.replace(".", "_") + "_return_" + i + ".bin");
@@ -118,7 +117,7 @@ public class JavaClient implements InitializingBean {
             @Override
             public void onNext(R response) {
                 try {
-                    log.info("[invokeClientStreamingRpcMethod] Response: {}", response);
+                    log.info("[invokeClientStreamingRpcMethod] {} - Response: {}", methodId, response);
                     ObjectUtil.logFieldsOfObject(response, methodId + " - response", responseTypeFieldNames);
                     if (response instanceof GeneratedMessageV3) {
                         MessageUtil.messageToFile((GeneratedMessageV3) response, config.getOutDir() + File.separator + methodId.replace(".", "_") + "_return_0.bin");
@@ -147,7 +146,7 @@ public class JavaClient implements InitializingBean {
         StreamObserver<T> requestObserver = method.apply(responseObserver);
 
         for (T parameter : parameters) {
-            log.info("[invokeClientStreamingRpcMethod] Received request {}", parameter);
+            log.info("[invokeClientStreamingRpcMethod] {} - Request: {}", methodId, parameter);
             ObjectUtil.logFieldsOfObject(parameter, methodId + " - request", requestTypeFieldNames);
             requestObserver.onNext(parameter);
         }
@@ -160,7 +159,7 @@ public class JavaClient implements InitializingBean {
             @Override
             public void onNext(R response) {
                 try {
-                    log.info("[invokeBidiStreamingRpcMethod] Response: {}", response);
+                    log.info("[invokeBidiStreamingRpcMethod] {} - Response: {}", methodId, response);
                     ObjectUtil.logFieldsOfObject(response, methodId + " - response", responseTypeFieldNames);
                     if (response instanceof GeneratedMessageV3) {
                         MessageUtil.messageToFile((GeneratedMessageV3) response, config.getOutDir() + File.separator + methodId.replace(".", "_") + "_return_" + i + ".bin");
@@ -190,7 +189,7 @@ public class JavaClient implements InitializingBean {
         StreamObserver<T> requestObserver = method.apply(responseObserver);
 
         for (T parameter : parameters) {
-            log.info("[invokeBidiStreamingRpcMethod] Received request {}", parameter);
+            log.info("[invokeBidiStreamingRpcMethod] {} - Request: {}", methodId, parameter);
             ObjectUtil.logFieldsOfObject(parameter, methodId + " - request", requestTypeFieldNames);
             requestObserver.onNext(parameter);
         }

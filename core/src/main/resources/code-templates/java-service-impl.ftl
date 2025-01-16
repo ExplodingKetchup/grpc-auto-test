@@ -10,7 +10,7 @@
 <#macro requestLogging method indent=0>
     <#assign tabs = generateTabs(indent)>
     <#if logRequests>
-${tabs}log.info("[${method.name}] Received request {}", request);
+${tabs}log.info("[${method.name}] Request: {}", request);
         <#if logRequestsPrintFields>
 ${tabs}ObjectUtil.logFieldsOfObject(request, "${method.id} - request", <#list registry.getAllFieldNamesAsCamelCase(method.inType) as fieldname>"${fieldname}"<#sep>, </#list>);
         </#if>

@@ -22,7 +22,7 @@ ${tabs}const rpcException = {code: grpc.status.${rpcException.statusCode.name()}
 <#macro requestLogging method indent=0>
     <#assign tabs = generateTabs(indent)>
     <#if logRequests>
-${tabs}logger.info(`[${method.id}] Received request: ${"$"}{JSON.stringify(request, null, 2)}`);
+${tabs}logger.info(`[${method.id}] Request: ${"$"}{JSON.stringify(request, null, 2)}`);
         <#if logRequestsPrintFields>
 ${tabs}logFieldsOfObject(logger, request, "${method.id} - request", [<#list registry.getAllFieldNames(method.inType) as fieldname>"${fieldname}"<#sep>, </#list>]);
         </#if>

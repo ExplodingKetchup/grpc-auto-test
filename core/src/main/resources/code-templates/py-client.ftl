@@ -10,7 +10,7 @@
 <#macro requestLogging invoker indent=0>
     <#assign tabs = generateTabs(indent)>
     <#if logRequests>
-${tabs}logging.info(f"[${invoker}] Invoke {method_id} with request {request}")
+${tabs}logging.info(f"[${invoker}] {method_id} - Request: {request}")
         <#if logRequestsPrintFields>
 ${tabs}log_fields_of_object(request, f"{method_id} - request", request_type_field_names)
         </#if>
@@ -19,7 +19,7 @@ ${tabs}log_fields_of_object(request, f"{method_id} - request", request_type_fiel
 <#macro responseLogging invoker indent=0>
     <#assign tabs = generateTabs(indent)>
     <#if logResponses>
-${tabs}logging.info(f"[${invoker}] Method {method_id} returns {response}")
+${tabs}logging.info(f"[${invoker}] {method_id} - Response: {response}")
         <#if logResponsesPrintFields>
 ${tabs}log_fields_of_object(response, f"{method_id} - response", response_type_field_names)
         </#if>
@@ -28,6 +28,7 @@ ${tabs}log_fields_of_object(response, f"{method_id} - response", response_type_f
 import atexit
 import logging
 import os.path
+import time
 from typing import Iterator
 
 from google.protobuf.message import Message
@@ -74,7 +75,7 @@ print(f"Configs: {configs}")
 
 
 # >>> HELPER FUNCTIONS
-def request_iterator_wrapper(request_iterator: Iterator[Message], calling_method_name: str, method_id: str) -> Iterator[
+def request_iterator_wrapper(request_iterator: Iterator[Message], calling_method_name: str, method_id: str, request_type_field_names: list[str]) -> Iterator[
     Message]:
     for request in request_iterator:
         <@requestLogging invoker="request_iterator_wrapper" indent=2/>
@@ -151,7 +152,8 @@ def invoke_client_streaming_rpc(method, request_iterator: Iterator[Message], met
             request_iterator_wrapper(
                 request_iterator,
                 calling_method_name="invoke_client_streaming_rpc",
-                method_id=method_id
+                method_id=method_id,
+                request_type_field_names=request_type_field_names
             )<#if registry.haveClientToServerMetadata()>,
             metadata=OUTBOUND_HEADERS</#if>
         )
@@ -176,7 +178,8 @@ def invoke_bidi_streaming_rpc(method, request_iterator: Iterator[Message], metho
             request_iterator_wrapper(
                 request_iterator,
                 calling_method_name="invoke_bidi_streaming_rpc",
-                method_id=method_id
+                method_id=method_id,
+                request_type_field_names=request_type_field_names
             )<#if registry.haveClientToServerMetadata()>,
             metadata=OUTBOUND_HEADERS</#if>
         )
@@ -257,6 +260,8 @@ def main():
     </#list>
 </#list>
     channel.close()
+
+    time.sleep(5)
 
 
 def at_shutdown():

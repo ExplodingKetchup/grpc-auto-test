@@ -4,10 +4,8 @@ import { createLogger, loadProtosGrpc, loadProtosProtobufjs, messageFromFile, me
 // Constants
 const BIN_SUFFIX = '-bin';
 
-const single_hotpot_RequestMessage_fields = ["small_hotpot", "float_boat"];
-const single_hotpot_BigHotpotOfTerror_fields = ["double_value", "float_value", "int32_value", "int64_value", "uint32_value", "uint64_value", "sint32_value", "sint64_value", "fixed32_value", "fixed64_value", "sfixed32_value", "sfixed64_value", "bool_value", "string_value", "bytes_value", "enum_value", "message_value"];
-const single_hotpot_ResponseMessage_fields = ["big_hotpot", "flex_tape"];
-const single_hotpot_SmallHotpotOfRickeridoo_fields = ["small_uint32_value", "small_string_value"];
+const default_hotpot_SmallHotpotOfRickeridoo_fields = ["small_uint32_value", "small_string_value"];
+const default_hotpot_BigHotpotOfTerror_fields = ["double_value", "float_value", "int32_value", "int64_value", "uint32_value", "uint64_value", "sint32_value", "sint64_value", "fixed32_value", "fixed64_value", "sfixed32_value", "sfixed64_value", "bool_value", "string_value", "bytes_value", "enum_value", "message_value"];
 
 // Load configs dynamically depending on environment
 const env = process.env.NODE_ENV || 'test';
@@ -31,14 +29,14 @@ console.log("Using environment " + env);
                 logger.error(`[invokeUnaryRpc] RPC invoke failed: ${err.message}\n${err.stack}`);
                 errorToFile(err, `${config.outDir}${methodId.replaceAll(".", "_")}_error.txt`);
             } else {
-                logger.info(`[invokeUnaryRpc] Method ${methodId} returns ${JSON.stringify(response, null, 2)}`);
+                logger.info(`[invokeUnaryRpc] ${methodId} - Response: ${JSON.stringify(response, null, 2)}`);
                 logFieldsOfObject(logger, response, methodId + " - response", responseTypeFieldNames);
                 messageToFile(responseType.fromObject(response), responseType, config.outDir + methodId.replaceAll(".", "_") + "_return_0.bin");
             }
         }
 
         let request = messageFromFile(config.testcaseDir + methodId.replaceAll(".", "_") + '_param_0.bin', requestType);
-        logger.info(`[invokeUnaryRpc] Invoke ${methodId}, param: ${JSON.stringify(request, null, 2)}`);
+        logger.info(`[invokeUnaryRpc] ${methodId} - Request: ${JSON.stringify(request, null, 2)}`);
         logFieldsOfObject(logger, request, methodId + " - request", requestTypeFieldNames);
         const call = method(request, headers, rpcCallback);
         call.on('metadata', metadata => {
@@ -50,7 +48,7 @@ console.log("Using environment " + env);
     function invokeServerStreamingRpc(method, requestType, responseType, methodId, requestTypeFieldNames, responseTypeFieldNames) {
         let responseIdx = 0;
         const request = messageFromFile(config.testcaseDir + methodId.replaceAll(".", "_") + '_param_0.bin', requestType);
-        logger.info(`[invokeServerStreamingRpc] Invoke ${methodId}, param: ${JSON.stringify(request, null, 2)}`);
+        logger.info(`[invokeServerStreamingRpc] ${methodId} - Request: ${JSON.stringify(request, null, 2)}`);
         logFieldsOfObject(logger, request, methodId + " - request", requestTypeFieldNames);
         const call = method(request, headers);
         call.on('metadata', (metadata) => {
@@ -58,7 +56,7 @@ console.log("Using environment " + env);
             metadataToFile(metadata, config.outDir + 'received_metadata.txt');
         });
         call.on('data', (response) => {
-            logger.info(`[invokeServerStreamingRpc] Method ${methodId} returns ${JSON.stringify(response, null, 2)}`);
+            logger.info(`[invokeServerStreamingRpc] ${methodId} - Response: ${JSON.stringify(response, null, 2)}`);
             logFieldsOfObject(logger, response, methodId + " - response", responseTypeFieldNames);
             messageToFile(responseType.fromObject(response), responseType, `${config.outDir}${methodId.replaceAll('.', '_')}_return_${responseIdx++}.bin`);
         });
@@ -77,7 +75,7 @@ console.log("Using environment " + env);
                 logger.error(`[invokeClientStreamingRpc] RPC invoke failed: ${err.message}\n${err.stack}`);
                 errorToFile(err, `${config.outDir}${methodId.replaceAll(".", "_")}_error.txt`);
             } else {
-                logger.info(`[invokeClientStreamingRpc] Method ${methodId} returns ${JSON.stringify(response, null, 2)}`);
+                logger.info(`[invokeClientStreamingRpc] ${methodId} - Response: ${JSON.stringify(response, null, 2)}`);
                 logFieldsOfObject(logger, response, methodId + " - response", responseTypeFieldNames);
                 messageToFile(responseType.fromObject(response), responseType, config.outDir + methodId.replaceAll(".", "_") + "_return_0.bin");
             }
@@ -91,7 +89,7 @@ console.log("Using environment " + env);
         loopMultipleFilesWithSamePrefix(`${config.testcaseDir}${methodId.replaceAll('.', '_')}_param`, '.bin')
                 .forEach((filepath) => {
                     const request = messageFromFile(filepath, requestType);
-                    logger.info(`[invokeClientStreamingRpc] Invoke ${methodId}, param: ${JSON.stringify(request, null, 2)}`);
+                    logger.info(`[invokeClientStreamingRpc] ${methodId} - Request: ${JSON.stringify(request, null, 2)}`);
                     logFieldsOfObject(logger, request, methodId + " - request", requestTypeFieldNames);
                     call.write(request);
                 });
@@ -106,7 +104,7 @@ console.log("Using environment " + env);
             metadataToFile(metadata, config.outDir + 'received_metadata.txt');
         });
         call.on('data', (response) => {
-            logger.info(`[invokeBidiStreamingRpc] Method ${methodId} returns ${JSON.stringify(response, null, 2)}`);
+            logger.info(`[invokeBidiStreamingRpc] ${methodId} - Response: ${JSON.stringify(response, null, 2)}`);
             logFieldsOfObject(logger, response, methodId + " - response", responseTypeFieldNames);
             messageToFile(responseType.fromObject(response), responseType, `${config.outDir}${methodId.replaceAll('.', '_')}_return_${responseIdx++}.bin`);
         });
@@ -120,7 +118,7 @@ console.log("Using environment " + env);
         loopMultipleFilesWithSamePrefix(`${config.testcaseDir}${methodId.replaceAll('.', '_')}_param`, '.bin')
                 .forEach((filepath) => {
                     const request = messageFromFile(filepath, requestType);
-                    logger.info(`[invokeBidiStreamingRpc] Invoke ${methodId}, param: ${JSON.stringify(request, null, 2)}`);
+                    logger.info(`[invokeBidiStreamingRpc] ${methodId} - Request: ${JSON.stringify(request, null, 2)}`);
                     logFieldsOfObject(logger, request, methodId + " - request", requestTypeFieldNames);
                     call.write(request);
                 });
@@ -132,22 +130,24 @@ console.log("Using environment " + env);
         try {
 
             // >>> SERVICE HotpotService
-            let hotpotServiceStub = new protosGrpc.single_hotpot.HotpotService(config.server.host + ':' + config.server.port, grpc.credentials.createInsecure());
+            let hotpotServiceStub = new protosGrpc.default_hotpot.HotpotService(config.server.host + ':' + config.server.port, grpc.credentials.createInsecure());
             logger.info(`[main] Connected to server at ${config.server.host}:${config.server.port}`);
 
             // METHOD unaryPot
-            invokeUnaryRpc((request, headers, callback) => hotpotServiceStub.unaryPot(request, headers, callback), root.lookupType('single_hotpot.RequestMessage'), root.lookupType('single_hotpot.ResponseMessage'), 'single_hotpot.HotpotService.unaryPot', single_hotpot_RequestMessage_fields, single_hotpot_ResponseMessage_fields);
+            invokeUnaryRpc((request, headers, callback) => hotpotServiceStub.unaryPot(request, headers, callback), root.lookupType('default_hotpot.BigHotpotOfTerror'), root.lookupType('default_hotpot.BigHotpotOfTerror'), 'default_hotpot.HotpotService.unaryPot', default_hotpot_BigHotpotOfTerror_fields, default_hotpot_BigHotpotOfTerror_fields);
             // METHOD serverStreamingPot
-            invokeServerStreamingRpc((request, headers) => hotpotServiceStub.serverStreamingPot(request, headers), root.lookupType('single_hotpot.RequestMessage'), root.lookupType('single_hotpot.ResponseMessage'), 'single_hotpot.HotpotService.serverStreamingPot', single_hotpot_RequestMessage_fields, single_hotpot_ResponseMessage_fields);
+            invokeServerStreamingRpc((request, headers) => hotpotServiceStub.serverStreamingPot(request, headers), root.lookupType('default_hotpot.BigHotpotOfTerror'), root.lookupType('default_hotpot.BigHotpotOfTerror'), 'default_hotpot.HotpotService.serverStreamingPot', default_hotpot_BigHotpotOfTerror_fields, default_hotpot_BigHotpotOfTerror_fields);
             // METHOD clientStreamingPot
-            invokeClientStreamingRpc((headers, callback) => hotpotServiceStub.clientStreamingPot(headers, callback), root.lookupType('single_hotpot.RequestMessage'), root.lookupType('single_hotpot.ResponseMessage'), 'single_hotpot.HotpotService.clientStreamingPot', single_hotpot_RequestMessage_fields, single_hotpot_ResponseMessage_fields);
+            invokeClientStreamingRpc((headers, callback) => hotpotServiceStub.clientStreamingPot(headers, callback), root.lookupType('default_hotpot.BigHotpotOfTerror'), root.lookupType('default_hotpot.BigHotpotOfTerror'), 'default_hotpot.HotpotService.clientStreamingPot', default_hotpot_BigHotpotOfTerror_fields, default_hotpot_BigHotpotOfTerror_fields);
             // METHOD bidiStreamingPot
-            invokeBidiStreamingRpc((headers) => hotpotServiceStub.bidiStreamingPot(headers), root.lookupType('single_hotpot.RequestMessage'), root.lookupType('single_hotpot.ResponseMessage'), 'single_hotpot.HotpotService.bidiStreamingPot', single_hotpot_RequestMessage_fields, single_hotpot_ResponseMessage_fields);
+            invokeBidiStreamingRpc((headers) => hotpotServiceStub.bidiStreamingPot(headers), root.lookupType('default_hotpot.BigHotpotOfTerror'), root.lookupType('default_hotpot.BigHotpotOfTerror'), 'default_hotpot.HotpotService.bidiStreamingPot', default_hotpot_BigHotpotOfTerror_fields, default_hotpot_BigHotpotOfTerror_fields);
 
             // <<< SERVICE HotpotService
         } catch (e) {
             logger.error(`[main] An error occurred: ${e.message}\n${e.stack}`);
         }
+
+        setTimeout(() => logger.info("[main] Shutdown delay timer elapsed"), 5000);
 
     }
 
