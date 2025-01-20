@@ -12,7 +12,7 @@
     <#if logRequests>
 ${tabs}log.info("[${method.name}] Request: {}", request);
         <#if logRequestsPrintFields>
-${tabs}ObjectUtil.logFieldsOfObject(request, "${method.id} - request", <#list registry.getAllFieldNamesAsCamelCase(method.inType) as fieldname>"${fieldname}"<#sep>, </#list>);
+${tabs}ObjectUtil.logFieldsOfObject(request, "${method.id} - request", <#list registry.getAllFieldsAsJavaGetters(method.inType) as fieldname>"${fieldname}"<#sep>, </#list>);
         </#if>
     </#if>
 </#macro>
@@ -21,13 +21,15 @@ ${tabs}ObjectUtil.logFieldsOfObject(request, "${method.id} - request", <#list re
     <#if logResponses>
 ${tabs}log.info("[${method.name}] Response: {}", response);
         <#if logResponsesPrintFields>
-${tabs}ObjectUtil.logFieldsOfObject(response, "${method.id} - response", <#list registry.getAllFieldNamesAsCamelCase(method.outType) as fieldname>"${fieldname}"<#sep>, </#list>);
+${tabs}ObjectUtil.logFieldsOfObject(response, "${method.id} - response", <#list registry.getAllFieldsAsJavaGetters(method.outType) as fieldname>"${fieldname}"<#sep>, </#list>);
         </#if>
     </#if>
 </#macro>
 <#assign service = registry.lookupService(serviceId)>
 package org.grpctest.java.server.generated.service;
 
+import io.grpc.Metadata;
+import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 import lombok.extern.slf4j.Slf4j;
 import org.grpctest.java.common.define.*;

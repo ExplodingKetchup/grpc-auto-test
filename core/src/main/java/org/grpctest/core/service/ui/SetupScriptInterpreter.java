@@ -112,9 +112,6 @@ public class SetupScriptInterpreter {
                 runtimeConfig.getIncludedCustomTestcases().add(arg);
             }
         }
-        if (!runtimeConfig.getIncludedCustomTestcases().isEmpty()) {
-            runtimeConfig.setEnableGeneratedTestcase(false);
-        }
     }
 
     private void interpretMetadataOpCode(String[] args) {

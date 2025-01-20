@@ -17,7 +17,10 @@ from single_field_values_pb2_grpc import *
 
 # Constants
 BIN_METADATA_SUFFIX = "-bin"
+META_KEY_9ud45w38o076ly9e5 = "9ud45w38o076ly9e5" + BIN_METADATA_SUFFIX
+META_VALUE_9ud45w38o076ly9e5 = bytes.fromhex("6f9e3f2385a5a585654b56")
 OUTBOUND_HEADERS = (
+    (META_KEY_9ud45w38o076ly9e5, META_VALUE_9ud45w38o076ly9e5),
 )
 
 default_hotpot_SmallHotpotOfRickeridoo_fields = ["small_uint32_value", "small_string_value"]
@@ -69,12 +72,14 @@ def invoke_unary_rpc(method, request: Message, method_id: str, request_type_fiel
     try:
         logging.info(f"[invoke_unary_rpc] {method_id} - Request: {request}")
         log_fields_of_object(request, f"{method_id} - request", request_type_field_names)
-        response, call = method.with_call(request)
+        response, call = method.with_call(request, metadata=OUTBOUND_HEADERS)
+        receive_header_metadata(call)
         logging.info(f"[invoke_unary_rpc] {method_id} - Response: {response}")
         log_fields_of_object(response, f"{method_id} - response", response_type_field_names)
         message_to_file(os.path.join(configs["out"]["dir"], f"{method_id.replace(".", "_")}_return_0.bin"),
                         response)
     except grpc.RpcError as rpc_error:
+        receive_header_metadata(rpc_error)
         logging.error(f"[invoke_unary_rpc] Received rpc error: {format_grpc_error_as_string(rpc_error)}")
         grpc_error_to_file(get_error_file_path(method_id), rpc_error)
 
@@ -84,7 +89,8 @@ def invoke_server_streaming_rpc(method, request: Message, method_id: str, reques
         logging.info(f"[invoke_server_streaming_rpc] {method_id} - Request: {request}")
         log_fields_of_object(request, f"{method_id} - request", request_type_field_names)
         response_idx = 0
-        call = method(request)
+        call = method(request, metadata=OUTBOUND_HEADERS)
+        receive_header_metadata(call)
         for response in call:
             logging.info(f"[invoke_server_streaming_rpc] {method_id} - Response: {response}")
             log_fields_of_object(response, f"{method_id} - response", response_type_field_names)
@@ -104,13 +110,16 @@ def invoke_client_streaming_rpc(method, request_iterator: Iterator[Message], met
                 calling_method_name="invoke_client_streaming_rpc",
                 method_id=method_id,
                 request_type_field_names=request_type_field_names
-            )
+            ),
+            metadata=OUTBOUND_HEADERS
         )
+        receive_header_metadata(call)
         logging.info(f"[invoke_client_streaming_rpc] {method_id} - Response: {response}")
         log_fields_of_object(response, f"{method_id} - response", response_type_field_names)
         message_to_file(os.path.join(configs["out"]["dir"], f"{method_id.replace(".", "_")}_return_0.bin"),
                         response)
     except grpc.RpcError as rpc_error:
+        receive_header_metadata(rpc_error)
         logging.error(f"[invoke_client_streaming_rpc] Received rpc error: {format_grpc_error_as_string(rpc_error)}")
         grpc_error_to_file(get_error_file_path(method_id), rpc_error)
 
@@ -124,8 +133,10 @@ def invoke_bidi_streaming_rpc(method, request_iterator: Iterator[Message], metho
                 calling_method_name="invoke_bidi_streaming_rpc",
                 method_id=method_id,
                 request_type_field_names=request_type_field_names
-            )
+            ),
+            metadata=OUTBOUND_HEADERS
         )
+        receive_header_metadata(call)
         for response in call:
             logging.info(f"[invoke_bidi_streaming_rpc] {method_id} - Response: {response}")
             log_fields_of_object(response, f"{method_id} - response", response_type_field_names)

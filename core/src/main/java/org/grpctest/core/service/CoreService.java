@@ -1,7 +1,5 @@
 package org.grpctest.core.service;
 
-import com.google.protobuf.Descriptors;
-import com.google.protobuf.DynamicMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.grpctest.core.config.Config;
 import org.grpctest.core.data.RpcModelRegistry;
@@ -129,7 +127,7 @@ public class CoreService implements InitializingBean {
             log.info("[Step 3 of 9] Finished reading content of .proto files");
 
             // Load test cases
-            if (!runtimeConfig.getEnableGeneratedTestcase()) {
+            if (!runtimeConfig.getIncludedCustomTestcases().isEmpty()) {
                 customTestCaseReader.loadTestCasesToRegistry(runtimeConfig.getIncludedCustomTestcases());
             }
 //
@@ -137,9 +135,31 @@ public class CoreService implements InitializingBean {
 //            DynamicMessage msg1 = DynamicMessage.newBuilder(descriptor).setField(descriptor.findFieldByName("message_value"), null).build();
 //            DynamicMessage msg2 = testCaseGenerator.generateMessage(rpcModelRegistry.lookupMessage("single_hotpot.SmallHotpotOfRickeridoo"), 0, 0);
 
-            // Generate random test cases for services without custom test cases
-            generateRandomTestcases(runtimeConfig);
+            // Generate test cases
+            if (runtimeConfig.getEnableGeneratedTestcase()) {
+                generateTestcases(runtimeConfig);
+            }
             log.info("[Step 4 of 9] Finished loading test cases");
+
+            // Remove methods with 0 testcase from registry
+            List<String> methodIdsToRemove = testcaseRegistry.getAllMethodsWithoutTestCases().stream().map(RpcService.RpcMethod::getId).toList();
+            for (String methodIdToRemove : methodIdsToRemove) {
+                rpcModelRegistry.removeMethod(methodIdToRemove);
+                testcaseRegistry.deleteEntry(methodIdToRemove);
+                log.warn("No testcase found for method {}. Method removed", methodIdToRemove);
+            }
+
+            // Also remove services without methods
+            List<String> serviceIdsToRemove = rpcModelRegistry.getAllServicesWithoutMethod().stream().map(RpcService::getId).toList();
+            for (String serviceIdToRemove : serviceIdsToRemove) {
+                rpcModelRegistry.removeService(serviceIdToRemove);
+                log.warn("Service {} contains no method with testcase. Service removed", serviceIdToRemove);
+            }
+
+            // Sanity check: if no method is available for testing, just end test
+            if (rpcModelRegistry.getAllMethods().isEmpty()) {
+                finalize(false, false);
+            }
 
             // Write all test cases to binary file
             testCaseWriter.writeAllTestCases();
@@ -182,15 +202,7 @@ public class CoreService implements InitializingBean {
             log.error("An error occurred, terminating test", t);
             hasError = true;
         } finally {
-            try {
-                // Clean up and Analyze results if there was no error last run
-                log.info("Tests are finished. Did we encounter error? {}", hasError);
-                finalize(!hasError);
-                log.info("Finished testing");
-            } catch (Throwable e) {
-                log.error("Cleanup failed", e);
-                throw new RuntimeException(e);
-            }
+            finalize(hasError, !hasError);
         }
     }
 
@@ -226,7 +238,7 @@ public class CoreService implements InitializingBean {
         dockerService.dockerComposeUpSpecifyServices(false, "py-client");
     }
 
-    private void generateRandomTestcases(RuntimeConfig runtimeConfig) {
+    private void generateTestcases(RuntimeConfig runtimeConfig) {
         for (RpcService.RpcMethod method : testcaseRegistry.getAllMethodsWithoutTestCases()) {
             testcaseRegistry.addTestCase(testCaseGenerator.generateTestcase(method, runtimeConfig.getOmitFieldsInRandomTestcases(), runtimeConfig.getValueMode(), runtimeConfig.getEnableException()));
         }
@@ -363,20 +375,31 @@ public class CoreService implements InitializingBean {
         }
     }
 
-    private void finalize(boolean analyzeResult) throws Throwable {
-        // Shut down and clean test containers
-        dockerService.dockerComposeDown();
+    private void finalize(boolean hasError, boolean analyzeResult) {
+        try {
+            // Clean up and Analyze results if there was no error last run
+            log.info("Tests are finished. Did we encounter error? {}", hasError);
 
-        // Analyze result
-        if (analyzeResult && Objects.nonNull(this.runtimeConfig)) {
-            resultAnalyzer.processAllMethods(this.runtimeConfig);
-            log.info("[Step 9 of 9] Finished analyzing results");
-        }
+            // Shut down and clean test containers
+            dockerService.dockerComposeDown();
 
-        // Clean up after test
-        if ((config.getCleanupMode().equals(CleanupMode.AFTER)) ||
-                (config.getCleanupMode().equals(CleanupMode.BEFORE_AND_AFTER))) {
-            genericFileService.cleanup();
+            // Analyze result
+            if (analyzeResult && Objects.nonNull(this.runtimeConfig)) {
+                resultAnalyzer.processAllMethods(this.runtimeConfig);
+                log.info("[Step 9 of 9] Finished analyzing results");
+            }
+
+            // Clean up after test
+            if ((config.getCleanupMode().equals(CleanupMode.AFTER)) ||
+                    (config.getCleanupMode().equals(CleanupMode.BEFORE_AND_AFTER))) {
+                genericFileService.cleanup();
+            }
+            log.info("Finished testing");
+
+            System.exit(0);
+        } catch (Throwable e) {
+            log.error("Cleanup failed", e);
+            throw new RuntimeException(e);
         }
     }
 }

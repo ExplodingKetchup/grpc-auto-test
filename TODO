@@ -19,3 +19,4 @@ TODO:
 - Python: protoc generate command: python3 -m grpc_tools.protoc --proto_path=proto --python_out=. --pyi_out=. --grpc_python_out=. proto/*.proto
 - Python: Are rpc_grpc_pb2.py generated if rpc.proto doesn't have service definition?
 - Core: Review Docker health check. If client shutdown too fast, healthcheck hangs until timeout.
+- Protoscope: protoscope -descriptor-set protobin/common.protobin -message-type numbered_hotpot.BigHotpotOfTerror -print-field-names -explicit-wire-types out/server/numbered_hotpot_HotpotService_unaryPot_param_0.bin

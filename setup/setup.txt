@@ -1,4 +1,5 @@
-CLIENT NODEJS
+CLIENT JAVA
 SERVER PYTHON
-TESTCASE --random:2
+TESTCASE big-hotpot-bidis-no-response.json big-hotpot-clients-no-response.json big-hotpot-servers-no-response.json big-hotpot-unary-no-response.json
 INCLUDE_PROTO single_field_values.proto
+METADATA --server-client:BIN --client-server:BIN

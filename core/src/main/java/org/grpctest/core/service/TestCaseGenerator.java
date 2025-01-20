@@ -207,8 +207,9 @@ public class TestCaseGenerator {
             case BYTE_STRING -> ByteString.copyFrom(randomBytes());
             case DOUBLE -> random.nextDouble();
             case ENUM -> {
-                List<Descriptors.EnumValueDescriptor> enumValues = field.getEnumType().getValues();
-                yield enumValues.get(random.nextInt(enumValues.size()));
+//                List<Descriptors.EnumValueDescriptor> enumValues = field.getEnumType().getValues();
+//                yield enumValues.get(random.nextInt(enumValues.size()));
+                yield field.getEnumType().findValueByNumberCreatingIfUnknown(10);
             }
             case FLOAT -> random.nextFloat();
             case INT -> random.nextInt();

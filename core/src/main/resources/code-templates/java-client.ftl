@@ -58,7 +58,7 @@ public class JavaClient implements InitializingBean {
 </#list>
 
 <#list registry.getAllMessages() as message>
-    private final String[] ${message.id?replace(".", "_")}_fields = new String[]{<#list registry.getAllFieldNamesAsCamelCase(message.id) as fieldname>"${fieldname}"<#sep>, </#list>};
+    private final String[] ${message.id?replace(".", "_")}_fields = new String[]{<#list registry.getAllFieldsAsJavaGetters(message.id) as fieldname>"${fieldname}"<#sep>, </#list>};
 </#list>
 
     public JavaClient(Config config, ClientInterceptor clientInterceptor) {

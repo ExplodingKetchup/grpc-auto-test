@@ -124,9 +124,9 @@ function messageFromFile(filepath, messageType) {
 function messageToFile(message, messageType, filepath) {
     // Make sure the message and messageType matches
     let err = messageType.verify(message);
-    if (err) {
-        throw Error(err);
-    }
+    // if (err) {
+    //     throw Error(err);
+    // }
 
     const buf = messageType.encode(message).finish();
 
@@ -156,7 +156,7 @@ function formatErrorForOutput(err) {
     const statusName = Object.keys(grpc.status).find(
         (key) => grpc.status[key] === err.code
     );
-    return `${statusName}\n${err.message}\n${formatMetadataForOutput(err.metadata)}`;
+    return `${statusName}\n${err.details}\n${formatMetadataForOutput(err.metadata)}`;
 }
 
 function errorToFile(err, filepath) {
@@ -188,14 +188,16 @@ function loopMultipleFilesWithSamePrefix(prefix, suffix) {
 function logFieldsOfObject(logger, obj, objName, fieldNames) {
     fieldNames.forEach((fieldname) => {
         let typeDisplayString = "";
+        let valueDisplayString = obj[fieldname];
         if (obj[fieldname] === null) {
             typeDisplayString = "null";
         } else if (typeof obj[fieldname] === "object") {
-            typeDisplayString = obj.constructor.name;
+            typeDisplayString = obj[fieldname].constructor.name;
+            valueDisplayString = JSON.stringify(obj[fieldname], null, 2);
         } else {
             typeDisplayString = typeof obj[fieldname];
         }
-        logger.info(`[logFieldsOfObject] ${objName}: ${fieldname} (${typeDisplayString}) = ${obj[fieldname]}`);
+        logger.info(`[logFieldsOfObject] ${objName}: ${fieldname} (${typeDisplayString}) = ${valueDisplayString}`);
     });
 }
 

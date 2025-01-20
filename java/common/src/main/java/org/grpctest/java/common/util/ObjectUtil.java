@@ -46,19 +46,17 @@ public class ObjectUtil {
         return o.getClass().getName();
     }
 
-    public static void logFieldsOfObject(Object o, String objectName, String... fieldNames) {
-        for (String fieldName : fieldNames) {
+    public static void logFieldsOfObject(Object o, String objectName, String... getterNames) {
+        for (String getterName : getterNames) {
             try {
-                fieldName = StringUtils.capitalize(fieldName);
-
-                // Get the field object
-                Method getter = o.getClass().getDeclaredMethod("get" + fieldName);
+                // Get the getter method
+                Method getter = o.getClass().getDeclaredMethod(getterName);
 
                 // Get the value of the field
                 Object value = getter.invoke(o);
-                log.info("[logFieldsOfObject] {}: {} ({}) = {}", objectName, fieldName, value.getClass().getName(), value);
-            } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ignored) {
-
+                log.info("[logFieldsOfObject] {}: {}() ({}) = {}", objectName, getterName, value.getClass().getName(), value);
+            } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+                log.warn("[logFieldsOfObject] Failed to access field {} of object {}", getterName, o);
             }
         }
     }

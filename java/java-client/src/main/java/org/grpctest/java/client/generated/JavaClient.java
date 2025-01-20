@@ -28,8 +28,8 @@ public class JavaClient implements InitializingBean {
 
     private final HotpotServiceGrpc.HotpotServiceStub hotpotServiceAsyncStub;
 
-    private final String[] default_hotpot_SmallHotpotOfRickeridoo_fields = new String[]{"SmallUint32Value", "SmallStringValue"};
-    private final String[] default_hotpot_BigHotpotOfTerror_fields = new String[]{"DoubleValue", "FloatValue", "Int32Value", "Int64Value", "Uint32Value", "Uint64Value", "Sint32Value", "Sint64Value", "Fixed32Value", "Fixed64Value", "Sfixed32Value", "Sfixed64Value", "BoolValue", "StringValue", "BytesValue", "EnumValue", "MessageValue"};
+    private final String[] default_hotpot_SmallHotpotOfRickeridoo_fields = new String[]{"getSmallUint32Value", "getSmallStringValue"};
+    private final String[] default_hotpot_BigHotpotOfTerror_fields = new String[]{"getDoubleValue", "getFloatValue", "getInt32Value", "getInt64Value", "getUint32Value", "getUint64Value", "getSint32Value", "getSint64Value", "getFixed32Value", "getFixed64Value", "getSfixed32Value", "getSfixed64Value", "getBoolValue", "getStringValue", "getBytesValue", "getEnumValue", "getMessageValue"};
 
     public JavaClient(Config config, ClientInterceptor clientInterceptor) {
         this.config = config;

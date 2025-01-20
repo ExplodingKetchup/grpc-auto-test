@@ -1,0 +1,51 @@
+{
+  "methodId": "default_hotpot.HotpotService.unaryPot",
+  "paramValue": [
+    {
+      "double_value": 1.0,
+      "float_value": 1.0,
+      "int32_value": 1,
+      "int64_value": 1,
+      "uint32_value": 1,
+      "uint64_value": 1,
+      "sint32_value": 1,
+      "sint64_value": 1,
+      "fixed32_value": 1,
+      "fixed64_value": 1,
+      "sfixed32_value": 1,
+      "sfixed64_value": 1,
+      "bool_value": true,
+      "string_value": "one",
+      "bytes_value": "01",
+      "enum_value": 16,
+      "message_value": {
+        "small_uint32_value": 1,
+        "small_string_value": "hello"
+      }
+    }
+  ],
+  "returnValue": [
+    {
+      "double_value": 1.0,
+      "float_value": 1.0,
+      "int32_value": 1,
+      "int64_value": 1,
+      "uint32_value": 1,
+      "uint64_value": 1,
+      "sint32_value": 1,
+      "sint64_value": 1,
+      "fixed32_value": 1,
+      "fixed64_value": 1,
+      "sfixed32_value": 1,
+      "sfixed64_value": 1,
+      "bool_value": true,
+      "string_value": "one",
+      "bytes_value": "01",
+      "enum_value": 16,
+      "message_value": {
+        "small_uint32_value": 1,
+        "small_string_value": "hello"
+      }
+    }
+  ]
+}

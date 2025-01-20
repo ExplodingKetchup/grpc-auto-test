@@ -83,11 +83,17 @@ public class DynamicMessageUtilService {
                 if (field.isRepeated()) {
                     if (entry.getValue() instanceof List) {
                         for (Object value : (List)entry.getValue()) {
-                            builder.addRepeatedField(field, convertSingleFieldValue(value, field));
+                            Object convertedValue = convertSingleFieldValue(value, field);
+                            if (Objects.nonNull(convertedValue)) {
+                                builder.addRepeatedField(field, convertedValue);
+                            }
                         }
                     }
                 } else {
-                    builder.setField(field, convertSingleFieldValue(entry.getValue(), field));
+                    Object convertedValue = convertSingleFieldValue(entry.getValue(), field);
+                    if (Objects.nonNull(convertedValue)) {
+                        builder.setField(field, convertedValue);
+                    }
                 }
             }
         } else {
@@ -97,77 +103,90 @@ public class DynamicMessageUtilService {
     }
 
     private Object convertSingleFieldValue(Object value, Descriptors.FieldDescriptor field) {
-        return switch (field.getType()) {
-            case BOOL -> (Boolean) value;
-            case BYTES -> ByteString.copyFromUtf8((String) value);
-            case DOUBLE -> {
-                if (value instanceof String) {
-                    if (value.equals(NUMERIC_MAX)) {
-                        yield Double.MAX_VALUE;
-                    } else if (value.equals(NUMERIC_MIN)) {
-                        yield -Double.MAX_VALUE;
-                    } else if (value.equals(NUMERIC_FLOAT_MIN_FRACTION)) {
-                        yield Double.MIN_VALUE;
+        try {
+            return switch (field.getType()) {
+                case BOOL -> (Boolean) value;
+                case BYTES -> ByteString.fromHex((String) value);
+                case DOUBLE -> {
+                    if (value instanceof String) {
+                        if (value.equals(NUMERIC_MAX)) {
+                            yield Double.MAX_VALUE;
+                        } else if (value.equals(NUMERIC_MIN)) {
+                            yield -Double.MAX_VALUE;
+                        } else if (value.equals(NUMERIC_FLOAT_MIN_FRACTION)) {
+                            yield Double.MIN_VALUE;
+                        }
+                    }
+                    yield (Double) value;
+                }
+                case ENUM -> {
+                    if (value instanceof String) {
+                        yield field.getEnumType().findValueByName((String) value);
+                    } else if (value instanceof Long) {
+                        yield field.getEnumType().findValueByNumberCreatingIfUnknown(Math.toIntExact((Long) value));
+                    } else {
+                        yield null;
                     }
                 }
-                yield (Double) value;
-            }
-            case ENUM -> field.getEnumType().findValueByName((String) value);
-            case FIXED32, UINT32 -> {
-                if (value instanceof String) {
-                    if (value.equals(NUMERIC_MAX)) {
-                        yield -1;
-                    } else if (value.equals(NUMERIC_MIN)) {
-                        yield 0;
+                case FIXED32, UINT32 -> {
+                    if (value instanceof String) {
+                        if (value.equals(NUMERIC_MAX)) {
+                            yield -1;
+                        } else if (value.equals(NUMERIC_MIN)) {
+                            yield 0;
+                        }
                     }
+                    yield ((Long) value).intValue();
                 }
-                yield ((Long) value).intValue();
-            }
-            case FIXED64, UINT64 -> {
-                if (value instanceof String) {
-                    if (value.equals(NUMERIC_MAX)) {
-                        yield -1L;
-                    } else if (value.equals(NUMERIC_MIN)) {
-                        yield 0L;
+                case FIXED64, UINT64 -> {
+                    if (value instanceof String) {
+                        if (value.equals(NUMERIC_MAX)) {
+                            yield -1L;
+                        } else if (value.equals(NUMERIC_MIN)) {
+                            yield 0L;
+                        }
                     }
+                    yield (Long) value;
                 }
-                yield (Long) value;
-            }
-            case FLOAT -> {
-                if (value instanceof String) {
-                    if (value.equals(NUMERIC_MAX)) {
-                        yield Float.MAX_VALUE;
-                    } else if (value.equals(NUMERIC_MIN)) {
-                        yield -Float.MAX_VALUE;
-                    } else if (value.equals(NUMERIC_FLOAT_MIN_FRACTION)) {
-                        yield Float.MIN_VALUE;
+                case FLOAT -> {
+                    if (value instanceof String) {
+                        if (value.equals(NUMERIC_MAX)) {
+                            yield Float.MAX_VALUE;
+                        } else if (value.equals(NUMERIC_MIN)) {
+                            yield -Float.MAX_VALUE;
+                        } else if (value.equals(NUMERIC_FLOAT_MIN_FRACTION)) {
+                            yield Float.MIN_VALUE;
+                        }
                     }
+                    yield ((Double) value).floatValue();
                 }
-                yield ((Double) value).floatValue();
-            }
-            case INT32, SFIXED32, SINT32 -> {
-                if (value instanceof String) {
-                    if (value.equals(NUMERIC_MAX)) {
-                        yield Integer.MAX_VALUE;
-                    } else if (value.equals(NUMERIC_MIN)) {
-                        yield Integer.MIN_VALUE;
+                case INT32, SFIXED32, SINT32 -> {
+                    if (value instanceof String) {
+                        if (value.equals(NUMERIC_MAX)) {
+                            yield Integer.MAX_VALUE;
+                        } else if (value.equals(NUMERIC_MIN)) {
+                            yield Integer.MIN_VALUE;
+                        }
                     }
+                    yield ((Long) value).intValue();
                 }
-                yield ((Long) value).intValue();
-            }
-            case INT64, SFIXED64, SINT64 -> {
-                if (value instanceof String) {
-                    if (value.equals(NUMERIC_MAX)) {
-                        yield Long.MAX_VALUE;
-                    } else if (value.equals(NUMERIC_MIN)) {
-                        yield Long.MIN_VALUE;
+                case INT64, SFIXED64, SINT64 -> {
+                    if (value instanceof String) {
+                        if (value.equals(NUMERIC_MAX)) {
+                            yield Long.MAX_VALUE;
+                        } else if (value.equals(NUMERIC_MIN)) {
+                            yield Long.MIN_VALUE;
+                        }
                     }
+                    yield (Long) value;
                 }
-                yield (Long) value;
-            }
-            case MESSAGE -> objectToDynamicMessage(value, rpcModelRegistry.lookupMessage(field.getMessageType().getFullName()));
-            case STRING -> (String) value;
-            default -> throw new IllegalArgumentException("Field type not supported");
-        };
+                case MESSAGE ->
+                        objectToDynamicMessage(value, rpcModelRegistry.lookupMessage(field.getMessageType().getFullName()));
+                case STRING -> (String) value;
+                default -> throw new IllegalArgumentException("Field type not supported");
+            };
+        } catch (Exception e) {
+            return null;
+        }
     }
 }

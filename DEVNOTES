@@ -26,3 +26,4 @@ Rpc Error:
 - For unary and client streaming, the client cannot receive any responses when exception occurred
 - For server streaming and bidi streaming, the client can receive all responses up to the point the exception is raised
 on the server
+- The 2nd and 3rd point is in accordance to conventions

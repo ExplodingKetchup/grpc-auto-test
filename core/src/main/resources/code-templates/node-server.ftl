@@ -14,7 +14,7 @@
     <#assign trailers = rpcException.trailingMetadata>
 ${tabs}const trailers = new grpc.Metadata();
         <#list trailers?keys as trailerKey>
-${tabs}trailers.set(${trailerKey}, ${trailers[trailerKey].getRight()});
+${tabs}trailers.set("${trailerKey}", "${trailers[trailerKey].getRight()}");
         </#list>
 ${tabs}const rpcException = {code: grpc.status.${rpcException.statusCode.name()}, details: '${rpcException.description}', metadata: trailers};
     </#if>

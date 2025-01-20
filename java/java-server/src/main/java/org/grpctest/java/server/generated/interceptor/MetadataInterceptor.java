@@ -17,6 +17,12 @@ import java.util.HexFormat;
 public class MetadataInterceptor implements ServerInterceptor {
 
 
+    private static final Metadata.Key<byte[]> META_KEY_44deu1qso1 =
+            Metadata.Key.of("44deu1qso1" + Metadata.BINARY_HEADER_SUFFIX, Metadata.BINARY_BYTE_MARSHALLER);
+
+    private static final byte[] META_VALUE_44deu1qso1 = HexFormat.of().parseHex("b5854f1a");
+
+
     @Autowired
     private Config config;
 
@@ -30,6 +36,7 @@ public class MetadataInterceptor implements ServerInterceptor {
         return next.startCall(new ForwardingServerCall.SimpleForwardingServerCall<ReqT, RespT>(call) {
             @Override
             public void sendHeaders(Metadata responseMetadata) {
+                responseMetadata.put(META_KEY_44deu1qso1, META_VALUE_44deu1qso1);
                 log.info("[interceptCall] Server -> Client metadata:\n{}", MessageUtil.formatMetadataForOutput(responseMetadata));
                 super.sendHeaders(responseMetadata);
             }

@@ -4,6 +4,7 @@ import com.google.protobuf.Descriptors;
 import io.grpc.Metadata;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.grpctest.core.enums.MetadataType;
 import org.grpctest.core.pojo.RpcMessage;
@@ -63,6 +64,14 @@ public class RpcModelRegistry {
         return serviceLookupTable.values().stream().toList();
     }
 
+    public List<RpcService> getAllServicesWithoutMethod() {
+        return serviceLookupTable.values().stream().filter(service -> service.getMethods().isEmpty()).toList();
+    }
+
+    public void removeService(String serviceId) {
+        serviceLookupTable.remove(serviceId);
+    }
+
     // methodLookupTable
 
     public void addMethodToLookupTable(RpcService.RpcMethod method) {
@@ -79,6 +88,12 @@ public class RpcModelRegistry {
 
     public List<RpcService.RpcMethod> getAllMethods() {
         return methodLookupTable.values().stream().toList();
+    }
+
+    public void removeMethod(String methodId) {
+        RpcService.RpcMethod methodToRemove = lookupMethod(methodId);
+        lookupService(methodToRemove.getOwnerServiceId()).getMethods().removeIf(internalMethodId -> StringUtils.equals(methodId, internalMethodId));
+        methodLookupTable.remove(methodId);
     }
 
     // serviceLookupTable + methodLookupTable
@@ -126,6 +141,13 @@ public class RpcModelRegistry {
 
     public List<String> getAllFieldNamesAsCamelCase(String messageId) {
         return getAllFieldNames(messageId).stream().map((fieldname) -> StringUtil.snakeCaseToCamelCase(fieldname, true)).toList();
+    }
+
+    public List<String> getAllFieldsAsJavaGetters(String messageId) {
+        return messageLookupTable.get(messageId)
+                .getMessageDescriptor().getFields().stream().map(
+                        (fieldDescriptor) -> ("get" + StringUtil.snakeCaseToCamelCase(fieldDescriptor.getName(), true) + (fieldDescriptor.isRepeated() ? "List" : ""))
+                ).toList();
     }
 
     // clientToServerMetadata

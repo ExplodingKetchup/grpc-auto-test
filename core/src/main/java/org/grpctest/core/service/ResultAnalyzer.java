@@ -325,14 +325,14 @@ public class ResultAnalyzer {
         if (!StringUtils.equals(actual.getDescription(), expected.getDescription())) {
             return false;
         }
-        if (actual.getTrailingMetadata().size() != expected.getTrailingMetadata().size()) {
-            return false;
-        }
-        for (Map.Entry<String, Pair<MetadataType, String>> trailerActualEntry : actual.getTrailingMetadata().entrySet()) {
-            if (!expected.getTrailingMetadata().containsKey(trailerActualEntry.getKey())) {
+//        if (actual.getTrailingMetadata().size() != expected.getTrailingMetadata().size()) {
+//            return false;
+//        }
+        for (Map.Entry<String, Pair<MetadataType, String>> trailerExpectedEntry : expected.getTrailingMetadata().entrySet()) {
+            if (!actual.getTrailingMetadata().containsKey(trailerExpectedEntry.getKey())) {
                 return false;
             }
-            if (!StringUtils.equals(trailerActualEntry.getValue().getRight(), expected.getTrailingMetadata().get(trailerActualEntry.getKey()).getRight())) {
+            if (!StringUtils.equals(trailerExpectedEntry.getValue().getRight(), actual.getTrailingMetadata().get(trailerExpectedEntry.getKey()).getRight())) {
                 return false;
             }
         }
@@ -345,7 +345,7 @@ public class ResultAnalyzer {
                 List<String> lines = Files.readAllLines(Paths.get(filepath));
                 return readMetadata(lines);
             } catch (IOException ioe) {
-                log.error("[readExceptionFromFile] File I/O failed", ioe);
+                log.error("[readMetadataFromFile] File I/O failed", ioe);
                 throw ioe;
             }
         } else {

@@ -3,6 +3,8 @@ import { createLogger, loadProtosGrpc, loadProtosProtobufjs, messageFromFile, me
 
 // Constants
 const BIN_SUFFIX = '-bin';
+const META_KEY_wemvw36h7f6dk = 'wemvw36h7f6dk' + BIN_SUFFIX;
+const META_VALUE_wemvw36h7f6dk = Buffer.from('784d42', 'hex');
 
 const default_hotpot_SmallHotpotOfRickeridoo_fields = ["small_uint32_value", "small_string_value"];
 const default_hotpot_BigHotpotOfTerror_fields = ["double_value", "float_value", "int32_value", "int64_value", "uint32_value", "uint64_value", "sint32_value", "sint64_value", "fixed32_value", "fixed64_value", "sfixed32_value", "sfixed64_value", "bool_value", "string_value", "bytes_value", "enum_value", "message_value"];
@@ -22,6 +24,7 @@ console.log("Using environment " + env);
     let protosGrpc = loadProtosGrpc(config.protoDir);
     let root = loadProtosProtobufjs(config.protoDir);
     const headers = new grpc.Metadata();
+    headers.set(META_KEY_wemvw36h7f6dk, META_VALUE_wemvw36h7f6dk);
 
     function invokeUnaryRpc(method, requestType, responseType, methodId, requestTypeFieldNames, responseTypeFieldNames) {
         const rpcCallback = (err, response) => {
