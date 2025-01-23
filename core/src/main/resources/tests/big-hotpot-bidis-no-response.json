@@ -1,0 +1,58 @@
+{
+  "methodId": "default_hotpot.HotpotService.bidiStreamingPot",
+  "paramValue": [
+    {
+      "double_value": 1.0,
+      "float_value": 1.0,
+      "int32_value": 1,
+      "int64_value": 1,
+      "uint32_value": 1,
+      "uint64_value": 1,
+      "sint32_value": 1,
+      "sint64_value": 1,
+      "fixed32_value": 1,
+      "fixed64_value": 1,
+      "sfixed32_value": 1,
+      "sfixed64_value": 1,
+      "bool_value": true,
+      "string_value": "one",
+      "bytes_value": "01",
+      "enum_value": 1,
+      "message_value": {
+        "small_uint32_value": 1,
+        "small_string_value": "hello"
+      }
+    },
+    {
+      "double_value": 2.0,
+      "float_value": 2.0,
+      "int32_value": 2,
+      "int64_value": 2,
+      "uint32_value": 2,
+      "uint64_value": 2,
+      "sint32_value": 2,
+      "sint64_value": 2,
+      "fixed32_value": 2,
+      "fixed64_value": 2,
+      "sfixed32_value": 2,
+      "sfixed64_value": 2,
+      "bool_value": true,
+      "string_value": "two",
+      "bytes_value": "02",
+      "enum_value": 1,
+      "message_value": {
+        "small_uint32_value": 2,
+        "small_string_value": "hello123"
+      }
+    }
+  ],
+  "returnValue": [],
+  "exception": {
+    "statusCode": "INTERNAL",
+    "description": "pickled bananas",
+    "trailers": {
+      "key1": "STRvalue1"
+    },
+    "runtimeException": false
+  }
+}

@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+package repeated_hotpot;
+
+option java_multiple_files = true;
+option java_package = "org.grpctest.java.common.define";
+option java_outer_classname = "RepeatedValueProto";
+
+message BigHotpotOfTerror {
+  repeated double double_value = 1;
+  repeated float float_value = 2;
+  repeated int32 int32_value = 3;
+  repeated int64 int64_value = 4;
+  repeated uint32 uint32_value = 5;
+  repeated uint64 uint64_value = 6;
+  repeated sint32 sint32_value = 7;
+  repeated sint64 sint64_value = 8;
+  repeated fixed32 fixed32_value = 9;
+  repeated fixed64 fixed64_value = 10;
+  repeated sfixed32 sfixed32_value = 11;
+  repeated sfixed64 sfixed64_value = 12;
+  repeated bool bool_value = 13;
+  repeated string string_value = 14;
+  repeated bytes bytes_value = 15;
+  repeated AnExampleEnum enum_value = 16;
+  repeated SmallHotpotOfRickeridoo message_value = 17;
+}
+
+message SmallHotpotOfRickeridoo {
+  repeated uint32 small_uint32_value = 1;
+  repeated string small_string_value = 2;
+}
+
+enum AnExampleEnum {
+  AEE_ZERO = 0;
+  AEE_ONE = 1;
+  AEE_TWO = 2;
+  AEE_THREE = 3;
+  AEE_FOUR = 4;
+  AEE_FIVE = 5;
+  AEE_SIX = 6;
+  AEE_SEVEN = 7;
+}
+
+service HotpotService {
+  // UNARY
+  rpc UnaryPot(BigHotpotOfTerror) returns (BigHotpotOfTerror);
+  // SERVER_STREAMING
+  rpc ServerStreamingPot(BigHotpotOfTerror) returns (stream BigHotpotOfTerror);
+  // CLIENT_STREAMING
+  rpc ClientStreamingPot(stream BigHotpotOfTerror) returns (BigHotpotOfTerror);
+  // BIDI_STREAMING
+  rpc BidiStreamingPot(stream BigHotpotOfTerror) returns (stream BigHotpotOfTerror);
+}

@@ -1,0 +1,63 @@
+{
+  "methodId": "numbered_hotpot.HotpotService.bidiStreamingPot",
+  "paramValue": [
+    {
+      "double_value": "MIN",
+      "float_value": "MIN",
+      "int32_value": "MIN",
+      "int64_value": "MIN",
+      "uint32_value": "MIN",
+      "uint64_value": "MIN",
+      "sint32_value": "MIN",
+      "sint64_value": "MIN",
+      "fixed32_value": "MIN",
+      "fixed64_value": "MIN",
+      "sfixed32_value": "MIN",
+      "sfixed64_value": "MIN"
+    },
+    {
+      "double_value": "MIN",
+      "float_value": "MIN",
+      "int32_value": "MIN",
+      "int64_value": "MIN",
+      "uint32_value": "MIN",
+      "uint64_value": "MIN",
+      "sint32_value": "MIN",
+      "sint64_value": "MIN",
+      "fixed32_value": "MIN",
+      "fixed64_value": "MIN",
+      "sfixed32_value": "MIN",
+      "sfixed64_value": "MIN"
+    }
+  ],
+  "returnValue": [
+    {
+      "double_value": "MIN",
+      "float_value": "MIN",
+      "int32_value": "MIN",
+      "int64_value": "MIN",
+      "uint32_value": "MIN",
+      "uint64_value": "MIN",
+      "sint32_value": "MIN",
+      "sint64_value": "MIN",
+      "fixed32_value": "MIN",
+      "fixed64_value": "MIN",
+      "sfixed32_value": "MIN",
+      "sfixed64_value": "MIN"
+    },
+    {
+      "double_value": "MIN",
+      "float_value": "MIN",
+      "int32_value": "MIN",
+      "int64_value": "MIN",
+      "uint32_value": "MIN",
+      "uint64_value": "MIN",
+      "sint32_value": "MIN",
+      "sint64_value": "MIN",
+      "fixed32_value": "MIN",
+      "fixed64_value": "MIN",
+      "sfixed32_value": "MIN",
+      "sfixed64_value": "MIN"
+    }
+  ]
+}
