@@ -4,8 +4,12 @@ import { createLogger, loadProtosGrpc, loadProtosProtobufjs, messageFromFile, me
 
 // Constants
 const BIN_SUFFIX = '-bin';
-const META_KEY_6 = '6' + BIN_SUFFIX;
-const META_VALUE_6 = Buffer.from('8dd4e1cf88b396093b19', 'hex');
+const META_KEY_c4w50x = 'c4w50x' + BIN_SUFFIX;
+const META_VALUE_c4w50x = Buffer.from('821b818ee92f8c196ae38674af05c0dc0b8438', 'hex');
+const META_KEY_3ifjo = '3ifjo' + BIN_SUFFIX;
+const META_VALUE_3ifjo = Buffer.from('02', 'hex');
+const META_KEY_boj3514dwawi1ndmt5n = 'boj3514dwawi1ndmt5n' + BIN_SUFFIX;
+const META_VALUE_boj3514dwawi1ndmt5n = Buffer.from('47b720', 'hex');
 
 // Load configs dynamically depending on environment
 const env = process.env.NODE_ENV || 'test';
@@ -38,7 +42,9 @@ console.log("Using environment " + env);
             });
 
             const metadata = new grpc.Metadata();
-            metadata.set(META_KEY_6, META_VALUE_6);
+            metadata.set(META_KEY_c4w50x, META_VALUE_c4w50x);
+            metadata.set(META_KEY_3ifjo, META_VALUE_3ifjo);
+            metadata.set(META_KEY_boj3514dwawi1ndmt5n, META_VALUE_boj3514dwawi1ndmt5n);
             call.sendMetadata(metadata);
 
             call.on('end', () => {
@@ -49,10 +55,7 @@ console.log("Using environment " + env);
                             logFieldsOfObject(logger, response, "default_hotpot.HotpotService.bidiStreamingPot - response", ["double_value", "float_value", "int32_value", "int64_value", "uint32_value", "uint64_value", "sint32_value", "sint64_value", "fixed32_value", "fixed64_value", "sfixed32_value", "sfixed64_value", "bool_value", "string_value", "bytes_value", "enum_value", "message_value"]);
                             call.write(response);
                         });
-                const trailers = new grpc.Metadata();
-                trailers.set("key1", "value1");
-                const rpcException = {code: grpc.status.INTERNAL, details: 'pickled bananas', metadata: trailers};
-                call.emit('error', rpcException);
+               call.end();
             });
 
         } catch (e) {
@@ -74,13 +77,18 @@ console.log("Using environment " + env);
             messageToFile(requestMessageType.fromObject(request), requestMessageType, config.outDir + "default_hotpot_HotpotService_unaryPot_param_0.bin");
 
             const metadata = new grpc.Metadata();
-            metadata.set(META_KEY_6, META_VALUE_6);
+            metadata.set(META_KEY_c4w50x, META_VALUE_c4w50x);
+            metadata.set(META_KEY_3ifjo, META_VALUE_3ifjo);
+            metadata.set(META_KEY_boj3514dwawi1ndmt5n, META_VALUE_boj3514dwawi1ndmt5n);
             call.sendMetadata(metadata);
 
-            const trailers = new grpc.Metadata();
-            trailers.set("key1", "value1");
-            const rpcException = {code: grpc.status.INTERNAL, details: 'pickled bananas', metadata: trailers};
-            callback(rpcException);
+            const response = messageFromFile(
+                config.testcaseDir + "default_hotpot_HotpotService_unaryPot_return_0.bin",
+                responseMessageType
+            );
+            logger.info(`[default_hotpot.HotpotService.unaryPot] Response: ${JSON.stringify(response, null, 2)}`);
+            logFieldsOfObject(logger, response, "default_hotpot.HotpotService.unaryPot - response", ["double_value", "float_value", "int32_value", "int64_value", "uint32_value", "uint64_value", "sint32_value", "sint64_value", "fixed32_value", "fixed64_value", "sfixed32_value", "sfixed64_value", "bool_value", "string_value", "bytes_value", "enum_value", "message_value"]);
+            callback(null, response);
 
         } catch (e) {
             logger.error(`[default_hotpot_HotpotService_unaryPot] An error occurred: ${e.message}\n${e.stack}`);
@@ -101,7 +109,9 @@ console.log("Using environment " + env);
             messageToFile(requestMessageType.fromObject(request), requestMessageType, config.outDir + "default_hotpot_HotpotService_serverStreamingPot_param_0.bin");
 
             const metadata = new grpc.Metadata();
-            metadata.set(META_KEY_6, META_VALUE_6);
+            metadata.set(META_KEY_c4w50x, META_VALUE_c4w50x);
+            metadata.set(META_KEY_3ifjo, META_VALUE_3ifjo);
+            metadata.set(META_KEY_boj3514dwawi1ndmt5n, META_VALUE_boj3514dwawi1ndmt5n);
             call.sendMetadata(metadata);
 
             loopMultipleFilesWithSamePrefix(config.testcaseDir + 'default_hotpot_HotpotService_serverStreamingPot_return', '.bin')
@@ -111,10 +121,7 @@ console.log("Using environment " + env);
                         logFieldsOfObject(logger, response, "default_hotpot.HotpotService.serverStreamingPot - response", ["double_value", "float_value", "int32_value", "int64_value", "uint32_value", "uint64_value", "sint32_value", "sint64_value", "fixed32_value", "fixed64_value", "sfixed32_value", "sfixed64_value", "bool_value", "string_value", "bytes_value", "enum_value", "message_value"]);
                         call.write(response);
                     });
-            const trailers = new grpc.Metadata();
-            trailers.set("key1", "value1");
-            const rpcException = {code: grpc.status.INTERNAL, details: 'pickled bananas', metadata: trailers};
-            call.emit('error', rpcException);
+            call.end();
 
         } catch (e) {
             logger.error(`[default_hotpot_HotpotService_serverStreamingPot] An error occurred: ${e.message}\n${e.stack}`);
@@ -137,14 +144,19 @@ console.log("Using environment " + env);
             });
 
             const metadata = new grpc.Metadata();
-            metadata.set(META_KEY_6, META_VALUE_6);
+            metadata.set(META_KEY_c4w50x, META_VALUE_c4w50x);
+            metadata.set(META_KEY_3ifjo, META_VALUE_3ifjo);
+            metadata.set(META_KEY_boj3514dwawi1ndmt5n, META_VALUE_boj3514dwawi1ndmt5n);
             call.sendMetadata(metadata);
 
             call.on('end', () => {
-                const trailers = new grpc.Metadata();
-                trailers.set("key1", "value1");
-                const rpcException = {code: grpc.status.INTERNAL, details: 'pickled bananas', metadata: trailers};
-                callback(rpcException);
+               const response = messageFromFile(
+                   config.testcaseDir + "default_hotpot_HotpotService_clientStreamingPot_return_0.bin",
+                   responseMessageType
+               );
+                logger.info(`[default_hotpot.HotpotService.clientStreamingPot] Response: ${JSON.stringify(response, null, 2)}`);
+                logFieldsOfObject(logger, response, "default_hotpot.HotpotService.clientStreamingPot - response", ["double_value", "float_value", "int32_value", "int64_value", "uint32_value", "uint64_value", "sint32_value", "sint64_value", "fixed32_value", "fixed64_value", "sfixed32_value", "sfixed64_value", "bool_value", "string_value", "bytes_value", "enum_value", "message_value"]);
+               callback(null, response);
             });
 
         } catch (e) {

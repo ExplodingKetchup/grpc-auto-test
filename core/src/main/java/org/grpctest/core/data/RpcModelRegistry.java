@@ -1,8 +1,8 @@
 package org.grpctest.core.data;
 
 import com.google.protobuf.Descriptors;
-import io.grpc.Metadata;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -45,6 +45,14 @@ public class RpcModelRegistry {
     /** List of all proto files */
     @Getter
     private final List<String> protoFiles = new ArrayList<>();
+
+    @Getter
+    @Setter
+    private String requestCompression;
+
+    @Getter
+    @Setter
+    private String responseCompression;
 
     // serviceLookupTable
 
@@ -190,5 +198,17 @@ public class RpcModelRegistry {
 
     public void addProtoFilename(String protoFilename) {
         protoFiles.add(protoFilename);
+    }
+
+    // requestCompression
+
+    public boolean isRequestCompressionSet() {
+        return StringUtils.isNotBlank(requestCompression);
+    }
+
+    // responseCompression
+
+    public boolean isResponseCompressionSet() {
+        return StringUtils.isNotBlank(responseCompression);
     }
 }

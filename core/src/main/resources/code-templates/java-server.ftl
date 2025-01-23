@@ -1,8 +1,6 @@
 package org.grpctest.java.server.generated;
 
-import io.grpc.Server;
-import io.grpc.ServerBuilder;
-import io.grpc.ServerInterceptors;
+import io.grpc.*;
 import lombok.extern.slf4j.Slf4j;
 import org.grpctest.java.server.config.Config;
 import org.grpctest.java.server.generated.interceptor.MetadataInterceptor;
@@ -31,6 +29,15 @@ public class JavaServer implements InitializingBean {
         this.config = config;
         this.server = ServerBuilder
                 .forPort(config.getServerPort())
+<#if registry.isResponseCompressionSet()>
+                .intercept(new ServerInterceptor() {
+                    @Override
+                    public <ReqT, RespT> ServerCall.Listener<ReqT> interceptCall(ServerCall<ReqT, RespT> call, Metadata headers, ServerCallHandler<ReqT, RespT> next) {
+                        call.setCompression("${registry.getCompression()}");
+                        return next.startCall(call, headers);
+                    }
+                })
+</#if>
 <#list registry.getAllServices() as service>
                 .addService(ServerInterceptors.intercept(${service.name?uncap_first}, metadataInterceptor))
 </#list>

@@ -19,6 +19,9 @@ public interface TestSetupUi {
                 .omitFieldsInRandomTestcases(chooseOmitFieldsInRandomTestcases())
                 .valueMode(chooseValueMode())
                 .includedCustomTestcases(chooseIncludedCustomTestcases())
+                .generateFilesOnly(chooseGenerateFilesOnly())
+                .requestCompression(chooseRequestCompression())
+                .responseCompression(chooseResponseCompression())
                 .build();
     }
 
@@ -43,4 +46,10 @@ public interface TestSetupUi {
     int chooseValueMode() throws Exception;
 
     List<String> chooseIncludedCustomTestcases() throws Exception;
+
+    boolean chooseGenerateFilesOnly() throws Exception;
+
+    String chooseRequestCompression() throws Exception;
+
+    String chooseResponseCompression() throws Exception;
 }

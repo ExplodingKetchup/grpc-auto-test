@@ -1,5 +1,6 @@
 package org.grpctest.java.common.util;
 
+import com.google.protobuf.Message;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -51,10 +52,22 @@ public class ObjectUtil {
             try {
                 // Get the getter method
                 Method getter = o.getClass().getDeclaredMethod(getterName);
-
                 // Get the value of the field
                 Object value = getter.invoke(o);
-                log.info("[logFieldsOfObject] {}: {}() ({}) = {}", objectName, getterName, value.getClass().getName(), value);
+
+                // Check field set / unset
+                if (o instanceof Message) {
+                    String fieldPresence;
+                    try {
+                        Method hasFieldMethod = o.getClass().getDeclaredMethod("has" + getterName.substring(3));
+                        fieldPresence = hasFieldMethod.invoke(o).toString();
+                    } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+                        fieldPresence = "N/A";
+                    }
+                    log.info("[logFieldsOfObject] {}: {}() ({}; fieldPresence = {}) = {}", objectName, getterName, value.getClass().getName(), fieldPresence, value);
+                } else {
+                    log.info("[logFieldsOfObject] {}: {}() ({}) = {}", objectName, getterName, value.getClass().getName(), value);
+                }
             } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
                 log.warn("[logFieldsOfObject] Failed to access field {} of object {}", getterName, o);
             }

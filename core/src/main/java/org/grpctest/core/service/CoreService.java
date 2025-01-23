@@ -166,37 +166,50 @@ public class CoreService implements InitializingBean {
             log.info("[Step 5 of 9] Finished writing test cases to file");
 
             setServerInConfig(runtimeConfig);
+            addCompressionSettings(runtimeConfig);
             addMetadata(runtimeConfig);
             log.info("Preparations completed. Launching server...");
 
             // Build and launch server
             switch (runtimeConfig.getServer()) {
-                case JAVA -> buildAndLaunchJavaServer();
-                case NODEJS -> buildAndLaunchNodejsServer();
-                case PYTHON -> buildAndLaunchPythonServer();
+                case JAVA -> javaCodeGenService.generateServer();
+                case NODEJS -> nodejsCodeGenService.generateServer();
+                case PYTHON -> pythonCodeGenService.generateServer();
             }
-
-            // Wait for server to start properly
-            TimeUtil.pollForCondition(() -> {
-                try {
-                    return checkServerRunning(runtimeConfig.getServer());
-                } catch (IOException ioe) {
-                    return false;
+            if (!runtimeConfig.getGenerateFilesOnly()) {
+                if (runtimeConfig.getServer().equals(RuntimeConfig.Language.JAVA)) {
+                    mavenInvoker.buildServer();
                 }
-            }, 1000, config.getServerStartupTimeoutMillis());
-            log.info("Server started, will start launching client...");
+                dockerService.dockerComposeUpSpecifyServices(true, RuntimeConfig.Language.getServerName(runtimeConfig.getServer()));
+
+                // Wait for server to start properly
+                TimeUtil.pollForCondition(() -> {
+                    try {
+                        return checkServerRunning(runtimeConfig.getServer());
+                    } catch (IOException ioe) {
+                        return false;
+                    }
+                }, 1000, config.getServerStartupTimeoutMillis());
+                log.info("Server started, will start launching client...");
+            }
 
             // Build and launch client
             switch (runtimeConfig.getClient()) {
-                case JAVA -> buildAndLaunchJavaClient();
-                case NODEJS -> buildAndLaunchNodejsClient();
-                case PYTHON -> buildAndLaunchPythonClient();
+                case JAVA -> javaCodeGenService.generateClient();
+                case NODEJS -> nodejsCodeGenService.generateClient();
+                case PYTHON -> pythonCodeGenService.generateClient();
             }
+            if (!runtimeConfig.getGenerateFilesOnly()) {
+                if (runtimeConfig.getClient().equals(RuntimeConfig.Language.JAVA)) {
+                    mavenInvoker.buildClient();
+                }
+                dockerService.dockerComposeUpSpecifyServices(false, RuntimeConfig.Language.getClientName(runtimeConfig.getClient()));
 
-            // Wait until all tests are finished
-            TimeUtil.pollForCondition(() -> checkTestsFinished(runtimeConfig), 1000, config.getTestTimeoutMillis());
-            log.info("Client shut down. Concluding tests...");
-            Thread.sleep(5000);     // Wait for stuff to finish before shutting down
+                // Wait until all tests are finished
+                TimeUtil.pollForCondition(() -> checkTestsFinished(runtimeConfig), 1000, config.getTestTimeoutMillis());
+                log.info("Client shut down. Concluding tests...");
+                Thread.sleep(5000);     // Wait for stuff to finish before shutting down
+            }
 
         } catch (Throwable t) {
             log.error("An error occurred, terminating test", t);
@@ -204,38 +217,6 @@ public class CoreService implements InitializingBean {
         } finally {
             finalize(hasError, !hasError);
         }
-    }
-
-    private void buildAndLaunchJavaServer() throws Throwable {
-        javaCodeGenService.generateServer();
-        mavenInvoker.buildServer();
-        dockerService.dockerComposeUpSpecifyServices(true, "java-server");
-    }
-
-    private void buildAndLaunchJavaClient() throws Throwable {
-        javaCodeGenService.generateClient();
-        mavenInvoker.buildClient();
-        dockerService.dockerComposeUpSpecifyServices(false, "java-client");
-    }
-
-    private void buildAndLaunchNodejsServer() throws Exception {
-        nodejsCodeGenService.generateServer();
-        dockerService.dockerComposeUpSpecifyServices(true, "node-server");
-    }
-
-    private void buildAndLaunchNodejsClient() throws Exception {
-        nodejsCodeGenService.generateClient();
-        dockerService.dockerComposeUpSpecifyServices(false, "node-client");
-    }
-
-    private void buildAndLaunchPythonServer() throws Exception {
-        pythonCodeGenService.generateServer();
-        dockerService.dockerComposeUpSpecifyServices(true, "py-server");
-    }
-
-    private void buildAndLaunchPythonClient() throws Exception {
-        pythonCodeGenService.generateClient();
-        dockerService.dockerComposeUpSpecifyServices(false, "py-client");
     }
 
     private void generateTestcases(RuntimeConfig runtimeConfig) {
@@ -251,6 +232,11 @@ public class CoreService implements InitializingBean {
             case NODEJS -> config.setNodejsClientServerHost(serverName);
             case PYTHON -> config.setPyClientServerHost(serverName);
         }
+    }
+
+    private void addCompressionSettings(RuntimeConfig runtimeConfig) {
+        rpcModelRegistry.setRequestCompression(runtimeConfig.getRequestCompression());
+        rpcModelRegistry.setResponseCompression(runtimeConfig.getResponseCompression());
     }
 
     private void addMetadata(RuntimeConfig runtimeConfig) {

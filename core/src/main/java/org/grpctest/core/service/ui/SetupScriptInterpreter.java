@@ -1,5 +1,6 @@
 package org.grpctest.core.service.ui;
 
+import com.google.common.collect.Lists;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -10,12 +11,15 @@ import org.springframework.stereotype.Service;
 
 import java.io.*;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 @NoArgsConstructor
 @Service
 @Slf4j
 public class SetupScriptInterpreter {
+
+    private static final List<String> SUPPORTED_COMPRESSION_ALGOS = Lists.newArrayList("gzip");
 
     private RuntimeConfig runtimeConfig;
 
@@ -48,10 +52,12 @@ public class SetupScriptInterpreter {
         switch (opCode) {
             case SERVER -> interpretServerOpCode(words[1]);
             case CLIENT -> interpretClientOpCode(words[1]);
-            case TESTCASE -> interpretTestcaseOpCode(Arrays.copyOfRange(words, 1, words.length));
-            case METADATA -> interpretMetadataOpCode(Arrays.copyOfRange(words, 1, words.length));
+            case TESTCASE -> interpretTestcaseOpCode(getArgs(words));
+            case COMPRESSION -> interpretCompressionOpCode(getArgs(words));
+            case METADATA -> interpretMetadataOpCode(getArgs(words));
             case MOCK_EXCEPTION -> interpretMockExceptionOpCode();
-            case INCLUDE_PROTO -> interpretIncludeProtoOpCode(Arrays.copyOfRange(words, 1, words.length));
+            case INCLUDE_PROTO -> interpretIncludeProtoOpCode(getArgs(words));
+            case GENERATE_FILES_ONLY -> interpretGenerateFilesOnlyOpCode(getArgs(words));
         }
     }
 
@@ -114,6 +120,23 @@ public class SetupScriptInterpreter {
         }
     }
 
+    private void interpretCompressionOpCode(String[] args) {
+        for (String arg : args) {
+            Pair<String, String> flag = parseFlagArg(arg);
+            if (Objects.nonNull(flag)) {
+                if (StringUtils.equals(flag.getLeft(), "request")){
+                    if (SUPPORTED_COMPRESSION_ALGOS.contains(flag.getRight())) {
+                        runtimeConfig.setRequestCompression(flag.getRight());
+                    }
+                } else if (StringUtils.equals(flag.getLeft(), "response")) {
+                    if (SUPPORTED_COMPRESSION_ALGOS.contains(flag.getRight())) {
+                        runtimeConfig.setResponseCompression(flag.getRight());
+                    }
+                }
+            }
+        }
+    }
+
     private void interpretMetadataOpCode(String[] args) {
         for (String arg: args) {
             // Flags
@@ -148,6 +171,17 @@ public class SetupScriptInterpreter {
         }
     }
 
+    private void interpretGenerateFilesOnlyOpCode(String[] args) {
+        runtimeConfig.setGenerateFilesOnly(true);
+    }
+
+    private String[] getArgs(String[] line) {
+        if (line.length > 1) {
+            return Arrays.copyOfRange(line, 1, line.length);
+        }
+        return new String[]{};
+    }
+
     /**
      * Extract information from a "flag" arg (in the form --(flag_key):(flag_value) or --(flag_key))
      * @param arg
@@ -177,11 +211,17 @@ public class SetupScriptInterpreter {
          * "--random" and "--default" are mutually exclusive. If both are present, will interpret the 1st flag only.
          */
         TESTCASE,
+        /** COMPRESSION --request:compression_algo --response:compression_algo <br>
+         * Currently only support gzip. If not specified, will interpret as uncompressed.
+         */
+        COMPRESSION,
         /** METADATA (--server-client:{@link org.grpctest.core.enums.MetadataType}) (--client-server:{@link org.grpctest.core.enums.MetadataType}) [Optional] */
         METADATA,
         /** MOCK_EXCEPTION [Optional] */
         MOCK_EXCEPTION,
         /** INCLUDE_PROTO rpc_1.proto rpc_2.proto [Optional] */
-        INCLUDE_PROTO
+        INCLUDE_PROTO,
+        /** GENERATE_FILES_ONLY */
+        GENERATE_FILES_ONLY
     }
 }

@@ -11,16 +11,16 @@ from file_utils import list_files_with_same_prefix
 from log_utils import configure_logger, get_log_file_for_this_instance, log_fields_of_object
 from message_utils import message_from_file, message_to_file, format_grpc_error_as_string, grpc_error_to_file, \
     metadata_to_file, format_metadata_as_string
-from single_field_values_pb2 import *
-from single_field_values_pb2_grpc import *
+from single_field_values_implicit_pb2 import *
+from single_field_values_implicit_pb2_grpc import *
 
 
 # Constants
 BIN_METADATA_SUFFIX = "-bin"
-META_KEY_9ud45w38o076ly9e5 = "9ud45w38o076ly9e5" + BIN_METADATA_SUFFIX
-META_VALUE_9ud45w38o076ly9e5 = bytes.fromhex("6f9e3f2385a5a585654b56")
+META_KEY_y4kk47j3 = "y4kk47j3" + BIN_METADATA_SUFFIX
+META_VALUE_y4kk47j3 = bytes.fromhex("af6df2")
 OUTBOUND_HEADERS = (
-    (META_KEY_9ud45w38o076ly9e5, META_VALUE_9ud45w38o076ly9e5),
+    (META_KEY_y4kk47j3, META_VALUE_y4kk47j3),
 )
 
 default_hotpot_SmallHotpotOfRickeridoo_fields = ["small_uint32_value", "small_string_value"]
@@ -82,6 +82,11 @@ def invoke_unary_rpc(method, request: Message, method_id: str, request_type_fiel
         receive_header_metadata(rpc_error)
         logging.error(f"[invoke_unary_rpc] Received rpc error: {format_grpc_error_as_string(rpc_error)}")
         grpc_error_to_file(get_error_file_path(method_id), rpc_error)
+        response = rpc_error.args[0].response
+        logging.info(f"[invoke_unary_rpc] {method_id} - Response: {response}")
+        log_fields_of_object(response, f"{method_id} - response", response_type_field_names)
+        message_to_file(os.path.join(configs["out"]["dir"], f"{method_id.replace(".", "_")}_return_0.bin"),
+                        response)
 
 
 def invoke_server_streaming_rpc(method, request: Message, method_id: str, request_type_field_names: list[str], response_type_field_names: list[str]):
@@ -122,6 +127,11 @@ def invoke_client_streaming_rpc(method, request_iterator: Iterator[Message], met
         receive_header_metadata(rpc_error)
         logging.error(f"[invoke_client_streaming_rpc] Received rpc error: {format_grpc_error_as_string(rpc_error)}")
         grpc_error_to_file(get_error_file_path(method_id), rpc_error)
+        response = rpc_error.args[0].response
+        logging.info(f"[invoke_client_streaming_rpc] {method_id} - Response: {response}")
+        log_fields_of_object(response, f"{method_id} - response", response_type_field_names)
+        message_to_file(os.path.join(configs["out"]["dir"], f"{method_id.replace(".", "_")}_return_0.bin"),
+                        response)
 
 
 def invoke_bidi_streaming_rpc(method, request_iterator: Iterator[Message], method_id: str, request_type_field_names: list[str], response_type_field_names: list[str]):

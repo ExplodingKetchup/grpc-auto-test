@@ -86,5 +86,20 @@ public class TestSetupUiScriptImpl implements TestSetupUi {
         return runtimeConfig.getIncludedCustomTestcases();
     }
 
+    @Override
+    public boolean chooseGenerateFilesOnly() throws Exception {
+        return runtimeConfig.getGenerateFilesOnly();
+    }
+
+    @Override
+    public String chooseRequestCompression() throws Exception {
+        return runtimeConfig.getRequestCompression();
+    }
+
+    @Override
+    public String chooseResponseCompression() throws Exception {
+        return runtimeConfig.getResponseCompression();
+    }
+
 
 }

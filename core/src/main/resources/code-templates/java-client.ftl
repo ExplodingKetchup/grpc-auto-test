@@ -43,6 +43,7 @@ import org.springframework.stereotype.Component;
 import java.io.File;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 @Component
@@ -66,8 +67,8 @@ public class JavaClient implements InitializingBean {
         Channel originChannel = ManagedChannelBuilder.forAddress(config.getServiceHost(), config.getServicePort()).usePlaintext().build();
         Channel channel = ClientInterceptors.intercept(originChannel, clientInterceptor);
 <#list registry.getAllServices() as service>
-        this.${service.name?uncap_first}BlockingStub = ${service.name}Grpc.newBlockingStub(channel);
-        this.${service.name?uncap_first}AsyncStub = ${service.name}Grpc.newStub(channel);
+        this.${service.name?uncap_first}BlockingStub = ${service.name}Grpc.newBlockingStub(channel)<#if registry.isRequestCompressionSet()>.withCompression("${registry.getRequestCompression()}")</#if>;
+        this.${service.name?uncap_first}AsyncStub = ${service.name}Grpc.newStub(channel)<#if registry.isRequestCompressionSet()>.withCompression("${registry.getRequestCompression()}")</#if>;
 </#list>
         log.info("Connected to server at {}:{}", config.getServiceHost(), config.getServicePort());
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -84,7 +85,8 @@ public class JavaClient implements InitializingBean {
     <#assign responseFields = method.outType?replace(".", "_") + "_fields">
         // Invoke test case: ${method.id}
     <#if method.type == "UNARY">
-        invokeUnaryRpcMethod(${method.ownerServiceId?split(".")?last?uncap_first}BlockingStub::${method.name}, MessageUtil.messageFromFile(config.getTestcaseDir() + File.separator + "${method.id?replace(".", "_")}_param_0.bin", ${method.inType?split(".")?last}.class), "${method.id}", ${requestFields}, ${responseFields});
+        // invokeUnaryRpcMethod(${method.ownerServiceId?split(".")?last?uncap_first}BlockingStub::${method.name}, MessageUtil.messageFromFile(config.getTestcaseDir() + File.separator + "${method.id?replace(".", "_")}_param_0.bin", ${method.inType?split(".")?last}.class), "${method.id}", ${requestFields}, ${responseFields});
+        invokeUnaryRpcMethodAsync(${method.ownerServiceId?split(".")?last?uncap_first}AsyncStub::${method.name}, MessageUtil.messageFromFile(config.getTestcaseDir() + File.separator + "${method.id?replace(".", "_")}_param_0.bin", ${method.inType?split(".")?last}.class), "${method.id}", ${requestFields}, ${responseFields});
     <#elseif method.type == "SERVER_STREAMING">
         invokeServerStreamingRpcMethod(${method.ownerServiceId?split(".")?last?uncap_first}BlockingStub::${method.name}, MessageUtil.messageFromFile(config.getTestcaseDir() + File.separator + "${method.id?replace(".", "_")}_param_0.bin", ${method.inType?split(".")?last}.class), "${method.id}", ${requestFields}, ${responseFields});
     <#elseif method.type == "CLIENT_STREAMING">
@@ -117,6 +119,40 @@ public class JavaClient implements InitializingBean {
             } catch (Exception e) {
             }
         }
+    }
+
+    private <T, R> void invokeUnaryRpcMethodAsync(BiConsumer<T, StreamObserver<R>> method,  T parameter, String methodId, String[] requestTypeFieldNames, String[] responseTypeFieldNames) {
+        StreamObserver<R> responseObserver = new StreamObserver<R>() {
+            @Override
+            public void onNext(R response) {
+                try {
+                    <@responseLogging invoker="invokeUnaryRpcMethodAsync" indent=5/>
+                    if (response instanceof GeneratedMessageV3) {
+                        MessageUtil.messageToFile((GeneratedMessageV3) response, config.getOutDir() + File.separator + methodId.replace(".", "_") + "_return_0.bin");
+                    } else {
+                        log.error("[invokeUnaryRpcMethodAsync] Method {} returns message of type [{}], incompatible with protobuf", methodId, response.getClass());
+                    }
+                } catch (Throwable t) {
+                    log.error("[invokeUnaryRpcMethodAsync] Error processing response {}", response, t);
+                }
+            }
+
+            @Override
+            public void onError(Throwable throwable) {
+                log.error("[invokeUnaryRpcMethodAsync] Method {} throws error", methodId, throwable);
+                try {
+                    MessageUtil.grpcExceptionToFile(config.getOutDir() + File.separator + methodId.replace(".", "_") + "_error.txt", throwable);
+                } catch (Exception e) {
+                }
+            }
+
+            @Override
+            public void onCompleted() {
+
+            }
+        };
+        <@requestLogging invoker="invokeUnaryRpcMethodAsync" indent=2/>
+        method.accept(parameter, responseObserver);
     }
 
     private <T, R> void invokeServerStreamingRpcMethod(Function<T, Iterator<R>> method, T parameter, String methodId, String[] requestTypeFieldNames, String[] responseTypeFieldNames) {

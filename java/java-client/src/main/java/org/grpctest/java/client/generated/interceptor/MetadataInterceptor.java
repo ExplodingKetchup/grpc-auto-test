@@ -16,22 +16,22 @@ import java.util.HexFormat;
 public class MetadataInterceptor implements ClientInterceptor {
 
 
-    private static final Metadata.Key<byte[]> META_KEY_abbu908ml1796p471i =
-            Metadata.Key.of("abbu908ml1796p471i" + Metadata.BINARY_HEADER_SUFFIX, Metadata.BINARY_BYTE_MARSHALLER);
+    private static final Metadata.Key<byte[]> META_KEY_1wy4 =
+            Metadata.Key.of("1wy4" + Metadata.BINARY_HEADER_SUFFIX, Metadata.BINARY_BYTE_MARSHALLER);
 
-    private static final byte[] META_VALUE_abbu908ml1796p471i = HexFormat.of().parseHex("297520bf");
-
-
-    private static final Metadata.Key<byte[]> META_KEY_5go3gcv428n053tr5u7 =
-            Metadata.Key.of("5go3gcv428n053tr5u7" + Metadata.BINARY_HEADER_SUFFIX, Metadata.BINARY_BYTE_MARSHALLER);
-
-    private static final byte[] META_VALUE_5go3gcv428n053tr5u7 = HexFormat.of().parseHex("3035ed94");
+    private static final byte[] META_VALUE_1wy4 = HexFormat.of().parseHex("bb22825a211bdb");
 
 
-    private static final Metadata.Key<byte[]> META_KEY_0bj5fadu =
-            Metadata.Key.of("0bj5fadu" + Metadata.BINARY_HEADER_SUFFIX, Metadata.BINARY_BYTE_MARSHALLER);
+    private static final Metadata.Key<byte[]> META_KEY_b2j8 =
+            Metadata.Key.of("b2j8" + Metadata.BINARY_HEADER_SUFFIX, Metadata.BINARY_BYTE_MARSHALLER);
 
-    private static final byte[] META_VALUE_0bj5fadu = HexFormat.of().parseHex("c1f1e750673fb043fb54e1da3f76a242b7");
+    private static final byte[] META_VALUE_b2j8 = HexFormat.of().parseHex("c95074f7be5ce711b203ce69f4");
+
+
+    private static final Metadata.Key<byte[]> META_KEY_w5c6ej849bl4ug7e39 =
+            Metadata.Key.of("w5c6ej849bl4ug7e39" + Metadata.BINARY_HEADER_SUFFIX, Metadata.BINARY_BYTE_MARSHALLER);
+
+    private static final byte[] META_VALUE_w5c6ej849bl4ug7e39 = HexFormat.of().parseHex("9b5fcfa4");
 
 
     @Autowired
@@ -42,9 +42,9 @@ public class MetadataInterceptor implements ClientInterceptor {
         return new ForwardingClientCall.SimpleForwardingClientCall<ReqT, RespT>(channel.newCall(methodDescriptor, callOptions)) {
             @Override
             public void start(Listener<RespT> responseListener, Metadata headers) {
-                headers.put(META_KEY_abbu908ml1796p471i, META_VALUE_abbu908ml1796p471i);
-                headers.put(META_KEY_5go3gcv428n053tr5u7, META_VALUE_5go3gcv428n053tr5u7);
-                headers.put(META_KEY_0bj5fadu, META_VALUE_0bj5fadu);
+                headers.put(META_KEY_1wy4, META_VALUE_1wy4);
+                headers.put(META_KEY_b2j8, META_VALUE_b2j8);
+                headers.put(META_KEY_w5c6ej849bl4ug7e39, META_VALUE_w5c6ej849bl4ug7e39);
                 log.info("[interceptCall] Client -> Server metadata:\n{}", MessageUtil.formatMetadataForOutput(headers));
                 super.start(new ForwardingClientCallListener.SimpleForwardingClientCallListener<RespT>(responseListener) {
                     @Override

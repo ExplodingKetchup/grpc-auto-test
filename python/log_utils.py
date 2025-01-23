@@ -2,6 +2,7 @@ import logging
 import os
 import time
 
+from google.protobuf.message import Message
 
 def configure_logger(log_file: str):
     """
@@ -32,6 +33,14 @@ def log_fields_of_object(obj: object, obj_name: str, field_names: list[str]) -> 
     for field_name in field_names:
         try:
             value = getattr(obj, field_name)
-            logging.info(f"[log_fields_of_object] {obj_name}: {field_name} ({type(value).__name__}) = {value}")
+            if isinstance(obj, Message):
+                field_presence = ""
+                try:
+                    field_presence = str(obj.HasField(field_name))
+                except ValueError:
+                    field_presence = "N/A"
+                logging.info(f"[log_fields_of_object] {obj_name}: {field_name} ({type(value).__name__}; field_presence = {field_presence}) = {value}")
+            else:
+                logging.info(f"[log_fields_of_object] {obj_name}: {field_name} ({type(value).__name__}) = {value}")
         except AttributeError:
             logging.warning(f"[log_fields_of_object] Field {field_name} is not defined in message")

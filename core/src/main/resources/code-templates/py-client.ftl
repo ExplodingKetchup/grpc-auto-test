@@ -126,6 +126,10 @@ def invoke_unary_rpc(method, request: Message, method_id: str, request_type_fiel
 </#if>
         logging.error(f"[invoke_unary_rpc] Received rpc error: {format_grpc_error_as_string(rpc_error)}")
         grpc_error_to_file(get_error_file_path(method_id), rpc_error)
+        response = rpc_error.args[0].response
+        <@responseLogging invoker="invoke_unary_rpc" indent=2/>
+        message_to_file(os.path.join(configs["out"]["dir"], f"{method_id.replace(".", "_")}_return_0.bin"),
+                        response)
 
 
 def invoke_server_streaming_rpc(method, request: Message, method_id: str, request_type_field_names: list[str], response_type_field_names: list[str]):
@@ -169,6 +173,10 @@ def invoke_client_streaming_rpc(method, request_iterator: Iterator[Message], met
 </#if>
         logging.error(f"[invoke_client_streaming_rpc] Received rpc error: {format_grpc_error_as_string(rpc_error)}")
         grpc_error_to_file(get_error_file_path(method_id), rpc_error)
+        response = rpc_error.args[0].response
+        <@responseLogging invoker="invoke_client_streaming_rpc" indent=2/>
+        message_to_file(os.path.join(configs["out"]["dir"], f"{method_id.replace(".", "_")}_return_0.bin"),
+                        response)
 
 
 def invoke_bidi_streaming_rpc(method, request_iterator: Iterator[Message], method_id: str, request_type_field_names: list[str], response_type_field_names: list[str]):

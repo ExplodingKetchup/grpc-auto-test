@@ -58,7 +58,7 @@ public class TestCaseGenerator {
             case UNARY -> {
                 if (hasException) {
                     numberOfParams = 1;
-                    numberOfReturns = 0;
+                    numberOfReturns = 1;
                 } else {
                     numberOfParams = 1;
                     numberOfReturns = 1;
@@ -76,7 +76,7 @@ public class TestCaseGenerator {
             case CLIENT_STREAMING -> {
                 if (hasException) {
                     numberOfParams = random.nextInt(2, 4);
-                    numberOfReturns = 0;
+                    numberOfReturns = 1;
                 } else {
                     numberOfParams = random.nextInt(2, 4);
                     numberOfReturns = 1;
@@ -207,9 +207,8 @@ public class TestCaseGenerator {
             case BYTE_STRING -> ByteString.copyFrom(randomBytes());
             case DOUBLE -> random.nextDouble();
             case ENUM -> {
-//                List<Descriptors.EnumValueDescriptor> enumValues = field.getEnumType().getValues();
-//                yield enumValues.get(random.nextInt(enumValues.size()));
-                yield field.getEnumType().findValueByNumberCreatingIfUnknown(10);
+                List<Descriptors.EnumValueDescriptor> enumValues = field.getEnumType().getValues();
+                yield enumValues.get(random.nextInt(enumValues.size()));
             }
             case FLOAT -> random.nextFloat();
             case INT -> random.nextInt();

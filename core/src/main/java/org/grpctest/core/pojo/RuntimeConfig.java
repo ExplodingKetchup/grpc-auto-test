@@ -42,6 +42,15 @@ public class RuntimeConfig {
     @Builder.Default
     private List<String> includedCustomTestcases = new ArrayList<>();
 
+    @Builder.Default
+    private Boolean generateFilesOnly = false;
+
+    @Builder.Default
+    private String requestCompression = "";
+
+    @Builder.Default
+    private String responseCompression = "";
+
     @Getter
     public enum Language {
         JAVA("Java"),
@@ -58,6 +67,14 @@ public class RuntimeConfig {
             CLIENT_NAME.put(JAVA, "java-client");
             CLIENT_NAME.put(NODEJS, "node-client");
             CLIENT_NAME.put(PYTHON, "py-client");
+        }
+
+        public static String getServerName(Language language) {
+            return SERVER_NAME.get(language);
+        }
+
+        public static String getClientName(Language language) {
+            return CLIENT_NAME.get(language);
         }
 
         private final String displayName;

@@ -197,7 +197,8 @@ function logFieldsOfObject(logger, obj, objName, fieldNames) {
         } else {
             typeDisplayString = typeof obj[fieldname];
         }
-        logger.info(`[logFieldsOfObject] ${objName}: ${fieldname} (${typeDisplayString}) = ${valueDisplayString}`);
+        let fieldPresence = obj.hasOwnProperty(fieldname);
+        logger.info(`[logFieldsOfObject] ${objName}: ${fieldname} (${typeDisplayString}; fieldPresence = ${fieldPresence}) = ${valueDisplayString}`);
     });
 }
 
