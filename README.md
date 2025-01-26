@@ -86,7 +86,7 @@ Note that the date/time here are in UTC timezone
 - `grpc-auto-test/out/server`: Contains output files from server.
 
 ### grpc-auto-test/setup
-Contains the setup script (see (#setup-script)).
+Contains the setup script (see 'Setup script').
 
 ### grpc-auto-test/test-cases
 Contains test messages (encoded to binary form using Protobuf). Test programs will read from this place to form messages to send to the other party.
@@ -181,7 +181,7 @@ By enabling `value_flag`, we enabled testcase generation. Testcase generation ge
 testcases with default values (depending on the key of `value_flag`).
 With testcase generation, we can specify if the program should generate value for every fields (`value_flag` value = 0),
 or generate value for some of the fields (`value_flag` value = 1), or generate empty messages (`value_flag` value = 2).<br>
-You can also specify custom test cases here. See (#custom-test-cases) for the syntax.<br>
+You can also specify custom test cases here. See 'Custom test cases' for the syntax.<br>
 `COMPRESSION`: Specify whether to use compression on requests and responses. **(UNTESTED FEATURE)**<br>
 `METADATA`: Send test headers (randomly generated) with each call. In a run, the set of headers is identical between
 each call. `client-server` refers to client-to-server headers, and `server-client` refers to server-to-client ones.
