@@ -26,13 +26,6 @@ public class JavaServer implements InitializingBean {
         this.config = config;
         this.server = ServerBuilder
                 .forPort(config.getServerPort())
-                .intercept(new ServerInterceptor() {
-                    @Override
-                    public <ReqT, RespT> ServerCall.Listener<ReqT> interceptCall(ServerCall<ReqT, RespT> call, Metadata headers, ServerCallHandler<ReqT, RespT> next) {
-                        call.setCompression("gzip");
-                        return next.startCall(call, headers);
-                    }
-                })
                 .addService(ServerInterceptors.intercept(hotpotService, metadataInterceptor))
                 .build();
     }

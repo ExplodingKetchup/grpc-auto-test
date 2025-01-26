@@ -29,6 +29,7 @@ import * as grpc from '@grpc/grpc-js';
 import { createLogger, loadProtosGrpc, loadProtosProtobufjs, messageFromFile, messageToFile, formatMetadataForOutput, metadataToFile, formatErrorForOutput, errorToFile, loopMultipleFilesWithSamePrefix, logFieldsOfObject } from './common.js';
 
 // Constants
+const SUPPORTED_COMPRESSION_ALGO = ["", "deflate", "gzip", "gzip-stream"];
 const BIN_SUFFIX = '-bin';
 <#assign metaMap = registry.getAllClientToServerMetadata()>
 <#list metaMap?keys as metaKey>
@@ -167,7 +168,7 @@ console.log("Using environment " + env);
 
 <#list registry.getAllServices() as service>
             // >>> SERVICE ${service.name}
-            let ${service.name?uncap_first}Stub = new protosGrpc.${service.id}(config.server.host + ':' + config.server.port, grpc.credentials.createInsecure());
+            let ${service.name?uncap_first}Stub = new protosGrpc.${service.id}(config.server.host + ':' + config.server.port, grpc.credentials.createInsecure()<#if registry.isRequestCompressionSet()>, {'grpc.default_compression_algorithm': SUPPORTED_COMPRESSION_ALGO.indexOf("${registry.getRequestCompression}"), 'grpc.default_compression_level': 2}</#if>);
             logger.info(`[main] Connected to server at ${"$"}{config.server.host}:${"$"}{config.server.port}`);
 
     <#list registry.getAllMethods(service) as method>

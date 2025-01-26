@@ -4,12 +4,6 @@ import { createLogger, loadProtosGrpc, loadProtosProtobufjs, messageFromFile, me
 
 // Constants
 const BIN_SUFFIX = '-bin';
-const META_KEY_c4w50x = 'c4w50x' + BIN_SUFFIX;
-const META_VALUE_c4w50x = Buffer.from('821b818ee92f8c196ae38674af05c0dc0b8438', 'hex');
-const META_KEY_3ifjo = '3ifjo' + BIN_SUFFIX;
-const META_VALUE_3ifjo = Buffer.from('02', 'hex');
-const META_KEY_boj3514dwawi1ndmt5n = 'boj3514dwawi1ndmt5n' + BIN_SUFFIX;
-const META_VALUE_boj3514dwawi1ndmt5n = Buffer.from('47b720', 'hex');
 
 // Load configs dynamically depending on environment
 const env = process.env.NODE_ENV || 'test';
@@ -42,9 +36,6 @@ console.log("Using environment " + env);
             });
 
             const metadata = new grpc.Metadata();
-            metadata.set(META_KEY_c4w50x, META_VALUE_c4w50x);
-            metadata.set(META_KEY_3ifjo, META_VALUE_3ifjo);
-            metadata.set(META_KEY_boj3514dwawi1ndmt5n, META_VALUE_boj3514dwawi1ndmt5n);
             call.sendMetadata(metadata);
 
             call.on('end', () => {
@@ -77,9 +68,6 @@ console.log("Using environment " + env);
             messageToFile(requestMessageType.fromObject(request), requestMessageType, config.outDir + "default_hotpot_HotpotService_unaryPot_param_0.bin");
 
             const metadata = new grpc.Metadata();
-            metadata.set(META_KEY_c4w50x, META_VALUE_c4w50x);
-            metadata.set(META_KEY_3ifjo, META_VALUE_3ifjo);
-            metadata.set(META_KEY_boj3514dwawi1ndmt5n, META_VALUE_boj3514dwawi1ndmt5n);
             call.sendMetadata(metadata);
 
             const response = messageFromFile(
@@ -109,9 +97,6 @@ console.log("Using environment " + env);
             messageToFile(requestMessageType.fromObject(request), requestMessageType, config.outDir + "default_hotpot_HotpotService_serverStreamingPot_param_0.bin");
 
             const metadata = new grpc.Metadata();
-            metadata.set(META_KEY_c4w50x, META_VALUE_c4w50x);
-            metadata.set(META_KEY_3ifjo, META_VALUE_3ifjo);
-            metadata.set(META_KEY_boj3514dwawi1ndmt5n, META_VALUE_boj3514dwawi1ndmt5n);
             call.sendMetadata(metadata);
 
             loopMultipleFilesWithSamePrefix(config.testcaseDir + 'default_hotpot_HotpotService_serverStreamingPot_return', '.bin')
@@ -144,9 +129,6 @@ console.log("Using environment " + env);
             });
 
             const metadata = new grpc.Metadata();
-            metadata.set(META_KEY_c4w50x, META_VALUE_c4w50x);
-            metadata.set(META_KEY_3ifjo, META_VALUE_3ifjo);
-            metadata.set(META_KEY_boj3514dwawi1ndmt5n, META_VALUE_boj3514dwawi1ndmt5n);
             call.sendMetadata(metadata);
 
             call.on('end', () => {
@@ -168,7 +150,7 @@ console.log("Using environment " + env);
 
     // BEGIN Server
     function getServer() {
-        let server = new grpc.Server();
+        let server = new grpc.Server({"default_compression_level": 2});
 
         server.addService(protosGrpc.default_hotpot.HotpotService.service, {
             unaryPot: default_hotpot_HotpotService_unaryPot,

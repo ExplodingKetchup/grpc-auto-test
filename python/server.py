@@ -8,25 +8,21 @@ from config_utils import load_config
 from file_utils import list_files_with_same_prefix
 from log_utils import configure_logger, get_log_file_for_this_instance, log_fields_of_object
 from message_utils import message_to_file, message_from_file, format_metadata_as_string, metadata_to_file
-from repeated_field_values_pb2 import *
-from repeated_field_values_pb2_grpc import *
+from single_field_values_pb2 import *
+from single_field_values_pb2_grpc import *
 
 
 # Constants
+_COMPRESSION_ALGOS = {
+    "none": grpc.Compression.NoCompression,
+    "deflate": grpc.Compression.Deflate,
+    "gzip": grpc.Compression.Gzip,
+}
 BIN_METADATA_SUFFIX = "-bin"
-META_KEY_45vj609w4q4kor085 = "45vj609w4q4kor085" + BIN_METADATA_SUFFIX
-META_VALUE_45vj609w4q4kor085 = bytes.fromhex("83aeca66af89cc841e9dd11eeea1527f05af52")
-META_KEY_27i43v8213r68sp7a71 = "27i43v8213r68sp7a71" + BIN_METADATA_SUFFIX
-META_VALUE_27i43v8213r68sp7a71 = bytes.fromhex("6994aa0bed6663fd814dc5b2da3d8e4feabf")
-META_KEY_85p = "85p" + BIN_METADATA_SUFFIX
-META_VALUE_85p = bytes.fromhex("6e790519ab8b4ef413024962a4eb")
 OUTBOUND_HEADERS = (
-    (META_KEY_45vj609w4q4kor085, META_VALUE_45vj609w4q4kor085),
-    (META_KEY_27i43v8213r68sp7a71, META_VALUE_27i43v8213r68sp7a71),
-    (META_KEY_85p, META_VALUE_85p),
 )
-repeated_hotpot_SmallHotpotOfRickeridoo_fields = ["small_uint32_value", "small_string_value"]
-repeated_hotpot_BigHotpotOfTerror_fields = ["double_value", "float_value", "int32_value", "int64_value", "uint32_value", "uint64_value", "sint32_value", "sint64_value", "fixed32_value", "fixed64_value", "sfixed32_value", "sfixed64_value", "bool_value", "string_value", "bytes_value", "enum_value", "message_value"]
+default_hotpot_SmallHotpotOfRickeridoo_fields = ["small_uint32_value", "small_string_value"]
+default_hotpot_BigHotpotOfTerror_fields = ["double_value", "float_value", "int32_value", "int64_value", "uint32_value", "uint64_value", "sint32_value", "sint64_value", "fixed32_value", "fixed64_value", "sfixed32_value", "sfixed64_value", "bool_value", "string_value", "bytes_value", "enum_value", "message_value"]
 
 
 # Configs
@@ -93,40 +89,32 @@ def send_header_metadata(context):
 class HotpotServiceServicer(HotpotServiceServicer):
 
     def UnaryPot(self, request, context):
-        method_id = "repeated_hotpot.HotpotService.unaryPot"
+        method_id = "default_hotpot.HotpotService.unaryPot"
         response_class = BigHotpotOfTerror
 
-        receive_header_metadata(context)
-        handle_single_request(request, method_id, repeated_hotpot_BigHotpotOfTerror_fields)
-        send_header_metadata(context)
-        return get_single_response(method_id, response_class, repeated_hotpot_BigHotpotOfTerror_fields)
+        handle_single_request(request, method_id, default_hotpot_BigHotpotOfTerror_fields)
+        return get_single_response(method_id, response_class, default_hotpot_BigHotpotOfTerror_fields)
 
     def ServerStreamingPot(self, request, context):
-        method_id = "repeated_hotpot.HotpotService.serverStreamingPot"
+        method_id = "default_hotpot.HotpotService.serverStreamingPot"
         response_class = BigHotpotOfTerror
 
-        receive_header_metadata(context)
-        handle_single_request(request, method_id, repeated_hotpot_BigHotpotOfTerror_fields)
-        send_header_metadata(context)
-        for response in get_streaming_response(method_id, response_class, repeated_hotpot_BigHotpotOfTerror_fields):
+        handle_single_request(request, method_id, default_hotpot_BigHotpotOfTerror_fields)
+        for response in get_streaming_response(method_id, response_class, default_hotpot_BigHotpotOfTerror_fields):
             yield response
 
     def ClientStreamingPot(self, request_iterator, context):
-        method_id = "repeated_hotpot.HotpotService.clientStreamingPot"
+        method_id = "default_hotpot.HotpotService.clientStreamingPot"
         response_class = BigHotpotOfTerror
 
-        receive_header_metadata(context)
-        handle_streaming_request(request_iterator, method_id, repeated_hotpot_BigHotpotOfTerror_fields)
-        send_header_metadata(context)
-        return get_single_response(method_id, response_class, repeated_hotpot_BigHotpotOfTerror_fields)
+        handle_streaming_request(request_iterator, method_id, default_hotpot_BigHotpotOfTerror_fields)
+        return get_single_response(method_id, response_class, default_hotpot_BigHotpotOfTerror_fields)
 
     def BidiStreamingPot(self, request_iterator, context):
-        method_id = "repeated_hotpot.HotpotService.bidiStreamingPot"
+        method_id = "default_hotpot.HotpotService.bidiStreamingPot"
         response_class = BigHotpotOfTerror
-        receive_header_metadata(context)
-        handle_streaming_request(request_iterator, method_id, repeated_hotpot_BigHotpotOfTerror_fields)
-        send_header_metadata(context)
-        for response in get_streaming_response(method_id, response_class, repeated_hotpot_BigHotpotOfTerror_fields):
+        handle_streaming_request(request_iterator, method_id, default_hotpot_BigHotpotOfTerror_fields)
+        for response in get_streaming_response(method_id, response_class, default_hotpot_BigHotpotOfTerror_fields):
             yield response
 
 
@@ -134,7 +122,7 @@ class HotpotServiceServicer(HotpotServiceServicer):
 def main():
     configure_logger(get_log_file_for_this_instance(configs["log"]["dir"], configs["log"]["file_prefix"]))
 
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10), compression=_COMPRESSION_ALGOS["none"])
     add_HotpotServiceServicer_to_server(HotpotServiceServicer(), server)
     server.add_insecure_port(f"[::]:{configs["server"]["port"]}")
     server.start()

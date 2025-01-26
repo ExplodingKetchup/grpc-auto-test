@@ -29,15 +29,15 @@ public class JavaClient implements InitializingBean {
 
     private final HotpotServiceGrpc.HotpotServiceStub hotpotServiceAsyncStub;
 
-    private final String[] repeated_hotpot_SmallHotpotOfRickeridoo_fields = new String[]{"getSmallUint32ValueList", "getSmallStringValueList"};
-    private final String[] repeated_hotpot_BigHotpotOfTerror_fields = new String[]{"getDoubleValueList", "getFloatValueList", "getInt32ValueList", "getInt64ValueList", "getUint32ValueList", "getUint64ValueList", "getSint32ValueList", "getSint64ValueList", "getFixed32ValueList", "getFixed64ValueList", "getSfixed32ValueList", "getSfixed64ValueList", "getBoolValueList", "getStringValueList", "getBytesValueList", "getEnumValueList", "getMessageValueList"};
+    private final String[] default_hotpot_SmallHotpotOfRickeridoo_fields = new String[]{"getSmallUint32Value", "getSmallStringValue"};
+    private final String[] default_hotpot_BigHotpotOfTerror_fields = new String[]{"getDoubleValue", "getFloatValue", "getInt32Value", "getInt64Value", "getUint32Value", "getUint64Value", "getSint32Value", "getSint64Value", "getFixed32Value", "getFixed64Value", "getSfixed32Value", "getSfixed64Value", "getBoolValue", "getStringValue", "getBytesValue", "getEnumValue", "getMessageValue"};
 
     public JavaClient(Config config, ClientInterceptor clientInterceptor) {
         this.config = config;
         Channel originChannel = ManagedChannelBuilder.forAddress(config.getServiceHost(), config.getServicePort()).usePlaintext().build();
         Channel channel = ClientInterceptors.intercept(originChannel, clientInterceptor);
         this.hotpotServiceBlockingStub = HotpotServiceGrpc.newBlockingStub(channel).withCompression("gzip");
-        this.hotpotServiceAsyncStub = HotpotServiceGrpc.newStub(channel);
+        this.hotpotServiceAsyncStub = HotpotServiceGrpc.newStub(channel).withCompression("gzip");
         log.info("Connected to server at {}:{}", config.getServiceHost(), config.getServicePort());
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             log.info("Client shutting down...");
@@ -48,18 +48,18 @@ public class JavaClient implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        // Invoke test case: repeated_hotpot.HotpotService.bidiStreamingPot
-        invokeBidiStreamingRpcMethod(hotpotServiceAsyncStub::bidiStreamingPot, MessageUtil.messageListFromMultipleFiles(config.getTestcaseDir() + File.separator + "repeated_hotpot_HotpotService_bidiStreamingPot_param.bin", BigHotpotOfTerror.class), "repeated_hotpot.HotpotService.bidiStreamingPot", repeated_hotpot_BigHotpotOfTerror_fields, repeated_hotpot_BigHotpotOfTerror_fields);
+        // Invoke test case: default_hotpot.HotpotService.bidiStreamingPot
+        invokeBidiStreamingRpcMethod(hotpotServiceAsyncStub::bidiStreamingPot, MessageUtil.messageListFromMultipleFiles(config.getTestcaseDir() + File.separator + "default_hotpot_HotpotService_bidiStreamingPot_param.bin", BigHotpotOfTerror.class), "default_hotpot.HotpotService.bidiStreamingPot", default_hotpot_BigHotpotOfTerror_fields, default_hotpot_BigHotpotOfTerror_fields);
 
-        // Invoke test case: repeated_hotpot.HotpotService.clientStreamingPot
-        invokeClientStreamingRpcMethod(hotpotServiceAsyncStub::clientStreamingPot, MessageUtil.messageListFromMultipleFiles(config.getTestcaseDir() + File.separator + "repeated_hotpot_HotpotService_clientStreamingPot_param.bin", BigHotpotOfTerror.class), "repeated_hotpot.HotpotService.clientStreamingPot", repeated_hotpot_BigHotpotOfTerror_fields, repeated_hotpot_BigHotpotOfTerror_fields);
+        // Invoke test case: default_hotpot.HotpotService.unaryPot
+        // invokeUnaryRpcMethod(hotpotServiceBlockingStub::unaryPot, MessageUtil.messageFromFile(config.getTestcaseDir() + File.separator + "default_hotpot_HotpotService_unaryPot_param_0.bin", BigHotpotOfTerror.class), "default_hotpot.HotpotService.unaryPot", default_hotpot_BigHotpotOfTerror_fields, default_hotpot_BigHotpotOfTerror_fields);
+        invokeUnaryRpcMethodAsync(hotpotServiceAsyncStub::unaryPot, MessageUtil.messageFromFile(config.getTestcaseDir() + File.separator + "default_hotpot_HotpotService_unaryPot_param_0.bin", BigHotpotOfTerror.class), "default_hotpot.HotpotService.unaryPot", default_hotpot_BigHotpotOfTerror_fields, default_hotpot_BigHotpotOfTerror_fields);
 
-        // Invoke test case: repeated_hotpot.HotpotService.unaryPot
-        // invokeUnaryRpcMethod(hotpotServiceBlockingStub::unaryPot, MessageUtil.messageFromFile(config.getTestcaseDir() + File.separator + "repeated_hotpot_HotpotService_unaryPot_param_0.bin", BigHotpotOfTerror.class), "repeated_hotpot.HotpotService.unaryPot", repeated_hotpot_BigHotpotOfTerror_fields, repeated_hotpot_BigHotpotOfTerror_fields);
-        invokeUnaryRpcMethodAsync(hotpotServiceAsyncStub::unaryPot, MessageUtil.messageFromFile(config.getTestcaseDir() + File.separator + "repeated_hotpot_HotpotService_unaryPot_param_0.bin", BigHotpotOfTerror.class), "repeated_hotpot.HotpotService.unaryPot", repeated_hotpot_BigHotpotOfTerror_fields, repeated_hotpot_BigHotpotOfTerror_fields);
+        // Invoke test case: default_hotpot.HotpotService.serverStreamingPot
+        invokeServerStreamingRpcMethod(hotpotServiceBlockingStub::serverStreamingPot, MessageUtil.messageFromFile(config.getTestcaseDir() + File.separator + "default_hotpot_HotpotService_serverStreamingPot_param_0.bin", BigHotpotOfTerror.class), "default_hotpot.HotpotService.serverStreamingPot", default_hotpot_BigHotpotOfTerror_fields, default_hotpot_BigHotpotOfTerror_fields);
 
-        // Invoke test case: repeated_hotpot.HotpotService.serverStreamingPot
-        invokeServerStreamingRpcMethod(hotpotServiceBlockingStub::serverStreamingPot, MessageUtil.messageFromFile(config.getTestcaseDir() + File.separator + "repeated_hotpot_HotpotService_serverStreamingPot_param_0.bin", BigHotpotOfTerror.class), "repeated_hotpot.HotpotService.serverStreamingPot", repeated_hotpot_BigHotpotOfTerror_fields, repeated_hotpot_BigHotpotOfTerror_fields);
+        // Invoke test case: default_hotpot.HotpotService.clientStreamingPot
+        invokeClientStreamingRpcMethod(hotpotServiceAsyncStub::clientStreamingPot, MessageUtil.messageListFromMultipleFiles(config.getTestcaseDir() + File.separator + "default_hotpot_HotpotService_clientStreamingPot_param.bin", BigHotpotOfTerror.class), "default_hotpot.HotpotService.clientStreamingPot", default_hotpot_BigHotpotOfTerror_fields, default_hotpot_BigHotpotOfTerror_fields);
 
         for (int i = 0; i < 10000000; i++);
     }

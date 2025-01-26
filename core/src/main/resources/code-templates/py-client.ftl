@@ -45,6 +45,11 @@ from ${proto_file}_pb2_grpc import *
 
 
 # Constants
+_COMPRESSION_ALGOS = {
+    "none": grpc.Compression.NoCompression,
+    "deflate": grpc.Compression.Deflate,
+    "gzip": grpc.Compression.Gzip,
+}
 BIN_METADATA_SUFFIX = "-bin"
 <#assign metaMap = registry.getAllClientToServerMetadata()>
 <#list metaMap?keys as metaKey>
@@ -209,7 +214,12 @@ def invoke_bidi_streaming_rpc(method, request_iterator: Iterator[Message], metho
 def main():
     configure_logger(get_log_file_for_this_instance(configs["log"]["dir"], configs["log"]["file_prefix"]))
 
-    channel = grpc.insecure_channel(f"{configs["server"]["host"]}:{configs["server"]["port"]}")
+<#if registry.isRequestCompressionSet()>
+    <#assign compressionAlgo = registry.getRequestCompression()>
+<#else>
+    <#assign compressionAlgo = "none">
+</#if>
+    channel = grpc.insecure_channel(f"{configs["server"]["host"]}:{configs["server"]["port"]}", compression=_COMPRESSION_ALGOS["${compressionAlgo}"])
 
 <#list registry.getAllServices() as service>
     # >>> SERVICE ${service.name}

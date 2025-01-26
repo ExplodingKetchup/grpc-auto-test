@@ -10,8 +10,6 @@ TODO:
 - (Optional) Compile common.protobin in Core project
 - (Optional) multiple test cases per service
 - (Optional) Streaming RPC
-- Include metadata in RPC calls
-- Exception / Error handling
 - Channels-specific problems (e.g. compression)
 - Deadlines inconsistencies (Set same deadlines for both client and server, then wait and send delayed response)
 - RPC cancellation inconsistencies
@@ -20,3 +18,8 @@ TODO:
 - Python: Are rpc_grpc_pb2.py generated if rpc.proto doesn't have service definition?
 - Core: Review Docker health check. If client shutdown too fast, healthcheck hangs until timeout.
 - Protoscope: protoscope -descriptor-set protobin/common.protobin -message-type numbered_hotpot.BigHotpotOfTerror -print-field-names -explicit-wire-types out/server/numbered_hotpot_HotpotService_unaryPot_param_0.bin
+- Install tcpdump on containers:
+    - py: apt-get
+    - java: apt-get
+    - node: apk
+- RPC invocation with Authentication

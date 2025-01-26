@@ -19,7 +19,7 @@ import java.util.Objects;
 @Slf4j
 public class SetupScriptInterpreter {
 
-    private static final List<String> SUPPORTED_COMPRESSION_ALGOS = Lists.newArrayList("gzip");
+    private static final List<String> SUPPORTED_COMPRESSION_ALGOS = Lists.newArrayList("gzip", "deflate");
 
     private RuntimeConfig runtimeConfig;
 
@@ -42,14 +42,14 @@ public class SetupScriptInterpreter {
 
     private void interpretSingleLine(String line) throws IllegalArgumentException {
         String[] words = line.split(" ");
-        OpCode opCode;
+        Option option;
         try {
-            opCode = OpCode.valueOf(StringUtils.capitalize(words[0]));
+            option = Option.valueOf(StringUtils.capitalize(words[0]));
         } catch (IllegalArgumentException iae) {
             log.error("[interpretSingleLine] Illegal opcode: {}", words[0]);
             throw new IllegalArgumentException("Illegal opcode [" + words[0] + "]", iae);
         }
-        switch (opCode) {
+        switch (option) {
             case SERVER -> interpretServerOpCode(words[1]);
             case CLIENT -> interpretClientOpCode(words[1]);
             case TESTCASE -> interpretTestcaseOpCode(getArgs(words));
@@ -201,18 +201,19 @@ public class SetupScriptInterpreter {
         }
     }
 
-    private enum OpCode {
+    private enum Option {
         /** SERVER {@link org.grpctest.core.pojo.RuntimeConfig.Language} */
         SERVER,
         /** CLIENT {@link org.grpctest.core.pojo.RuntimeConfig.Language} */
         CLIENT,
-        /** TESTCASE (--{random, default}(:{0, 1, 2})) (custom_testcase1.json custom_testcase2.json) [Optional] <br>
+        /** TESTCASE (--{random, default}(:{0, 1, 2})) (custom_testcase1.json custom_testcase2.json) <br>
          * Note that if custom testcases are specified, "random" and "default" flags will be nullified. <br>
          * "--random" and "--default" are mutually exclusive. If both are present, will interpret the 1st flag only.
          */
         TESTCASE,
         /** COMPRESSION --request:compression_algo --response:compression_algo <br>
-         * Currently only support gzip. If not specified, will interpret as uncompressed.
+         * Currently only support "gzip" and "deflate". If not specified, will interpret as uncompressed. <br>
+         * Note that there is no mechanism to check if the algo is supported in a language. May cause errors in such cases.
          */
         COMPRESSION,
         /** METADATA (--server-client:{@link org.grpctest.core.enums.MetadataType}) (--client-server:{@link org.grpctest.core.enums.MetadataType}) [Optional] */

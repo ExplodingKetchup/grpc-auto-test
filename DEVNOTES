@@ -8,7 +8,7 @@ Limitations:
 - 1 Server / Client instance per run
 - 1 Server can contain multiple RPC services and methods
 - 1 Client can invoke any service multiple times
-- 1 param / return value per RPC method
+- 1 testcase per RPC method
 - Namespaces not implemented:
     - A unique RPC method is identified by service name and method name only
     - A unique message is identified by its name

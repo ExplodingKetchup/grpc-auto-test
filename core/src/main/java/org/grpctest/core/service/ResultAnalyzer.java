@@ -80,7 +80,7 @@ public class ResultAnalyzer {
         try {
             int expectedNumberOfInvocations = rpcModelRegistry.getAllMethods().size();
 
-            if (!runtimeConfig.getClientToServerMetadataType().equals(MetadataType.NONE)) {
+            if (!runtimeConfig.getClientToServerMetadataType().equals(MetadataType.NONE) || Files.exists(Paths.get(DIR_SERVER_OUT + "received_metadata.txt"))) {
                 output.append("Client -> Server").append(H2_UNDERLINE);
                 Map<String, Pair<String, Integer>> serverReceivedMetadata = readMetadataFromFile(DIR_SERVER_OUT + "received_metadata.txt");
                 Map<String, String> expectedServerReceivedMetadata = rpcModelRegistry.getClientToServerMetadata()
@@ -91,7 +91,7 @@ public class ResultAnalyzer {
                 output.append(formatMetadataResult(serverReceivedMetadata, expectedServerReceivedMetadata, expectedNumberOfInvocations));
             }
 
-            if (!runtimeConfig.getServerToClientMetadataType().equals(MetadataType.NONE)) {
+            if (!runtimeConfig.getServerToClientMetadataType().equals(MetadataType.NONE) || Files.exists(Paths.get(DIR_CLIENT_OUT + "received_metadata.txt"))) {
                 output.append("\nServer -> Client").append(H2_UNDERLINE);
                 Map<String, Pair<String, Integer>> clientReceivedMetadata = readMetadataFromFile(DIR_CLIENT_OUT + "received_metadata.txt");
                 Map<String, String> expectedClientReceivedMetadata = rpcModelRegistry.getServerToClientMetadata()

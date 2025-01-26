@@ -67,6 +67,11 @@ from ${proto_file}_pb2_grpc import *
 
 
 # Constants
+_COMPRESSION_ALGOS = {
+    "none": grpc.Compression.NoCompression,
+    "deflate": grpc.Compression.Deflate,
+    "gzip": grpc.Compression.Gzip,
+}
 BIN_METADATA_SUFFIX = "-bin"
 <#assign metaMap = registry.getAllServerToClientMetadata()>
 <#list metaMap?keys as metaKey>
@@ -208,7 +213,12 @@ class ${service.name}Servicer(${service.name}Servicer):
 def main():
     configure_logger(get_log_file_for_this_instance(configs["log"]["dir"], configs["log"]["file_prefix"]))
 
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+<#if registry.isResponseCompressionSet()>
+    <#assign compressionAlgo = registry.getResponseCompression()>
+<#else>
+    <#assign compressionAlgo = "none">
+</#if>
+    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10), compression=_COMPRESSION_ALGOS["${compressionAlgo}"])
 <#list registry.getAllServices() as service>
     add_${service.name}Servicer_to_server(${service.name}Servicer(), server)
 </#list>
