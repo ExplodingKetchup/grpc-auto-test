@@ -241,8 +241,8 @@ Explanations:
 - `paramValue`: array of request messages (field_name is the same as defined in .proto file).
 - `returnValue`: array of response messages.
 - `value` depends on the type of the field:
-  - float / double: real number (if it is an integer, you could put '.0' at the end to avoid errors)
-  - integer types: integer number
+  - float / double: real number (if it is an integer, you could put '.0' at the end to avoid errors); you can put 'MAX' or 'MIN' for the max / min value
+  - integer types: integer number; you can put 'MAX' or 'MIN' for the max / min value
   - bool: true/false
   - string: a string
   - bytes: a string of hex values (e.g. "02ae5f")
