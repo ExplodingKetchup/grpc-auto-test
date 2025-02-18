@@ -14,25 +14,6 @@ import org.springframework.stereotype.Component;
 public class Config {
 
     // Core Service
-    /** Log directory */
-    @Value("${core.log.dir}")
-    private String logDir;
-
-    /** Proto descriptor file (classpath) */
-    @Value("${core.proto.descriptor.path}")
-    private String protoDescriptorPath;
-
-    /** Custom test case location */
-    @Value("${core.custom-tests.classpath:tests}")
-    private String customTestsClasspath;
-
-    /** Proto file location */
-    @Value("${core.proto.classpath:proto}")
-    private String protoClasspath;
-
-    /** Test case directory (In binary form, for client and server to access) */
-    @Value("${core.out.tests.dir:test-cases}")
-    private String testsDir;
 
     /** Test setup script (File path) */
     @Value("${core.setup.script:setup/setup.txt}")

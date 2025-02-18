@@ -1,0 +1,7 @@
+FROM ubuntu:latest
+
+ENV OUT_DIR=/app/out/tcpdump
+
+RUN apt update && apt install -y tcpdump
+
+ENTRYPOINT ["sh", "-c", "tcpdump -i eth0 -w $OUT_DIR/packets.pcap -U"]

@@ -13,9 +13,9 @@ RUN adduser \
     --shell "/sbin/nologin" \
     --no-create-home \
     --uid "${UID}" \
-    appuser
+    appuser && \
+    mkdir -p $HOME
 
-RUN mkdir -p $HOME
 WORKDIR $HOME
 
 COPY --chown=$UID --chmod=770 "$NODE_HOST_DIR/package*.json" "$HOME/"
@@ -28,8 +28,7 @@ COPY --chown=$UID --chmod=770 "$NODE_HOST_DIR/config/client/deploy.js" "$HOME/co
 
 RUN npm install
 
-RUN chown -R appuser $HOME
-RUN chmod -R 770 $HOME
+RUN chown -R appuser $HOME && chmod -R 770 $HOME
 
 USER appuser
 

@@ -2,6 +2,7 @@ package org.grpctest.core.service.ui;
 
 import lombok.extern.slf4j.Slf4j;
 import org.grpctest.core.config.Config;
+import org.grpctest.core.enums.Language;
 import org.grpctest.core.enums.MetadataType;
 import org.grpctest.core.pojo.RuntimeConfig;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -37,12 +38,12 @@ public class TestSetupUiScriptImpl implements TestSetupUi {
     }
 
     @Override
-    public RuntimeConfig.Language chooseServer() throws Exception {
+    public Language chooseServer() throws Exception {
         return runtimeConfig.getServer();
     }
 
     @Override
-    public RuntimeConfig.Language chooseClient() throws Exception {
+    public Language chooseClient() throws Exception {
         return runtimeConfig.getClient();
     }
 

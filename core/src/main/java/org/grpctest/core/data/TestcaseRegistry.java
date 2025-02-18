@@ -3,11 +3,16 @@ package org.grpctest.core.data;
 import lombok.extern.slf4j.Slf4j;
 import org.grpctest.core.pojo.RpcService;
 import org.grpctest.core.pojo.TestCase;
+import org.grpctest.core.service.TestCaseWriter;
 import org.grpctest.core.util.CollectionUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.File;
 import java.util.*;
+
+import static org.grpctest.core.constant.Constants.OUT_DIR_CLIENT;
+import static org.grpctest.core.constant.Constants.OUT_DIR_SERVER;
 
 /** A registry to store all rpc methods under test and their respective test cases.<br> */
 @Component
@@ -101,5 +106,73 @@ public class TestcaseRegistry {
             );
         }
         return testCase;
+    }
+
+    /**
+     * Same as {@link TestcaseRegistry#getExpectedClientOutputFiles(String)}, but this method lists all
+     * files from all methods, plus received_metadata.txt if server -> client metadata is enabled.
+     * @return
+     */
+    public List<String> getExpectedClientOutputFiles() {
+        List<String> result = new ArrayList<>();
+        if (rpcModelRegistry.haveServerToClientMetadata()) {
+            result.add(OUT_DIR_CLIENT + File.separator + "received_metadata.txt");
+        }
+        for (RpcService.RpcMethod rpcMethod : rpcModelRegistry.getAllMethods()) {
+            result.addAll(getExpectedClientOutputFiles(rpcMethod.getId()));
+        }
+        return result;
+    }
+
+    /**
+     * List all files related to the specified method that should AT LEAST be present after client finishes.<br>
+     * It will return: <br>
+     * - All received responses files (_return.bin), IF there is no exception <br>
+     * - Exception files (_error.txt), IF an exception will be raised on the server side
+     *
+     * @param methodId
+     * @return file paths corresponding to expected files
+     */
+    public List<String> getExpectedClientOutputFiles(String methodId) {
+        List<String> result = new ArrayList<>();
+        if (Objects.nonNull(getExceptionForMethod(methodId))) {
+            result.add(OUT_DIR_CLIENT + File.separator + methodId.replace(".", "_") + "_error.txt");
+            return result;
+        }
+        for (int i = 0; i < getMethodTestCases(methodId).get(0).getReturnValueDynMsg().size(); i++) {
+            result.add(OUT_DIR_CLIENT + File.separator + methodId.replace(".", "_") + "_return_" + i + ".bin");
+        }
+        return result;
+    }
+
+    /**
+     * Same as {@link TestcaseRegistry#getExpectedServerOutputFiles(String)}, but this method lists all
+     * files from all methods, plus received_metadata.txt if client -> server metadata is enabled.
+     * @return
+     */
+    public List<String> getExpectedServerOutputFiles() {
+        List<String> result = new ArrayList<>();
+        if (rpcModelRegistry.haveClientToServerMetadata()) {
+            result.add(OUT_DIR_SERVER + File.separator + "received_metadata.txt");
+        }
+        for (RpcService.RpcMethod rpcMethod : rpcModelRegistry.getAllMethods()) {
+            result.addAll(getExpectedClientOutputFiles(rpcMethod.getId()));
+        }
+        return result;
+    }
+
+    /**
+     * List all files related to the specified method that should AT LEAST be present after server finishes.<br>
+     * It will return all received responses files (_param.bin).
+     *
+     * @param methodId
+     * @return file paths corresponding to expected files
+     */
+    public List<String> getExpectedServerOutputFiles(String methodId) {
+        List<String> result = new ArrayList<>();
+        for (int i = 0; i < getMethodTestCases(methodId).get(0).getParamValueDynMsg().size(); i++) {
+            result.add(OUT_DIR_SERVER + File.separator + methodId.replace(".", "_") + "_param_" + i + ".bin");
+        }
+        return result;
     }
 }

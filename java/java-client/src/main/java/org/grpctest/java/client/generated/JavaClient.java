@@ -29,15 +29,14 @@ public class JavaClient implements InitializingBean {
 
     private final HotpotServiceGrpc.HotpotServiceStub hotpotServiceAsyncStub;
 
-    private final String[] default_hotpot_SmallHotpotOfRickeridoo_fields = new String[]{"getSmallUint32Value", "getSmallStringValue"};
-    private final String[] default_hotpot_BigHotpotOfTerror_fields = new String[]{"getDoubleValue", "getFloatValue", "getInt32Value", "getInt64Value", "getUint32Value", "getUint64Value", "getSint32Value", "getSint64Value", "getFixed32Value", "getFixed64Value", "getSfixed32Value", "getSfixed64Value", "getBoolValue", "getStringValue", "getBytesValue", "getEnumValue", "getMessageValue"};
+    private final String[] numbered_hotpot_BigHotpotOfTerror_fields = new String[]{"getDoubleValue", "getFloatValue", "getInt32Value", "getInt64Value", "getUint32Value", "getUint64Value", "getSint32Value", "getSint64Value", "getFixed32Value", "getFixed64Value", "getSfixed32Value", "getSfixed64Value"};
 
     public JavaClient(Config config, ClientInterceptor clientInterceptor) {
         this.config = config;
         Channel originChannel = ManagedChannelBuilder.forAddress(config.getServiceHost(), config.getServicePort()).usePlaintext().build();
         Channel channel = ClientInterceptors.intercept(originChannel, clientInterceptor);
-        this.hotpotServiceBlockingStub = HotpotServiceGrpc.newBlockingStub(channel).withCompression("gzip");
-        this.hotpotServiceAsyncStub = HotpotServiceGrpc.newStub(channel).withCompression("gzip");
+        this.hotpotServiceBlockingStub = HotpotServiceGrpc.newBlockingStub(channel);
+        this.hotpotServiceAsyncStub = HotpotServiceGrpc.newStub(channel);
         log.info("Connected to server at {}:{}", config.getServiceHost(), config.getServicePort());
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             log.info("Client shutting down...");
@@ -48,18 +47,18 @@ public class JavaClient implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        // Invoke test case: default_hotpot.HotpotService.bidiStreamingPot
-        invokeBidiStreamingRpcMethod(hotpotServiceAsyncStub::bidiStreamingPot, MessageUtil.messageListFromMultipleFiles(config.getTestcaseDir() + File.separator + "default_hotpot_HotpotService_bidiStreamingPot_param.bin", BigHotpotOfTerror.class), "default_hotpot.HotpotService.bidiStreamingPot", default_hotpot_BigHotpotOfTerror_fields, default_hotpot_BigHotpotOfTerror_fields);
+        // Invoke test case: numbered_hotpot.HotpotService.serverStreamingPot
+        invokeServerStreamingRpcMethod(hotpotServiceBlockingStub::serverStreamingPot, MessageUtil.messageFromFile(config.getTestcaseDir() + File.separator + "numbered_hotpot_HotpotService_serverStreamingPot_param_0.bin", BigHotpotOfTerror.class), "numbered_hotpot.HotpotService.serverStreamingPot", numbered_hotpot_BigHotpotOfTerror_fields, numbered_hotpot_BigHotpotOfTerror_fields);
 
-        // Invoke test case: default_hotpot.HotpotService.unaryPot
-        // invokeUnaryRpcMethod(hotpotServiceBlockingStub::unaryPot, MessageUtil.messageFromFile(config.getTestcaseDir() + File.separator + "default_hotpot_HotpotService_unaryPot_param_0.bin", BigHotpotOfTerror.class), "default_hotpot.HotpotService.unaryPot", default_hotpot_BigHotpotOfTerror_fields, default_hotpot_BigHotpotOfTerror_fields);
-        invokeUnaryRpcMethodAsync(hotpotServiceAsyncStub::unaryPot, MessageUtil.messageFromFile(config.getTestcaseDir() + File.separator + "default_hotpot_HotpotService_unaryPot_param_0.bin", BigHotpotOfTerror.class), "default_hotpot.HotpotService.unaryPot", default_hotpot_BigHotpotOfTerror_fields, default_hotpot_BigHotpotOfTerror_fields);
+        // Invoke test case: numbered_hotpot.HotpotService.clientStreamingPot
+        invokeClientStreamingRpcMethod(hotpotServiceAsyncStub::clientStreamingPot, MessageUtil.messageListFromMultipleFiles(config.getTestcaseDir() + File.separator + "numbered_hotpot_HotpotService_clientStreamingPot_param.bin", BigHotpotOfTerror.class), "numbered_hotpot.HotpotService.clientStreamingPot", numbered_hotpot_BigHotpotOfTerror_fields, numbered_hotpot_BigHotpotOfTerror_fields);
 
-        // Invoke test case: default_hotpot.HotpotService.serverStreamingPot
-        invokeServerStreamingRpcMethod(hotpotServiceBlockingStub::serverStreamingPot, MessageUtil.messageFromFile(config.getTestcaseDir() + File.separator + "default_hotpot_HotpotService_serverStreamingPot_param_0.bin", BigHotpotOfTerror.class), "default_hotpot.HotpotService.serverStreamingPot", default_hotpot_BigHotpotOfTerror_fields, default_hotpot_BigHotpotOfTerror_fields);
+        // Invoke test case: numbered_hotpot.HotpotService.bidiStreamingPot
+        invokeBidiStreamingRpcMethod(hotpotServiceAsyncStub::bidiStreamingPot, MessageUtil.messageListFromMultipleFiles(config.getTestcaseDir() + File.separator + "numbered_hotpot_HotpotService_bidiStreamingPot_param.bin", BigHotpotOfTerror.class), "numbered_hotpot.HotpotService.bidiStreamingPot", numbered_hotpot_BigHotpotOfTerror_fields, numbered_hotpot_BigHotpotOfTerror_fields);
 
-        // Invoke test case: default_hotpot.HotpotService.clientStreamingPot
-        invokeClientStreamingRpcMethod(hotpotServiceAsyncStub::clientStreamingPot, MessageUtil.messageListFromMultipleFiles(config.getTestcaseDir() + File.separator + "default_hotpot_HotpotService_clientStreamingPot_param.bin", BigHotpotOfTerror.class), "default_hotpot.HotpotService.clientStreamingPot", default_hotpot_BigHotpotOfTerror_fields, default_hotpot_BigHotpotOfTerror_fields);
+        // Invoke test case: numbered_hotpot.HotpotService.unaryPot
+        // invokeUnaryRpcMethod(hotpotServiceBlockingStub::unaryPot, MessageUtil.messageFromFile(config.getTestcaseDir() + File.separator + "numbered_hotpot_HotpotService_unaryPot_param_0.bin", BigHotpotOfTerror.class), "numbered_hotpot.HotpotService.unaryPot", numbered_hotpot_BigHotpotOfTerror_fields, numbered_hotpot_BigHotpotOfTerror_fields);
+        invokeUnaryRpcMethodAsync(hotpotServiceAsyncStub::unaryPot, MessageUtil.messageFromFile(config.getTestcaseDir() + File.separator + "numbered_hotpot_HotpotService_unaryPot_param_0.bin", BigHotpotOfTerror.class), "numbered_hotpot.HotpotService.unaryPot", numbered_hotpot_BigHotpotOfTerror_fields, numbered_hotpot_BigHotpotOfTerror_fields);
 
         for (int i = 0; i < 10000000; i++);
     }

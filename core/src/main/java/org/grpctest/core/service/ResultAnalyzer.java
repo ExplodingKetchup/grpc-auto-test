@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.grpctest.core.config.Config;
 import org.grpctest.core.data.RpcModelRegistry;
 import org.grpctest.core.data.TestcaseRegistry;
 import org.grpctest.core.enums.MetadataType;
@@ -17,6 +18,7 @@ import org.grpctest.core.service.util.DynamicMessageUtilService;
 import org.grpctest.core.util.FileUtil;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -24,6 +26,9 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static org.grpctest.core.constant.Constants.OUT_DIR_CLIENT;
+import static org.grpctest.core.constant.Constants.OUT_DIR_SERVER;
 
 /**
  * Class to analyze results written by client and server. <br>
@@ -38,8 +43,6 @@ import java.util.stream.Collectors;
 public class ResultAnalyzer {
 
     private static final String ANALYZER_OUT_DIR = "out/analyzer/";
-    public static final String DIR_SERVER_OUT = "out/server/";
-    public static final String DIR_CLIENT_OUT = "out/client/";
     private static final String OUTPUT_FILE_EXT = ".txt";
     private static final String H1_UNDERLINE = "\n====================================\n\n";
     private static final String H2_UNDERLINE = "\n------------------------------------\n\n";
@@ -48,6 +51,7 @@ public class ResultAnalyzer {
     private static final String OUTPUT_TITLE = "OUTPUT ANALYZER RESULTS" + H1_UNDERLINE;
 
     private final String outputFileName = generateFileName();
+    private final Config config;
 
     private final RpcModelRegistry rpcModelRegistry;
 
@@ -80,9 +84,9 @@ public class ResultAnalyzer {
         try {
             int expectedNumberOfInvocations = rpcModelRegistry.getAllMethods().size();
 
-            if (!runtimeConfig.getClientToServerMetadataType().equals(MetadataType.NONE) || Files.exists(Paths.get(DIR_SERVER_OUT + "received_metadata.txt"))) {
+            if (!runtimeConfig.getClientToServerMetadataType().equals(MetadataType.NONE) || Files.exists(Paths.get(OUT_DIR_SERVER, "received_metadata.txt"))) {
                 output.append("Client -> Server").append(H2_UNDERLINE);
-                Map<String, Pair<String, Integer>> serverReceivedMetadata = readMetadataFromFile(DIR_SERVER_OUT + "received_metadata.txt");
+                Map<String, Pair<String, Integer>> serverReceivedMetadata = readMetadataFromFile(OUT_DIR_SERVER + File.separator + "received_metadata.txt");
                 Map<String, String> expectedServerReceivedMetadata = rpcModelRegistry.getClientToServerMetadata()
                         .entrySet().stream()
                         .map(entry -> Pair.of(entry.getKey().concat(entry.getValue().getLeft().equals(MetadataType.BIN) ? Metadata.BINARY_HEADER_SUFFIX : ""), entry.getValue().getRight()))
@@ -91,9 +95,9 @@ public class ResultAnalyzer {
                 output.append(formatMetadataResult(serverReceivedMetadata, expectedServerReceivedMetadata, expectedNumberOfInvocations));
             }
 
-            if (!runtimeConfig.getServerToClientMetadataType().equals(MetadataType.NONE) || Files.exists(Paths.get(DIR_CLIENT_OUT + "received_metadata.txt"))) {
+            if (!runtimeConfig.getServerToClientMetadataType().equals(MetadataType.NONE) || Files.exists(Paths.get(OUT_DIR_CLIENT, "received_metadata.txt"))) {
                 output.append("\nServer -> Client").append(H2_UNDERLINE);
-                Map<String, Pair<String, Integer>> clientReceivedMetadata = readMetadataFromFile(DIR_CLIENT_OUT + "received_metadata.txt");
+                Map<String, Pair<String, Integer>> clientReceivedMetadata = readMetadataFromFile(OUT_DIR_CLIENT + File.separator + "received_metadata.txt");
                 Map<String, String> expectedClientReceivedMetadata = rpcModelRegistry.getServerToClientMetadata()
                         .entrySet().stream()
                         .map(entry -> Pair.of(entry.getKey().concat(entry.getValue().getLeft().equals(MetadataType.BIN) ? Metadata.BINARY_HEADER_SUFFIX : ""), entry.getValue().getRight()))
@@ -130,7 +134,7 @@ public class ResultAnalyzer {
         // Process param outputs
         for (int i = 0; i < expectedParams.size(); i++) {
             // File paths
-            String actualParamFilePath = DIR_SERVER_OUT + method.getId().replace(".", "_") + "_param_" + i + ".bin";
+            String actualParamFilePath = OUT_DIR_SERVER + File.separator + method.getId().replace(".", "_") + "_param_" + i + ".bin";
             if (!Files.exists(Paths.get(actualParamFilePath))) {
                 log.warn("[processOneMethod] Expected request output file {} not found", actualParamFilePath);
                 continue;
@@ -149,7 +153,7 @@ public class ResultAnalyzer {
         // Process returns output
         for (int i = 0; i < expectedReturns.size(); i++) {
             // File paths
-            String actualReturnFilePath = DIR_CLIENT_OUT + method.getId().replace(".", "_") + "_return_" + i + ".bin";
+            String actualReturnFilePath = OUT_DIR_CLIENT + File.separator + method.getId().replace(".", "_") + "_return_" + i + ".bin";
             if (!Files.exists(Paths.get(actualReturnFilePath))) {
                 log.warn("[processOneMethod] Expected response output file {} not found", actualReturnFilePath);
                 continue;
@@ -169,7 +173,7 @@ public class ResultAnalyzer {
         TestCase.RpcException expectedException = testCase.getException();
         TestCase.RpcException actualException = null;
         if (Objects.nonNull(expectedException)) {
-            actualException = readExceptionFromFile(DIR_CLIENT_OUT + method.getId().replace(".", "_") + "_error.txt");
+            actualException = readExceptionFromFile(OUT_DIR_CLIENT + File.separator + method.getId().replace(".", "_") + "_error.txt");
         }
 
         // Compile info into a String and append to File
@@ -190,74 +194,6 @@ public class ResultAnalyzer {
                         ""
                 )
         );
-    }
-
-    /**
-     * Same as {@link ResultAnalyzer#getExpectedClientOutputFiles(String)}, but this method lists all
-     * files from all methods, plus received_metadata.txt if server -> client metadata is enabled.
-     * @return
-     */
-    public List<String> getExpectedClientOutputFiles() {
-        List<String> result = new ArrayList<>();
-        if (rpcModelRegistry.haveServerToClientMetadata()) {
-            result.add(DIR_CLIENT_OUT + "received_metadata.txt");
-        }
-        for (RpcService.RpcMethod rpcMethod : rpcModelRegistry.getAllMethods()) {
-            result.addAll(getExpectedClientOutputFiles(rpcMethod.getId()));
-        }
-        return result;
-    }
-
-    /**
-     * List all files related to the specified method that should AT LEAST be present after client finishes.<br>
-     * It will return: <br>
-     * - All received responses files (_return.bin), IF there is no exception <br>
-     * - Exception files (_error.txt), IF an exception will be raised on the server side
-     *
-     * @param methodId
-     * @return file paths corresponding to expected files
-     */
-    public List<String> getExpectedClientOutputFiles(String methodId) {
-        List<String> result = new ArrayList<>();
-        if (Objects.nonNull(testcaseRegistry.getExceptionForMethod(methodId))) {
-            result.add(DIR_CLIENT_OUT + methodId.replace(".", "_") + "_error.txt");
-            return result;
-        }
-        for (int i = 0; i < testcaseRegistry.getMethodTestCases(methodId).get(0).getReturnValueDynMsg().size(); i++) {
-            result.add(DIR_CLIENT_OUT + methodId.replace(".", "_") + "_return_" + i + ".bin");
-        }
-        return result;
-    }
-
-    /**
-     * Same as {@link ResultAnalyzer#getExpectedServerOutputFiles(String)}, but this method lists all
-     * files from all methods, plus received_metadata.txt if client -> server metadata is enabled.
-     * @return
-     */
-    public List<String> getExpectedServerOutputFiles() {
-        List<String> result = new ArrayList<>();
-        if (rpcModelRegistry.haveClientToServerMetadata()) {
-            result.add(DIR_SERVER_OUT + "received_metadata.txt");
-        }
-        for (RpcService.RpcMethod rpcMethod : rpcModelRegistry.getAllMethods()) {
-            result.addAll(getExpectedClientOutputFiles(rpcMethod.getId()));
-        }
-        return result;
-    }
-
-    /**
-     * List all files related to the specified method that should AT LEAST be present after server finishes.<br>
-     * It will return all received responses files (_param.bin).
-     *
-     * @param methodId
-     * @return file paths corresponding to expected files
-     */
-    public List<String> getExpectedServerOutputFiles(String methodId) {
-        List<String> result = new ArrayList<>();
-        for (int i = 0; i < testcaseRegistry.getMethodTestCases(methodId).get(0).getParamValueDynMsg().size(); i++) {
-            result.add(DIR_SERVER_OUT + methodId.replace(".", "_") + "_param_" + i + ".bin");
-        }
-        return result;
     }
 
     private boolean compareRawList(List<Pair<byte[], DynamicMessage>> msgList1, List<Pair<byte[], DynamicMessage>> msgList2) {

@@ -21,6 +21,8 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.grpctest.core.constant.Constants.*;
+
 @Slf4j
 @Component
 @AllArgsConstructor
@@ -35,26 +37,30 @@ public class GenericFileService {
     private final ResourceLoader resourceLoader;
 
     public void copyProtos(RuntimeConfig runtimeConfig) throws Throwable {
-        copyResourceFiles(config.getProtoClasspath(), PROTO_TARGET_JAVA, runtimeConfig.getIncludedProtos());
-        copyResourceFiles(config.getProtoClasspath(), PROTO_TARGET_NODEJS, runtimeConfig.getIncludedProtos());
-        copyResourceFiles(config.getProtoClasspath(), PROTO_TARGET_PYTHON, runtimeConfig.getIncludedProtos());
+        copyResourceFiles(PROTO_CLASSPATH, PROTO_TARGET_JAVA, runtimeConfig.getIncludedProtos());
+        copyResourceFiles(PROTO_CLASSPATH, PROTO_TARGET_NODEJS, runtimeConfig.getIncludedProtos());
+        copyResourceFiles(PROTO_CLASSPATH, PROTO_TARGET_PYTHON, runtimeConfig.getIncludedProtos());
     }
 
     /**
      * Cleans the following places (temporary storage areas during test):<br>
      * protobin/common.protobin<br>
-     * test-cases/*<br>
+     * test-cases/client/*<br>
+     * test-cases/server/*<br>
      * out/client/*<br>
      * out/server/*<br>
+     * out/tcpdump/*<br>
      * java/common/src/main/proto/*<br>
      * nodejs/proto/*<br>
      * python/proto/*<br>
      */
     public void cleanup() throws IOException {
         FileUtils.cleanDirectory(new File("protobin/"));
-        FileUtils.cleanDirectory(new File("test-cases/"));
-        FileUtils.cleanDirectory(new File("out/client/"));
-        FileUtils.cleanDirectory(new File("out/server/"));
+        FileUtils.cleanDirectory(new File(TESTS_DIR_CLIENT));
+        FileUtils.cleanDirectory(new File(TESTS_DIR_SERVER));
+        FileUtils.cleanDirectory(new File(OUT_DIR_CLIENT));
+        FileUtils.cleanDirectory(new File(OUT_DIR_SERVER));
+        FileUtils.cleanDirectory(new File("out/tcpdump/"));
         FileUtils.cleanDirectory(new File(PROTO_TARGET_JAVA));
         FileUtils.cleanDirectory(new File(PROTO_TARGET_NODEJS));
         FileUtils.cleanDirectory(new File(PROTO_TARGET_PYTHON));

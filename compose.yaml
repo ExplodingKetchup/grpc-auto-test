@@ -79,6 +79,18 @@ services:
       - "50051:50051"
     networks:
       - grpc-network
+  tcpdump:
+    build:
+      context: .
+      dockerfile: ./utils/Dockerfile.tcpdump
+    container_name: tcpdump-container
+    depends_on:
+      - ${TCPDUMP_ATTACHED_SERVICE}
+    volumes:
+      - ./out/tcpdump:/app/out/tcpdump
+    network_mode: service:${TCPDUMP_ATTACHED_SERVICE}
+    profiles:
+      - tcpdump_enabled
 
 
 networks:

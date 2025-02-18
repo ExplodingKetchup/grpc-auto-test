@@ -21,9 +21,6 @@ import java.util.regex.Pattern;
 @Slf4j
 public class MessageUtil {
 
-    private static final String DIR_SERVER_OUT = "out/server/";
-    private static final String DIR_CLIENT_OUT = "out/client/";
-
     public static <T extends Message> T messageFromFile(String filepath, Class<T> messageType) {
         try {
             try (FileInputStream fileInputStream = new FileInputStream(filepath)) {

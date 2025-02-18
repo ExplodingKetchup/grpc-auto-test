@@ -2,6 +2,7 @@ package org.grpctest.core.util;
 
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
@@ -71,6 +72,13 @@ public class StringUtil {
             sb.append(String.format("%02x", b));
         }
         return sb.toString();
+    }
+
+    public static String trimFileSeparatorAtEnd(String filepath) {
+        if (filepath.endsWith(File.separator)) {
+            return filepath.substring(0, filepath.length() - 1);
+        }
+        return filepath;
     }
 
 }

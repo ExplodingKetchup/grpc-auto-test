@@ -22,7 +22,7 @@ public class FileUtil {
      * @param content
      * @throws Throwable
      */
-    public static void appendToFile(String filepath, String title, String content) throws Throwable {
+    public static void appendToFile(String filepath, String title, String content) throws IOException {
         File file = new File(filepath);
         try {
             boolean isNewFile = file.createNewFile();
@@ -37,9 +37,6 @@ public class FileUtil {
         } catch (IOException ioe) {
             log.error("[appendToFile] File I/O got error", ioe);
             throw ioe;
-        } catch (Throwable t) {
-            log.error("[appendToFile] Failed with error", t);
-            throw t;
         }
     }
 

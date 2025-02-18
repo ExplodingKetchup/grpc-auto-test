@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.grpctest.core.enums.Language;
 import org.grpctest.core.enums.MetadataType;
 import org.grpctest.core.pojo.RuntimeConfig;
 import org.springframework.stereotype.Service;
@@ -63,7 +64,7 @@ public class SetupScriptInterpreter {
 
     private void interpretServerOpCode(String arg) throws IllegalArgumentException {
         try {
-            runtimeConfig.setServer(RuntimeConfig.Language.valueOf(StringUtils.capitalize(arg)));
+            runtimeConfig.setServer(Language.valueOf(StringUtils.capitalize(arg)));
         } catch (IllegalArgumentException iae) {
             log.error("[interpretServerOpCode] Illegal argument: {}", arg);
             throw new IllegalArgumentException("Illegal argument for opcode SERVER", iae);
@@ -72,7 +73,7 @@ public class SetupScriptInterpreter {
 
     private void interpretClientOpCode(String arg) throws IllegalArgumentException {
         try {
-            runtimeConfig.setClient(RuntimeConfig.Language.valueOf(StringUtils.capitalize(arg)));
+            runtimeConfig.setClient(Language.valueOf(StringUtils.capitalize(arg)));
         } catch (IllegalArgumentException iae) {
             log.error("[interpretClientOpCode] Illegal argument: {}", arg);
             throw new IllegalArgumentException("Illegal argument for opcode CLIENT", iae);
@@ -202,9 +203,9 @@ public class SetupScriptInterpreter {
     }
 
     private enum Option {
-        /** SERVER {@link org.grpctest.core.pojo.RuntimeConfig.Language} */
+        /** SERVER {@link Language} */
         SERVER,
-        /** CLIENT {@link org.grpctest.core.pojo.RuntimeConfig.Language} */
+        /** CLIENT {@link Language} */
         CLIENT,
         /** TESTCASE (--{random, default}(:{0, 1, 2})) (custom_testcase1.json custom_testcase2.json) <br>
          * Note that if custom testcases are specified, "random" and "default" flags will be nullified. <br>

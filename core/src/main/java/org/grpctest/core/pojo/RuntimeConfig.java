@@ -1,10 +1,10 @@
 package org.grpctest.core.pojo;
 
 import lombok.*;
+import org.grpctest.core.enums.Language;
 import org.grpctest.core.enums.MetadataType;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 /** Configs that are better suited to be set at runtime (esp. if they vary between each run) */
@@ -51,36 +51,4 @@ public class RuntimeConfig {
     @Builder.Default
     private String responseCompression = "";
 
-    @Getter
-    public enum Language {
-        JAVA("Java"),
-        NODEJS("Node.JS"),
-        PYTHON("Python");
-
-        public static final HashMap<Language, String> SERVER_NAME = new HashMap<>();
-        public static final HashMap<Language, String> CLIENT_NAME = new HashMap<>();
-        static {
-            SERVER_NAME.put(JAVA, "java-server");
-            SERVER_NAME.put(NODEJS, "node-server");
-            SERVER_NAME.put(PYTHON, "py-server");
-
-            CLIENT_NAME.put(JAVA, "java-client");
-            CLIENT_NAME.put(NODEJS, "node-client");
-            CLIENT_NAME.put(PYTHON, "py-client");
-        }
-
-        public static String getServerName(Language language) {
-            return SERVER_NAME.get(language);
-        }
-
-        public static String getClientName(Language language) {
-            return CLIENT_NAME.get(language);
-        }
-
-        private final String displayName;
-
-        Language(String displayName) {
-            this.displayName = displayName;
-        }
-    }
 }

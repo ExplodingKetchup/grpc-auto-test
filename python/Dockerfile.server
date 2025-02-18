@@ -14,9 +14,9 @@ RUN adduser \
     --shell "/sbin/nologin" \
     --no-create-home \
     --uid "${UID}" \
-    appuser
+    appuser && \
+    mkdir -p $HOME
 
-RUN mkdir -p $HOME
 WORKDIR $HOME
 
 COPY --chown=$UID --chmod=770 "$PY_HOST_DIR/requirements.txt" "$HOME/"
@@ -30,8 +30,9 @@ RUN python -m grpc_tools.protoc --proto_path=proto --python_out=. --pyi_out=. --
 
 COPY --chown=$UID --chmod=770 "$PY_HOST_DIR/config/server/$PY_ENV.yaml" "$HOME/config/server/"
 
-RUN chown -R appuser $HOME
-RUN chmod -R 770 $HOME
+RUN chown -R appuser $HOME && chmod -R 770 $HOME
+
+RUN apt-get update && apt-get install -y tcpdump
 
 USER appuser
 

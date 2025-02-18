@@ -17,6 +17,8 @@ import org.springframework.stereotype.Component;
 import java.io.FileInputStream;
 import java.io.IOException;
 
+import static org.grpctest.core.constant.Constants.PROTO_DESCRIPTOR_PATH;
+
 @Component
 @Slf4j
 @AllArgsConstructor
@@ -29,7 +31,7 @@ public class ProtobufReader {
     private final RpcModelRegistry rpcModelRegistry;
 
     public void loadProtoContent(RuntimeConfig runtimeConfig) throws Throwable {
-        try (FileInputStream inputStream = new FileInputStream(config.getProtoDescriptorPath())) {
+        try (FileInputStream inputStream = new FileInputStream(PROTO_DESCRIPTOR_PATH)) {
 
             // Get content of descriptor set
             DescriptorProtos.FileDescriptorSet descriptorSet = DescriptorProtos.FileDescriptorSet.parseFrom(inputStream);
@@ -74,7 +76,7 @@ public class ProtobufReader {
                 }
             }
         } catch (IOException ioe) {
-            log.error("[loadProtoContent] Fail to open resource at {}", config.getProtoDescriptorPath(), ioe);
+            log.error("[loadProtoContent] Fail to open resource at {}", PROTO_DESCRIPTOR_PATH, ioe);
             throw ioe;
         } catch (Throwable t) {
             log.error("[loadProtoContent] An error occurred", t);

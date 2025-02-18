@@ -1,5 +1,6 @@
 package org.grpctest.core.service.ui;
 
+import org.grpctest.core.enums.Language;
 import org.grpctest.core.enums.MetadataType;
 import org.grpctest.core.pojo.RuntimeConfig;
 
@@ -27,9 +28,9 @@ public interface TestSetupUi {
 
     void printHelloMessage();
 
-    RuntimeConfig.Language chooseServer() throws Exception;
+    Language chooseServer() throws Exception;
 
-    RuntimeConfig.Language chooseClient() throws Exception;
+    Language chooseClient() throws Exception;
 
     MetadataType chooseServerToClientMetadataType() throws Exception;
 

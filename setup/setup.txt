@@ -1,5 +1,4 @@
 CLIENT JAVA
 SERVER PYTHON
-TESTCASE --random
-INCLUDE_PROTO single_field_values.proto
-COMPRESSION --request:gzip
+TESTCASE test-max-values-unary.json test-max-values-bidistreaming.json test-max-values-clientstreaming.json test-max-values-serverstreaming.json
+INCLUDE_PROTO numerical_values.proto

@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.grpctest.core.config.Config;
+import org.grpctest.core.exception.ExternalProcessException;
 import org.grpctest.core.service.util.ExternalProcessUtilService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -79,7 +80,7 @@ public class MavenInvoker {
      * @param name  name given to this execution. Used to name log file for easy navigation
      * @throws Exception
      */
-    public void execute(String name) throws Exception {
+    public void execute(String name) throws ExternalProcessException {
         // Get command
         String cmd = toCmd();
 
@@ -93,46 +94,31 @@ public class MavenInvoker {
         clear();
     }
 
-    public void buildCommon() throws Exception {
-        try {
-            this
-                    .setWorkingDir(JAVA_COMMON)
-                    .addMvnGoal(MavenGoal.CLEAN)
-                    .addMvnGoal(MavenGoal.INSTALL)
-                    .addParam("DskipTests", "")
-                    .execute("common");
-        } catch (Exception e) {
-            log.error("[defaultBuild] An error occurred", e);
-            throw e;
-        }
+    public void buildCommon() throws ExternalProcessException {
+        this
+                .setWorkingDir(JAVA_COMMON)
+                .addMvnGoal(MavenGoal.CLEAN)
+                .addMvnGoal(MavenGoal.INSTALL)
+                .addParam("DskipTests", "")
+                .execute("common");
     }
 
-    public void buildServer() throws Throwable {
-        try {
-            this.
-                    setWorkingDir(JAVA_SERVER)
-                    .addMvnGoal(MavenGoal.CLEAN)
-                    .addMvnGoal(MavenGoal.PACKAGE)
-                    .addParam("DskipTests", "")
-                    .execute("server");
-        } catch (Exception e) {
-            log.error("[buildServer] An error occurred", e);
-            throw e;
-        }
+    public void buildServer() throws ExternalProcessException {
+        this.
+                setWorkingDir(JAVA_SERVER)
+                .addMvnGoal(MavenGoal.CLEAN)
+                .addMvnGoal(MavenGoal.PACKAGE)
+                .addParam("DskipTests", "")
+                .execute("server");
     }
 
-    public void buildClient() throws Throwable {
-        try {
-            this.
-                    setWorkingDir(JAVA_CLIENT)
-                    .addMvnGoal(MavenGoal.CLEAN)
-                    .addMvnGoal(MavenGoal.PACKAGE)
-                    .addParam("DskipTests", "")
-                    .execute("client");
-        } catch (Exception e) {
-            log.error("[buildClient] An error occurred", e);
-            throw e;
-        }
+    public void buildClient() throws ExternalProcessException {
+        this.
+                setWorkingDir(JAVA_CLIENT)
+                .addMvnGoal(MavenGoal.CLEAN)
+                .addMvnGoal(MavenGoal.PACKAGE)
+                .addParam("DskipTests", "")
+                .execute("client");
     }
 
     private void clear() {

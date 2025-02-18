@@ -39,6 +39,7 @@ public class HotpotService extends HotpotServiceGrpc.HotpotServiceImplBase {
                     }
             );
 
+            responseObserver.onError();
             responseObserver.onCompleted();
         } catch (Throwable t) {
             log.error("[unaryPot] An error occurred", t);

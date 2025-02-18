@@ -21,6 +21,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static org.grpctest.core.constant.Constants.CUSTOM_TESTS_CLASSPATH;
+
 @Component
 @Slf4j
 @AllArgsConstructor
@@ -38,7 +40,7 @@ public class CustomTestCaseReader {
     private List<TestCase> loadTestCases(List<String> includedFiles) throws Throwable {
         List<TestCase> testCases = new ArrayList<>();
         ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver(resourceLoader);
-        String classpath = "classpath:" + config.getCustomTestsClasspath() + "/*";
+        String classpath = "classpath:" + CUSTOM_TESTS_CLASSPATH + "/*";
         try {
             for (Resource resource : resourcePatternResolver.getResources(classpath)) {
                 if (includedFiles.isEmpty() || includedFiles.contains(resource.getFilename())) {
