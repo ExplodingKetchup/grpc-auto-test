@@ -11,9 +11,7 @@ import org.grpctest.core.pojo.RuntimeConfig;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @NoArgsConstructor
 @Service
@@ -59,6 +57,7 @@ public class SetupScriptInterpreter {
             case MOCK_EXCEPTION -> interpretMockExceptionOpCode();
             case INCLUDE_PROTO -> interpretIncludeProtoOpCode(getArgs(words));
             case GENERATE_FILES_ONLY -> interpretGenerateFilesOnlyOpCode(getArgs(words));
+            case SUPPORT -> interpretSupportOpCode(getArgs(words));
         }
     }
 
@@ -176,6 +175,29 @@ public class SetupScriptInterpreter {
         runtimeConfig.setGenerateFilesOnly(true);
     }
 
+    private void interpretSupportOpCode(String[] args) {
+        String supportService = "";
+        Integer position = -1;
+        for (String arg : args) {
+            Pair<String, String> flag = parseFlagArg(arg);
+            if (Objects.isNull(flag)) {
+                supportService = arg;
+            } else {
+                if (flag.getLeft().equals("position")) {
+                    position = Integer.parseInt(flag.getRight());
+                }
+            }
+        }
+        if (StringUtils.isBlank(supportService) || position < 0 || position > 3) {
+            log.warn("[interpretSupportOpCode] Invalid SUPPORT config [SUPPORT {}]. Will ignore this line", String.join(" ", args));
+            return;
+        }
+        if (Objects.isNull(runtimeConfig.getSupport())) {
+            runtimeConfig.setSupport(new HashMap<>());
+        }
+        runtimeConfig.getSupport().putIfAbsent(supportService, position);
+    }
+
     private String[] getArgs(String[] line) {
         if (line.length > 1) {
             return Arrays.copyOfRange(line, 1, line.length);
@@ -184,14 +206,14 @@ public class SetupScriptInterpreter {
     }
 
     /**
-     * Extract information from a "flag" arg (in the form --(flag_key):(flag_value) or --(flag_key))
+     * Extract information from a "flag" arg (in the form --(flag_key)=(flag_value) or --(flag_key))
      * @param arg
-     * @return a {@link Pair} of (flag_key) : (flag_value); (flag_value) will be {@literal null}
+     * @return a {@link Pair} of (flag_key) = (flag_value); (flag_value) will be {@literal null}
      * when arg is in the form "--(flag_key)"; returns {@literal null} if {@code arg} is not in the flag format
      */
     private Pair<String, String> parseFlagArg(String arg) {
         if (arg.startsWith("--")) {
-            String[] splitFlagArg = arg.substring(2).split(":");
+            String[] splitFlagArg = arg.substring(2).split("=");
             if (splitFlagArg.length > 2) return null;
             String flagKey = splitFlagArg[0];
             String flagValue = "";
@@ -207,23 +229,27 @@ public class SetupScriptInterpreter {
         SERVER,
         /** CLIENT {@link Language} */
         CLIENT,
-        /** TESTCASE (--{random, default}(:{0, 1, 2})) (custom_testcase1.json custom_testcase2.json) <br>
+        /** TESTCASE (--{random, default}(={0, 1, 2})) (custom_testcase1.json custom_testcase2.json) <br>
          * Note that if custom testcases are specified, "random" and "default" flags will be nullified. <br>
          * "--random" and "--default" are mutually exclusive. If both are present, will interpret the 1st flag only.
          */
         TESTCASE,
-        /** COMPRESSION --request:compression_algo --response:compression_algo <br>
+        /** COMPRESSION --request=compression_algo --response=compression_algo <br>
          * Currently only support "gzip" and "deflate". If not specified, will interpret as uncompressed. <br>
          * Note that there is no mechanism to check if the algo is supported in a language. May cause errors in such cases.
          */
         COMPRESSION,
-        /** METADATA (--server-client:{@link org.grpctest.core.enums.MetadataType}) (--client-server:{@link org.grpctest.core.enums.MetadataType}) [Optional] */
+        /** METADATA (--server-client={@link org.grpctest.core.enums.MetadataType}) (--client-server={@link org.grpctest.core.enums.MetadataType}) [Optional] */
         METADATA,
         /** MOCK_EXCEPTION [Optional] */
         MOCK_EXCEPTION,
         /** INCLUDE_PROTO rpc_1.proto rpc_2.proto [Optional] */
         INCLUDE_PROTO,
         /** GENERATE_FILES_ONLY */
-        GENERATE_FILES_ONLY
+        GENERATE_FILES_ONLY,
+        /** SUPPORT service-name --position=(0,1,2,3) <br>
+         * position: when to launch supporting service (0 = before server, 1 = after server, 2 = before client, 3 = after client)
+         */
+        SUPPORT
     }
 }

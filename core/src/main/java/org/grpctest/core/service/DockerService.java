@@ -28,7 +28,7 @@ public class DockerService {
     private static final String CMD_DOCKER_COMPOSE_UP = "%s docker compose -f compose.yaml -p grpc-auto-test %s up -d %s";
     private static final String CMD_DOCKER_COMPOSE_DOWN = "%s docker compose %s down --rmi all";
     private static final String CMD_DOCKER_COMPOSE_PS = "%s docker compose %s ps --services";
-    private static final List<String> SUPPORTED_SERVICES = Stream.concat(Language.CLIENT_NAME.values().stream(), Language.SERVER_NAME.values().stream()).toList();
+//    private static final List<String> SUPPORTED_SERVICES = Stream.concat(Language.CLIENT_NAME.values().stream(), Language.SERVER_NAME.values().stream()).toList();
     private static final long CONTAINER_HEALTH_CHECK_INTERVAL_MS = 1000;
     private static final int STABLE_THRESHOLD_INTERVALS = 5;    // After this many consecutive successful health checks, service can be considered stable
 
@@ -46,7 +46,7 @@ public class DockerService {
     }
 
     public void dockerComposeUpSpecifyServices(String profile, List<String> services, Map<String, String> env, boolean monitorUntilStable) throws DockerException {
-        String validServices = services.stream().filter(SUPPORTED_SERVICES::contains).collect(Collectors.joining(" "));
+        String validServices = services.stream().collect(Collectors.joining(" "));
         if (StringUtils.isBlank(validServices)) {
             log.warn("[dockerComposeUpSpecifyServices] No known services are specified. Will do nothing.");
             return;
@@ -61,7 +61,10 @@ public class DockerService {
         try {
             // Launch services
             externalProcessUtilService.execute(WORKING_DIR, cmd, LOG_FILE_PREFIX, false);
-            if (!monitorUntilStable) return;
+            if (!monitorUntilStable) {
+                log.info("[dockerComposeUpSpecifyServices] Successfully launched service [{}]", services);
+                return;
+            }
 
             // Monitor services periodically
             long currentTime = System.currentTimeMillis();
@@ -72,7 +75,7 @@ public class DockerService {
                 if (healthCheck(profile, env, validServices.split(" "))) {
                     consecutiveSuccessHealthChecks++;
                     if (consecutiveSuccessHealthChecks >= STABLE_THRESHOLD_INTERVALS) {
-                        log.info("[dockerComposeUpSpecifyServices] Successfully launched service [{}]", (Object) services);
+                        log.info("[dockerComposeUpSpecifyServices] Successfully launched service [{}]", services);
                         return;
                     }
                 } else {

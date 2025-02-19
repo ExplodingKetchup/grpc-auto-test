@@ -2,10 +2,12 @@ package org.grpctest.core.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.grpctest.core.config.Config;
+import org.grpctest.core.constant.PresetTestPrograms;
 import org.grpctest.core.data.RpcModelRegistry;
 import org.grpctest.core.data.TestcaseRegistry;
 import org.grpctest.core.enums.CleanupMode;
 import org.grpctest.core.enums.Language;
+import org.grpctest.core.enums.ProgramType;
 import org.grpctest.core.pojo.RpcService;
 import org.grpctest.core.pojo.RuntimeConfig;
 import org.grpctest.core.service.codegen.JavaCodeGenService;
@@ -62,6 +64,8 @@ public class CoreService implements InitializingBean {
 
     private final TestcaseRegistry testcaseRegistry;
 
+    private final PresetTestPrograms presetTestPrograms;
+
     private final TestProgramsManager testProgramsManager;
     
     private final ResultAnalyzer resultAnalyzer;
@@ -81,6 +85,7 @@ public class CoreService implements InitializingBean {
                        TestCaseWriter testCaseWriter,
                        RpcModelRegistry rpcModelRegistry,
                        TestcaseRegistry testcaseRegistry,
+                       PresetTestPrograms presetTestPrograms,
                        TestProgramsManager testProgramsManager,
                        ResultAnalyzer resultAnalyzer) {
         this.config = config;
@@ -96,6 +101,7 @@ public class CoreService implements InitializingBean {
         this.testCaseWriter = testCaseWriter;
         this.rpcModelRegistry = rpcModelRegistry;
         this.testcaseRegistry = testcaseRegistry;
+        this.presetTestPrograms = presetTestPrograms;
         this.testProgramsManager = testProgramsManager;
         this.resultAnalyzer = resultAnalyzer;
     }
@@ -190,6 +196,14 @@ public class CoreService implements InitializingBean {
                 testProgramsManager.resetDeployment();
                 testProgramsManager.addClient(runtimeConfig.getClient());
                 testProgramsManager.addServer(runtimeConfig.getServer());
+                for (String support : runtimeConfig.getSupport().keySet()) {
+                    Integer position = runtimeConfig.getSupport().get(support);
+                    testProgramsManager.attachSupportingService(
+                            presetTestPrograms.lookupTestProgramByServiceName(support),
+                            position <= 1 ? ProgramType.SERVER : ProgramType.CLIENT,
+                            position % 2 == 0   // I.e. 0 or 2
+                    );
+                }
                 testProgramsManager.deploy();
                 Thread.sleep(5000);     // Wait for stuff to finish before shutting down
             }

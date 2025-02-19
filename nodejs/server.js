@@ -150,7 +150,7 @@ console.log("Using environment " + env);
 
     // BEGIN Server
     function getServer() {
-        let server = new grpc.Server({"default_compression_level": 2});
+        let server = new grpc.Server();
 
         server.addService(protosGrpc.default_hotpot.HotpotService.service, {
             unaryPot: default_hotpot_HotpotService_unaryPot,

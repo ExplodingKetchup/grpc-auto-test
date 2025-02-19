@@ -4,10 +4,12 @@ import org.grpctest.core.enums.Language;
 import org.grpctest.core.enums.MetadataType;
 import org.grpctest.core.pojo.RuntimeConfig;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 public interface TestSetupUi {
-    default RuntimeConfig setupEverything() throws Exception {
+    default RuntimeConfig setupEverything() throws IOException {
         printHelloMessage();
         return RuntimeConfig.builder()
                 .server(chooseServer())
@@ -28,29 +30,31 @@ public interface TestSetupUi {
 
     void printHelloMessage();
 
-    Language chooseServer() throws Exception;
+    Language chooseServer() throws IOException;
 
-    Language chooseClient() throws Exception;
+    Language chooseClient() throws IOException;
 
-    MetadataType chooseServerToClientMetadataType() throws Exception;
+    MetadataType chooseServerToClientMetadataType() throws IOException;
 
-    MetadataType chooseClientToServerMetadataType() throws Exception;
+    MetadataType chooseClientToServerMetadataType() throws IOException;
 
-    boolean chooseEnableException() throws Exception;
+    boolean chooseEnableException() throws IOException;
 
-    boolean chooseEnableGeneratedTestcase() throws Exception;
+    boolean chooseEnableGeneratedTestcase() throws IOException;
 
-    List<String> chooseIncludedRpcFiles() throws Exception;
+    List<String> chooseIncludedRpcFiles() throws IOException;
 
-    int chooseOmitFieldsInRandomTestcases() throws Exception;
+    int chooseOmitFieldsInRandomTestcases() throws IOException;
 
-    int chooseValueMode() throws Exception;
+    int chooseValueMode() throws IOException;
 
-    List<String> chooseIncludedCustomTestcases() throws Exception;
+    List<String> chooseIncludedCustomTestcases() throws IOException;
 
-    boolean chooseGenerateFilesOnly() throws Exception;
+    boolean chooseGenerateFilesOnly() throws IOException;
 
-    String chooseRequestCompression() throws Exception;
+    String chooseRequestCompression() throws IOException;
 
-    String chooseResponseCompression() throws Exception;
+    String chooseResponseCompression() throws IOException;
+    
+    Map<String, Integer> chooseSupport() throws IOException;
 }

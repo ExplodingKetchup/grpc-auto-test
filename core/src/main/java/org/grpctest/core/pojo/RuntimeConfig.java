@@ -1,11 +1,14 @@
 package org.grpctest.core.pojo;
 
 import lombok.*;
+import org.apache.commons.lang3.tuple.Pair;
 import org.grpctest.core.enums.Language;
 import org.grpctest.core.enums.MetadataType;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /** Configs that are better suited to be set at runtime (esp. if they vary between each run) */
 @Data
@@ -50,5 +53,8 @@ public class RuntimeConfig {
 
     @Builder.Default
     private String responseCompression = "";
+
+    @Builder.Default
+    private Map<String, Integer> support = new HashMap<>();
 
 }

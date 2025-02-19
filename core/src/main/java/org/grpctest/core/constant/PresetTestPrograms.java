@@ -8,6 +8,9 @@ import org.grpctest.core.pojo.TestProgram;
 import org.grpctest.core.service.util.TestProgramUtilService;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static org.grpctest.core.constant.Constants.TEST_PROGRAM_DEFAULT_POLL_INTERVAL_MS;
 
 @Component
@@ -22,6 +25,8 @@ public class PresetTestPrograms {
     private final TestProgram pyServer;
     private final TestProgram tcpdump;
 
+    private final Map<String, TestProgram> testProgramLookupTable = new HashMap<>();
+
     public PresetTestPrograms(Config config, TestProgramUtilService testProgramUtilService) {
         this.javaClient = new TestProgram("java-client", "java-client-container",ProgramType.CLIENT, Language.JAVA, "", false, null, -1, -1);
         this.javaServer = new TestProgram("java-server", "java-server-container", ProgramType.SERVER, Language.JAVA, "", true, () -> testProgramUtilService.checkServerRunning(Language.JAVA), TEST_PROGRAM_DEFAULT_POLL_INTERVAL_MS, config.getServerStartupTimeoutMillis());
@@ -30,5 +35,17 @@ public class PresetTestPrograms {
         this.pyClient = new TestProgram("py-client", "py-client-container", ProgramType.CLIENT, Language.PYTHON, "", false, null, -1, -1);
         this.pyServer = new TestProgram("py-server", "py-server-container", ProgramType.SERVER, Language.PYTHON, "", true, () -> testProgramUtilService.checkServerRunning(Language.PYTHON), TEST_PROGRAM_DEFAULT_POLL_INTERVAL_MS, config.getServerStartupTimeoutMillis());
         this.tcpdump = new TestProgram("tcpdump", "tcpdump-container", ProgramType.SUPPORT, Language.NOT_APPLICABLE, "tcpdump_enabled", true, null, -1, -1);
+
+        this.testProgramLookupTable.put("java-client", this.javaClient);
+        this.testProgramLookupTable.put("java-server", this.javaServer);
+        this.testProgramLookupTable.put("node-client", this.nodeClient);
+        this.testProgramLookupTable.put("node-server", this.nodeServer);
+        this.testProgramLookupTable.put("py-client", this.pyClient);
+        this.testProgramLookupTable.put("py-server", this.pyServer);
+        this.testProgramLookupTable.put("tcpdump", this.tcpdump);
+    }
+
+    public TestProgram lookupTestProgramByServiceName(String serviceName) {
+        return testProgramLookupTable.get(serviceName);
     }
 }
