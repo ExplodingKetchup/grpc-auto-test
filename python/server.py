@@ -122,7 +122,7 @@ class HotpotServiceServicer(HotpotServiceServicer):
 def main():
     configure_logger(get_log_file_for_this_instance(configs["log"]["dir"], configs["log"]["file_prefix"]))
 
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10), compression=_COMPRESSION_ALGOS["none"])
+    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10), compression=_COMPRESSION_ALGOS["gzip"])
     add_HotpotServiceServicer_to_server(HotpotServiceServicer(), server)
     server.add_insecure_port(f"[::]:{configs["server"]["port"]}")
     server.start()

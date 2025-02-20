@@ -30,8 +30,9 @@ def message_to_file(filepath: str, message: Message):
     :param message:
     :return:
     """
-    with open(filepath, "wb") as f:
-        f.write(message.SerializeToString())
+    if message is not None:
+        with open(filepath, "wb") as f:
+            f.write(message.SerializeToString())
 
 def format_metadata_as_string(metadata) -> str:
     if metadata is None:

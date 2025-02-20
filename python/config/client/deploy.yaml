@@ -6,5 +6,5 @@ in:
 out:
   dir: out/client
 server:
-  host: node-server
+  host: py-server
   port: 50051

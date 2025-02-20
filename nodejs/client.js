@@ -2,13 +2,8 @@ import * as grpc from '@grpc/grpc-js';
 import { createLogger, loadProtosGrpc, loadProtosProtobufjs, messageFromFile, messageToFile, formatMetadataForOutput, metadataToFile, formatErrorForOutput, errorToFile, loopMultipleFilesWithSamePrefix, logFieldsOfObject } from './common.js';
 
 // Constants
+const SUPPORTED_COMPRESSION_ALGO = ["", "deflate", "gzip", "gzip-stream"];
 const BIN_SUFFIX = '-bin';
-const META_KEY_6ak680h0y = '6ak680h0y' + BIN_SUFFIX;
-const META_VALUE_6ak680h0y = Buffer.from('2639dd09d4c63390d40bf5297920f2fad2', 'hex');
-const META_KEY_30ju7j578986s9 = '30ju7j578986s9' + BIN_SUFFIX;
-const META_VALUE_30ju7j578986s9 = Buffer.from('e2b2', 'hex');
-const META_KEY_3w0981nx15wu021d = '3w0981nx15wu021d' + BIN_SUFFIX;
-const META_VALUE_3w0981nx15wu021d = Buffer.from('eb9873a5d7ce4c67', 'hex');
 
 const default_hotpot_SmallHotpotOfRickeridoo_fields = ["small_uint32_value", "small_string_value"];
 const default_hotpot_BigHotpotOfTerror_fields = ["double_value", "float_value", "int32_value", "int64_value", "uint32_value", "uint64_value", "sint32_value", "sint64_value", "fixed32_value", "fixed64_value", "sfixed32_value", "sfixed64_value", "bool_value", "string_value", "bytes_value", "enum_value", "message_value"];
@@ -28,9 +23,6 @@ console.log("Using environment " + env);
     let protosGrpc = loadProtosGrpc(config.protoDir);
     let root = loadProtosProtobufjs(config.protoDir);
     const headers = new grpc.Metadata();
-    headers.set(META_KEY_6ak680h0y, META_VALUE_6ak680h0y);
-    headers.set(META_KEY_30ju7j578986s9, META_VALUE_30ju7j578986s9);
-    headers.set(META_KEY_3w0981nx15wu021d, META_VALUE_3w0981nx15wu021d);
 
     function invokeUnaryRpc(method, requestType, responseType, methodId, requestTypeFieldNames, responseTypeFieldNames) {
         const rpcCallback = (err, response) => {

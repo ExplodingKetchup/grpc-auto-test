@@ -36,8 +36,8 @@ public class JavaClient implements InitializingBean {
         this.config = config;
         Channel originChannel = ManagedChannelBuilder.forAddress(config.getServiceHost(), config.getServicePort()).usePlaintext().build();
         Channel channel = ClientInterceptors.intercept(originChannel, clientInterceptor);
-        this.hotpotServiceBlockingStub = HotpotServiceGrpc.newBlockingStub(channel).withCompression("gzip");
-        this.hotpotServiceAsyncStub = HotpotServiceGrpc.newStub(channel).withCompression("gzip");
+        this.hotpotServiceBlockingStub = HotpotServiceGrpc.newBlockingStub(channel);
+        this.hotpotServiceAsyncStub = HotpotServiceGrpc.newStub(channel);
         log.info("Connected to server at {}:{}", config.getServiceHost(), config.getServicePort());
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             log.info("Client shutting down...");

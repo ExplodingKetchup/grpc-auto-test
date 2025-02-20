@@ -33,7 +33,7 @@ public class JavaServer implements InitializingBean {
                 .intercept(new ServerInterceptor() {
                     @Override
                     public <ReqT, RespT> ServerCall.Listener<ReqT> interceptCall(ServerCall<ReqT, RespT> call, Metadata headers, ServerCallHandler<ReqT, RespT> next) {
-                        call.setCompression("${registry.getCompression()}");
+                        call.setCompression("${registry.getResponseCompression()}");
                         return next.startCall(call, headers);
                     }
                 })

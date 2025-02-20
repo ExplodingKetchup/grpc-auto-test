@@ -3,4 +3,4 @@ SERVER PYTHON
 TESTCASE --random
 INCLUDE_PROTO single_field_values.proto
 SUPPORT tcpdump --position=1
-COMPRESSION --request=gzip
+COMPRESSION --response=gzip

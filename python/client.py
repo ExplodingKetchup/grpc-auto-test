@@ -11,8 +11,8 @@ from file_utils import list_files_with_same_prefix
 from log_utils import configure_logger, get_log_file_for_this_instance, log_fields_of_object
 from message_utils import message_from_file, message_to_file, format_grpc_error_as_string, grpc_error_to_file, \
     metadata_to_file, format_metadata_as_string
-from single_field_values_implicit_pb2 import *
-from single_field_values_implicit_pb2_grpc import *
+from single_field_values_pb2 import *
+from single_field_values_pb2_grpc import *
 
 
 # Constants
@@ -22,10 +22,7 @@ _COMPRESSION_ALGOS = {
     "gzip": grpc.Compression.Gzip,
 }
 BIN_METADATA_SUFFIX = "-bin"
-META_KEY_y4kk47j3 = "y4kk47j3" + BIN_METADATA_SUFFIX
-META_VALUE_y4kk47j3 = bytes.fromhex("af6df2")
 OUTBOUND_HEADERS = (
-    (META_KEY_y4kk47j3, META_VALUE_y4kk47j3),
 )
 
 default_hotpot_SmallHotpotOfRickeridoo_fields = ["small_uint32_value", "small_string_value"]
@@ -77,14 +74,12 @@ def invoke_unary_rpc(method, request: Message, method_id: str, request_type_fiel
     try:
         logging.info(f"[invoke_unary_rpc] {method_id} - Request: {request}")
         log_fields_of_object(request, f"{method_id} - request", request_type_field_names)
-        response, call = method.with_call(request, metadata=OUTBOUND_HEADERS)
-        receive_header_metadata(call)
+        response, call = method.with_call(request)
         logging.info(f"[invoke_unary_rpc] {method_id} - Response: {response}")
         log_fields_of_object(response, f"{method_id} - response", response_type_field_names)
         message_to_file(os.path.join(configs["out"]["dir"], f"{method_id.replace(".", "_")}_return_0.bin"),
                         response)
     except grpc.RpcError as rpc_error:
-        receive_header_metadata(rpc_error)
         logging.error(f"[invoke_unary_rpc] Received rpc error: {format_grpc_error_as_string(rpc_error)}")
         grpc_error_to_file(get_error_file_path(method_id), rpc_error)
         response = rpc_error.args[0].response
@@ -99,8 +94,7 @@ def invoke_server_streaming_rpc(method, request: Message, method_id: str, reques
         logging.info(f"[invoke_server_streaming_rpc] {method_id} - Request: {request}")
         log_fields_of_object(request, f"{method_id} - request", request_type_field_names)
         response_idx = 0
-        call = method(request, metadata=OUTBOUND_HEADERS)
-        receive_header_metadata(call)
+        call = method(request)
         for response in call:
             logging.info(f"[invoke_server_streaming_rpc] {method_id} - Response: {response}")
             log_fields_of_object(response, f"{method_id} - response", response_type_field_names)
@@ -120,16 +114,13 @@ def invoke_client_streaming_rpc(method, request_iterator: Iterator[Message], met
                 calling_method_name="invoke_client_streaming_rpc",
                 method_id=method_id,
                 request_type_field_names=request_type_field_names
-            ),
-            metadata=OUTBOUND_HEADERS
+            )
         )
-        receive_header_metadata(call)
         logging.info(f"[invoke_client_streaming_rpc] {method_id} - Response: {response}")
         log_fields_of_object(response, f"{method_id} - response", response_type_field_names)
         message_to_file(os.path.join(configs["out"]["dir"], f"{method_id.replace(".", "_")}_return_0.bin"),
                         response)
     except grpc.RpcError as rpc_error:
-        receive_header_metadata(rpc_error)
         logging.error(f"[invoke_client_streaming_rpc] Received rpc error: {format_grpc_error_as_string(rpc_error)}")
         grpc_error_to_file(get_error_file_path(method_id), rpc_error)
         response = rpc_error.args[0].response
@@ -148,10 +139,8 @@ def invoke_bidi_streaming_rpc(method, request_iterator: Iterator[Message], metho
                 calling_method_name="invoke_bidi_streaming_rpc",
                 method_id=method_id,
                 request_type_field_names=request_type_field_names
-            ),
-            metadata=OUTBOUND_HEADERS
+            )
         )
-        receive_header_metadata(call)
         for response in call:
             logging.info(f"[invoke_bidi_streaming_rpc] {method_id} - Response: {response}")
             log_fields_of_object(response, f"{method_id} - response", response_type_field_names)
@@ -168,7 +157,7 @@ def invoke_bidi_streaming_rpc(method, request_iterator: Iterator[Message], metho
 def main():
     configure_logger(get_log_file_for_this_instance(configs["log"]["dir"], configs["log"]["file_prefix"]))
 
-    channel = grpc.insecure_channel(f"{configs["server"]["host"]}:{configs["server"]["port"]}", compression=_COMPRESSION_ALGOS["gzip"])
+    channel = grpc.insecure_channel(f"{configs["server"]["host"]}:{configs["server"]["port"]}", compression=_COMPRESSION_ALGOS["none"])
 
     # >>> SERVICE HotpotService
     HotpotService_stub = HotpotServiceStub(channel)
