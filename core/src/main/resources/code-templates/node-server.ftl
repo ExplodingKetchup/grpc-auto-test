@@ -22,7 +22,7 @@ ${tabs}const rpcException = {code: grpc.status.${rpcException.statusCode.name()}
 <#macro requestLogging method indent=0>
     <#assign tabs = generateTabs(indent)>
     <#if logRequests>
-${tabs}logger.info(`[${method.id}] Request: ${"$"}{JSON.stringify(request, null, 2)}`);
+${tabs}logger.info(`[${method.id}] Request:\n${"$"}{JSON.stringify(request, null, 2)}`);
         <#if logRequestsPrintFields>
 ${tabs}logFieldsOfObject(logger, request, "${method.id} - request", [<#list registry.getAllFieldNames(method.inType) as fieldname>"${fieldname}"<#sep>, </#list>]);
         </#if>
@@ -31,7 +31,7 @@ ${tabs}logFieldsOfObject(logger, request, "${method.id} - request", [<#list regi
 <#macro responseLogging method indent=0>
     <#assign tabs = generateTabs(indent)>
     <#if logResponses>
-${tabs}logger.info(`[${method.id}] Response: ${"$"}{JSON.stringify(response, null, 2)}`);
+${tabs}logger.info(`[${method.id}] Response:\n${"$"}{JSON.stringify(response, null, 2)}`);
         <#if logResponsesPrintFields>
 ${tabs}logFieldsOfObject(logger, response, "${method.id} - response", [<#list registry.getAllFieldNames(method.outType) as fieldname>"${fieldname}"<#sep>, </#list>]);
         </#if>
@@ -92,12 +92,12 @@ console.log("Using environment " + env);
     <#if method.type == "UNARY" || method.type == "SERVER_STREAMING">
             const request = call.request;
             <@requestLogging method=method indent=3/>
-            messageToFile(requestMessageType.fromObject(request), requestMessageType, config.outDir + "${method_id}_param_0.bin");
+            messageToFile(request, requestMessageType, config.outDir + "${method_id}_param_0.bin");
     <#elseif method.type == "CLIENT_STREAMING" || method.type =="BIDI_STREAMING">
             let requestIdx = 0;
             call.on('data', (request) => {
                 <@requestLogging method=method indent=4/>
-                messageToFile(requestMessageType.fromObject(request), requestMessageType, config.outDir + `${method_id}_param_${"$"}{requestIdx++}.bin`);
+                messageToFile(request, requestMessageType, config.outDir + `${method_id}_param_${"$"}{requestIdx++}.bin`);
             });
     </#if>
 

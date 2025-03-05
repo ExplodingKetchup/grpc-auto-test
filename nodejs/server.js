@@ -20,112 +20,83 @@ console.log("Using environment " + env);
     let root = loadProtosProtobufjs(config.protoDir);
 
     // BEGIN RPC methods implementation
-    function default_hotpot_HotpotService_bidiStreamingPot(call) {
+    function map_hotpot_HotpotService_bidiStreamingPot(call) {
         try {
-            logger.info(`[default_hotpot_HotpotService_bidiStreamingPot] Received metadata ${JSON.stringify(call.metadata, null, 2)}`);
+            logger.info(`[map_hotpot_HotpotService_bidiStreamingPot] Received metadata ${JSON.stringify(call.metadata, null, 2)}`);
             metadataToFile(call.metadata, config.outDir + 'received_metadata.txt');
 
-            let requestMessageType = root.lookupType("default_hotpot.BigHotpotOfTerror");
-            let responseMessageType = root.lookupType("default_hotpot.BigHotpotOfTerror");
+            let requestMessageType = root.lookupType("map_hotpot.MapPot");
+            let responseMessageType = root.lookupType("map_hotpot.MapPotReversed");
 
             let requestIdx = 0;
             call.on('data', (request) => {
-                logger.info(`[default_hotpot.HotpotService.bidiStreamingPot] Request: ${JSON.stringify(request, null, 2)}`);
-                logFieldsOfObject(logger, request, "default_hotpot.HotpotService.bidiStreamingPot - request", ["double_value", "float_value", "int32_value", "int64_value", "uint32_value", "uint64_value", "sint32_value", "sint64_value", "fixed32_value", "fixed64_value", "sfixed32_value", "sfixed64_value", "bool_value", "string_value", "bytes_value", "enum_value", "message_value"]);
-                messageToFile(requestMessageType.fromObject(request), requestMessageType, config.outDir + `default_hotpot_HotpotService_bidiStreamingPot_param_${requestIdx++}.bin`);
+                logger.info(`[map_hotpot.HotpotService.bidiStreamingPot] Request:\n${JSON.stringify(request, null, 2)}`);
+                logFieldsOfObject(logger, request, "map_hotpot.HotpotService.bidiStreamingPot - request", ["int_double_value", "int_int_value", "int_bool_value", "int_string_value", "int_bytes_value", "int_enum_value", "bool_double_value", "bool_bool_value", "bool_string_value", "bool_bytes_value", "bool_enum_value", "string_double_value", "string_string_value", "string_bytes_value", "string_enum_value"]);
+                messageToFile(request, requestMessageType, config.outDir + `map_hotpot_HotpotService_bidiStreamingPot_param_${requestIdx++}.bin`);
             });
 
             const metadata = new grpc.Metadata();
             call.sendMetadata(metadata);
 
             call.on('end', () => {
-                loopMultipleFilesWithSamePrefix(config.testcaseDir + 'default_hotpot_HotpotService_bidiStreamingPot_return', '.bin')
+                loopMultipleFilesWithSamePrefix(config.testcaseDir + 'map_hotpot_HotpotService_bidiStreamingPot_return', '.bin')
                         .forEach((filepath) => {
                             const response = messageFromFile(filepath, responseMessageType);
-                            logger.info(`[default_hotpot.HotpotService.bidiStreamingPot] Response: ${JSON.stringify(response, null, 2)}`);
-                            logFieldsOfObject(logger, response, "default_hotpot.HotpotService.bidiStreamingPot - response", ["double_value", "float_value", "int32_value", "int64_value", "uint32_value", "uint64_value", "sint32_value", "sint64_value", "fixed32_value", "fixed64_value", "sfixed32_value", "sfixed64_value", "bool_value", "string_value", "bytes_value", "enum_value", "message_value"]);
+                            logger.info(`[map_hotpot.HotpotService.bidiStreamingPot] Response:\n${JSON.stringify(response, null, 2)}`);
+                            logFieldsOfObject(logger, response, "map_hotpot.HotpotService.bidiStreamingPot - response", ["string_enum_value", "string_bytes_value", "string_string_value", "string_double_value", "bool_enum_value", "bool_bytes_value", "bool_string_value", "bool_bool_value", "bool_double_value", "int_enum_value", "int_bytes_value", "int_string_value", "int_bool_value", "int_int_value", "int_double_value"]);
                             call.write(response);
                         });
                call.end();
             });
 
         } catch (e) {
-            logger.error(`[default_hotpot_HotpotService_bidiStreamingPot] An error occurred: ${e.message}\n${e.stack}`);
+            logger.error(`[map_hotpot_HotpotService_bidiStreamingPot] An error occurred: ${e.message}\n${e.stack}`);
         }
     }
 
-    function default_hotpot_HotpotService_unaryPot(call, callback) {
+    function map_hotpot_HotpotService_serverStreamingPot(call) {
         try {
-            logger.info(`[default_hotpot_HotpotService_unaryPot] Received metadata ${JSON.stringify(call.metadata, null, 2)}`);
+            logger.info(`[map_hotpot_HotpotService_serverStreamingPot] Received metadata ${JSON.stringify(call.metadata, null, 2)}`);
             metadataToFile(call.metadata, config.outDir + 'received_metadata.txt');
 
-            let requestMessageType = root.lookupType("default_hotpot.BigHotpotOfTerror");
-            let responseMessageType = root.lookupType("default_hotpot.BigHotpotOfTerror");
+            let requestMessageType = root.lookupType("map_hotpot.MapPot");
+            let responseMessageType = root.lookupType("map_hotpot.MapPotReversed");
 
             const request = call.request;
-            logger.info(`[default_hotpot.HotpotService.unaryPot] Request: ${JSON.stringify(request, null, 2)}`);
-            logFieldsOfObject(logger, request, "default_hotpot.HotpotService.unaryPot - request", ["double_value", "float_value", "int32_value", "int64_value", "uint32_value", "uint64_value", "sint32_value", "sint64_value", "fixed32_value", "fixed64_value", "sfixed32_value", "sfixed64_value", "bool_value", "string_value", "bytes_value", "enum_value", "message_value"]);
-            messageToFile(requestMessageType.fromObject(request), requestMessageType, config.outDir + "default_hotpot_HotpotService_unaryPot_param_0.bin");
+            logger.info(`[map_hotpot.HotpotService.serverStreamingPot] Request:\n${JSON.stringify(request, null, 2)}`);
+            logFieldsOfObject(logger, request, "map_hotpot.HotpotService.serverStreamingPot - request", ["int_double_value", "int_int_value", "int_bool_value", "int_string_value", "int_bytes_value", "int_enum_value", "bool_double_value", "bool_bool_value", "bool_string_value", "bool_bytes_value", "bool_enum_value", "string_double_value", "string_string_value", "string_bytes_value", "string_enum_value"]);
+            messageToFile(request, requestMessageType, config.outDir + "map_hotpot_HotpotService_serverStreamingPot_param_0.bin");
 
             const metadata = new grpc.Metadata();
             call.sendMetadata(metadata);
 
-            const response = messageFromFile(
-                config.testcaseDir + "default_hotpot_HotpotService_unaryPot_return_0.bin",
-                responseMessageType
-            );
-            logger.info(`[default_hotpot.HotpotService.unaryPot] Response: ${JSON.stringify(response, null, 2)}`);
-            logFieldsOfObject(logger, response, "default_hotpot.HotpotService.unaryPot - response", ["double_value", "float_value", "int32_value", "int64_value", "uint32_value", "uint64_value", "sint32_value", "sint64_value", "fixed32_value", "fixed64_value", "sfixed32_value", "sfixed64_value", "bool_value", "string_value", "bytes_value", "enum_value", "message_value"]);
-            callback(null, response);
-
-        } catch (e) {
-            logger.error(`[default_hotpot_HotpotService_unaryPot] An error occurred: ${e.message}\n${e.stack}`);
-        }
-    }
-
-    function default_hotpot_HotpotService_serverStreamingPot(call) {
-        try {
-            logger.info(`[default_hotpot_HotpotService_serverStreamingPot] Received metadata ${JSON.stringify(call.metadata, null, 2)}`);
-            metadataToFile(call.metadata, config.outDir + 'received_metadata.txt');
-
-            let requestMessageType = root.lookupType("default_hotpot.BigHotpotOfTerror");
-            let responseMessageType = root.lookupType("default_hotpot.BigHotpotOfTerror");
-
-            const request = call.request;
-            logger.info(`[default_hotpot.HotpotService.serverStreamingPot] Request: ${JSON.stringify(request, null, 2)}`);
-            logFieldsOfObject(logger, request, "default_hotpot.HotpotService.serverStreamingPot - request", ["double_value", "float_value", "int32_value", "int64_value", "uint32_value", "uint64_value", "sint32_value", "sint64_value", "fixed32_value", "fixed64_value", "sfixed32_value", "sfixed64_value", "bool_value", "string_value", "bytes_value", "enum_value", "message_value"]);
-            messageToFile(requestMessageType.fromObject(request), requestMessageType, config.outDir + "default_hotpot_HotpotService_serverStreamingPot_param_0.bin");
-
-            const metadata = new grpc.Metadata();
-            call.sendMetadata(metadata);
-
-            loopMultipleFilesWithSamePrefix(config.testcaseDir + 'default_hotpot_HotpotService_serverStreamingPot_return', '.bin')
+            loopMultipleFilesWithSamePrefix(config.testcaseDir + 'map_hotpot_HotpotService_serverStreamingPot_return', '.bin')
                     .forEach((filepath) => {
                         const response = messageFromFile(filepath, responseMessageType);
-                        logger.info(`[default_hotpot.HotpotService.serverStreamingPot] Response: ${JSON.stringify(response, null, 2)}`);
-                        logFieldsOfObject(logger, response, "default_hotpot.HotpotService.serverStreamingPot - response", ["double_value", "float_value", "int32_value", "int64_value", "uint32_value", "uint64_value", "sint32_value", "sint64_value", "fixed32_value", "fixed64_value", "sfixed32_value", "sfixed64_value", "bool_value", "string_value", "bytes_value", "enum_value", "message_value"]);
+                        logger.info(`[map_hotpot.HotpotService.serverStreamingPot] Response:\n${JSON.stringify(response, null, 2)}`);
+                        logFieldsOfObject(logger, response, "map_hotpot.HotpotService.serverStreamingPot - response", ["string_enum_value", "string_bytes_value", "string_string_value", "string_double_value", "bool_enum_value", "bool_bytes_value", "bool_string_value", "bool_bool_value", "bool_double_value", "int_enum_value", "int_bytes_value", "int_string_value", "int_bool_value", "int_int_value", "int_double_value"]);
                         call.write(response);
                     });
             call.end();
 
         } catch (e) {
-            logger.error(`[default_hotpot_HotpotService_serverStreamingPot] An error occurred: ${e.message}\n${e.stack}`);
+            logger.error(`[map_hotpot_HotpotService_serverStreamingPot] An error occurred: ${e.message}\n${e.stack}`);
         }
     }
 
-    function default_hotpot_HotpotService_clientStreamingPot(call, callback) {
+    function map_hotpot_HotpotService_clientStreamingPot(call, callback) {
         try {
-            logger.info(`[default_hotpot_HotpotService_clientStreamingPot] Received metadata ${JSON.stringify(call.metadata, null, 2)}`);
+            logger.info(`[map_hotpot_HotpotService_clientStreamingPot] Received metadata ${JSON.stringify(call.metadata, null, 2)}`);
             metadataToFile(call.metadata, config.outDir + 'received_metadata.txt');
 
-            let requestMessageType = root.lookupType("default_hotpot.BigHotpotOfTerror");
-            let responseMessageType = root.lookupType("default_hotpot.BigHotpotOfTerror");
+            let requestMessageType = root.lookupType("map_hotpot.MapPot");
+            let responseMessageType = root.lookupType("map_hotpot.MapPotReversed");
 
             let requestIdx = 0;
             call.on('data', (request) => {
-                logger.info(`[default_hotpot.HotpotService.clientStreamingPot] Request: ${JSON.stringify(request, null, 2)}`);
-                logFieldsOfObject(logger, request, "default_hotpot.HotpotService.clientStreamingPot - request", ["double_value", "float_value", "int32_value", "int64_value", "uint32_value", "uint64_value", "sint32_value", "sint64_value", "fixed32_value", "fixed64_value", "sfixed32_value", "sfixed64_value", "bool_value", "string_value", "bytes_value", "enum_value", "message_value"]);
-                messageToFile(requestMessageType.fromObject(request), requestMessageType, config.outDir + `default_hotpot_HotpotService_clientStreamingPot_param_${requestIdx++}.bin`);
+                logger.info(`[map_hotpot.HotpotService.clientStreamingPot] Request:\n${JSON.stringify(request, null, 2)}`);
+                logFieldsOfObject(logger, request, "map_hotpot.HotpotService.clientStreamingPot - request", ["int_double_value", "int_int_value", "int_bool_value", "int_string_value", "int_bytes_value", "int_enum_value", "bool_double_value", "bool_bool_value", "bool_string_value", "bool_bytes_value", "bool_enum_value", "string_double_value", "string_string_value", "string_bytes_value", "string_enum_value"]);
+                messageToFile(request, requestMessageType, config.outDir + `map_hotpot_HotpotService_clientStreamingPot_param_${requestIdx++}.bin`);
             });
 
             const metadata = new grpc.Metadata();
@@ -133,16 +104,45 @@ console.log("Using environment " + env);
 
             call.on('end', () => {
                const response = messageFromFile(
-                   config.testcaseDir + "default_hotpot_HotpotService_clientStreamingPot_return_0.bin",
+                   config.testcaseDir + "map_hotpot_HotpotService_clientStreamingPot_return_0.bin",
                    responseMessageType
                );
-                logger.info(`[default_hotpot.HotpotService.clientStreamingPot] Response: ${JSON.stringify(response, null, 2)}`);
-                logFieldsOfObject(logger, response, "default_hotpot.HotpotService.clientStreamingPot - response", ["double_value", "float_value", "int32_value", "int64_value", "uint32_value", "uint64_value", "sint32_value", "sint64_value", "fixed32_value", "fixed64_value", "sfixed32_value", "sfixed64_value", "bool_value", "string_value", "bytes_value", "enum_value", "message_value"]);
+                logger.info(`[map_hotpot.HotpotService.clientStreamingPot] Response:\n${JSON.stringify(response, null, 2)}`);
+                logFieldsOfObject(logger, response, "map_hotpot.HotpotService.clientStreamingPot - response", ["string_enum_value", "string_bytes_value", "string_string_value", "string_double_value", "bool_enum_value", "bool_bytes_value", "bool_string_value", "bool_bool_value", "bool_double_value", "int_enum_value", "int_bytes_value", "int_string_value", "int_bool_value", "int_int_value", "int_double_value"]);
                callback(null, response);
             });
 
         } catch (e) {
-            logger.error(`[default_hotpot_HotpotService_clientStreamingPot] An error occurred: ${e.message}\n${e.stack}`);
+            logger.error(`[map_hotpot_HotpotService_clientStreamingPot] An error occurred: ${e.message}\n${e.stack}`);
+        }
+    }
+
+    function map_hotpot_HotpotService_unaryPot(call, callback) {
+        try {
+            logger.info(`[map_hotpot_HotpotService_unaryPot] Received metadata ${JSON.stringify(call.metadata, null, 2)}`);
+            metadataToFile(call.metadata, config.outDir + 'received_metadata.txt');
+
+            let requestMessageType = root.lookupType("map_hotpot.MapPot");
+            let responseMessageType = root.lookupType("map_hotpot.MapPotReversed");
+
+            const request = call.request;
+            logger.info(`[map_hotpot.HotpotService.unaryPot] Request:\n${JSON.stringify(request, null, 2)}`);
+            logFieldsOfObject(logger, request, "map_hotpot.HotpotService.unaryPot - request", ["int_double_value", "int_int_value", "int_bool_value", "int_string_value", "int_bytes_value", "int_enum_value", "bool_double_value", "bool_bool_value", "bool_string_value", "bool_bytes_value", "bool_enum_value", "string_double_value", "string_string_value", "string_bytes_value", "string_enum_value"]);
+            messageToFile(request, requestMessageType, config.outDir + "map_hotpot_HotpotService_unaryPot_param_0.bin");
+
+            const metadata = new grpc.Metadata();
+            call.sendMetadata(metadata);
+
+            const response = messageFromFile(
+                config.testcaseDir + "map_hotpot_HotpotService_unaryPot_return_0.bin",
+                responseMessageType
+            );
+            logger.info(`[map_hotpot.HotpotService.unaryPot] Response:\n${JSON.stringify(response, null, 2)}`);
+            logFieldsOfObject(logger, response, "map_hotpot.HotpotService.unaryPot - response", ["string_enum_value", "string_bytes_value", "string_string_value", "string_double_value", "bool_enum_value", "bool_bytes_value", "bool_string_value", "bool_bool_value", "bool_double_value", "int_enum_value", "int_bytes_value", "int_string_value", "int_bool_value", "int_int_value", "int_double_value"]);
+            callback(null, response);
+
+        } catch (e) {
+            logger.error(`[map_hotpot_HotpotService_unaryPot] An error occurred: ${e.message}\n${e.stack}`);
         }
     }
 
@@ -152,11 +152,11 @@ console.log("Using environment " + env);
     function getServer() {
         let server = new grpc.Server();
 
-        server.addService(protosGrpc.default_hotpot.HotpotService.service, {
-            unaryPot: default_hotpot_HotpotService_unaryPot,
-            serverStreamingPot: default_hotpot_HotpotService_serverStreamingPot,
-            clientStreamingPot: default_hotpot_HotpotService_clientStreamingPot,
-            bidiStreamingPot: default_hotpot_HotpotService_bidiStreamingPot        });
+        server.addService(protosGrpc.map_hotpot.HotpotService.service, {
+            unaryPot: map_hotpot_HotpotService_unaryPot,
+            serverStreamingPot: map_hotpot_HotpotService_serverStreamingPot,
+            clientStreamingPot: map_hotpot_HotpotService_clientStreamingPot,
+            bidiStreamingPot: map_hotpot_HotpotService_bidiStreamingPot        });
 
         return server;
     }

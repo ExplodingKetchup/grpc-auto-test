@@ -5,8 +5,8 @@ import { createLogger, loadProtosGrpc, loadProtosProtobufjs, messageFromFile, me
 const SUPPORTED_COMPRESSION_ALGO = ["", "deflate", "gzip", "gzip-stream"];
 const BIN_SUFFIX = '-bin';
 
-const default_hotpot_SmallHotpotOfRickeridoo_fields = ["small_uint32_value", "small_string_value"];
-const default_hotpot_BigHotpotOfTerror_fields = ["double_value", "float_value", "int32_value", "int64_value", "uint32_value", "uint64_value", "sint32_value", "sint64_value", "fixed32_value", "fixed64_value", "sfixed32_value", "sfixed64_value", "bool_value", "string_value", "bytes_value", "enum_value", "message_value"];
+const map_hotpot_MapPot_fields = ["int_double_value", "int_int_value", "int_bool_value", "int_string_value", "int_bytes_value", "int_enum_value", "bool_double_value", "bool_bool_value", "bool_string_value", "bool_bytes_value", "bool_enum_value", "string_double_value", "string_string_value", "string_bytes_value", "string_enum_value"];
+const map_hotpot_MapPotReversed_fields = ["string_enum_value", "string_bytes_value", "string_string_value", "string_double_value", "bool_enum_value", "bool_bytes_value", "bool_string_value", "bool_bool_value", "bool_double_value", "int_enum_value", "int_bytes_value", "int_string_value", "int_bool_value", "int_int_value", "int_double_value"];
 
 // Load configs dynamically depending on environment
 const env = process.env.NODE_ENV || 'test';
@@ -30,14 +30,14 @@ console.log("Using environment " + env);
                 logger.error(`[invokeUnaryRpc] RPC invoke failed: ${err.message}\n${err.stack}`);
                 errorToFile(err, `${config.outDir}${methodId.replaceAll(".", "_")}_error.txt`);
             } else {
-                logger.info(`[invokeUnaryRpc] ${methodId} - Response: ${JSON.stringify(response, null, 2)}`);
+                logger.info(`[invokeUnaryRpc] ${methodId} - Response:\n${JSON.stringify(response, null, 2)}`);
                 logFieldsOfObject(logger, response, methodId + " - response", responseTypeFieldNames);
-                messageToFile(responseType.fromObject(response), responseType, config.outDir + methodId.replaceAll(".", "_") + "_return_0.bin");
+                messageToFile(response, responseType, config.outDir + methodId.replaceAll(".", "_") + "_return_0.bin");
             }
         }
 
         let request = messageFromFile(config.testcaseDir + methodId.replaceAll(".", "_") + '_param_0.bin', requestType);
-        logger.info(`[invokeUnaryRpc] ${methodId} - Request: ${JSON.stringify(request, null, 2)}`);
+        logger.info(`[invokeUnaryRpc] ${methodId} - Request:\n${JSON.stringify(request, null, 2)}`);
         logFieldsOfObject(logger, request, methodId + " - request", requestTypeFieldNames);
         const call = method(request, headers, rpcCallback);
         call.on('metadata', metadata => {
@@ -49,7 +49,7 @@ console.log("Using environment " + env);
     function invokeServerStreamingRpc(method, requestType, responseType, methodId, requestTypeFieldNames, responseTypeFieldNames) {
         let responseIdx = 0;
         const request = messageFromFile(config.testcaseDir + methodId.replaceAll(".", "_") + '_param_0.bin', requestType);
-        logger.info(`[invokeServerStreamingRpc] ${methodId} - Request: ${JSON.stringify(request, null, 2)}`);
+        logger.info(`[invokeServerStreamingRpc] ${methodId} - Request:\n${JSON.stringify(request, null, 2)}`);
         logFieldsOfObject(logger, request, methodId + " - request", requestTypeFieldNames);
         const call = method(request, headers);
         call.on('metadata', (metadata) => {
@@ -57,9 +57,9 @@ console.log("Using environment " + env);
             metadataToFile(metadata, config.outDir + 'received_metadata.txt');
         });
         call.on('data', (response) => {
-            logger.info(`[invokeServerStreamingRpc] ${methodId} - Response: ${JSON.stringify(response, null, 2)}`);
+            logger.info(`[invokeServerStreamingRpc] ${methodId} - Response:\n${JSON.stringify(response, null, 2)}`);
             logFieldsOfObject(logger, response, methodId + " - response", responseTypeFieldNames);
-            messageToFile(responseType.fromObject(response), responseType, `${config.outDir}${methodId.replaceAll('.', '_')}_return_${responseIdx++}.bin`);
+            messageToFile(response, responseType, `${config.outDir}${methodId.replaceAll('.', '_')}_return_${responseIdx++}.bin`);
         });
         call.on('error', (err) => {
             logger.error(`[invokeServerStreamingRpc] RPC invoke failed: ${err.message}\n${err.stack}`);
@@ -76,9 +76,9 @@ console.log("Using environment " + env);
                 logger.error(`[invokeClientStreamingRpc] RPC invoke failed: ${err.message}\n${err.stack}`);
                 errorToFile(err, `${config.outDir}${methodId.replaceAll(".", "_")}_error.txt`);
             } else {
-                logger.info(`[invokeClientStreamingRpc] ${methodId} - Response: ${JSON.stringify(response, null, 2)}`);
+                logger.info(`[invokeClientStreamingRpc] ${methodId} - Response:\n${JSON.stringify(response, null, 2)}`);
                 logFieldsOfObject(logger, response, methodId + " - response", responseTypeFieldNames);
-                messageToFile(responseType.fromObject(response), responseType, config.outDir + methodId.replaceAll(".", "_") + "_return_0.bin");
+                messageToFile(response, responseType, config.outDir + methodId.replaceAll(".", "_") + "_return_0.bin");
             }
         }
 
@@ -90,7 +90,7 @@ console.log("Using environment " + env);
         loopMultipleFilesWithSamePrefix(`${config.testcaseDir}${methodId.replaceAll('.', '_')}_param`, '.bin')
                 .forEach((filepath) => {
                     const request = messageFromFile(filepath, requestType);
-                    logger.info(`[invokeClientStreamingRpc] ${methodId} - Request: ${JSON.stringify(request, null, 2)}`);
+                    logger.info(`[invokeClientStreamingRpc] ${methodId} - Request:\n${JSON.stringify(request, null, 2)}`);
                     logFieldsOfObject(logger, request, methodId + " - request", requestTypeFieldNames);
                     call.write(request);
                 });
@@ -105,9 +105,9 @@ console.log("Using environment " + env);
             metadataToFile(metadata, config.outDir + 'received_metadata.txt');
         });
         call.on('data', (response) => {
-            logger.info(`[invokeBidiStreamingRpc] ${methodId} - Response: ${JSON.stringify(response, null, 2)}`);
+            logger.info(`[invokeBidiStreamingRpc] ${methodId} - Response:\n${JSON.stringify(response, null, 2)}`);
             logFieldsOfObject(logger, response, methodId + " - response", responseTypeFieldNames);
-            messageToFile(responseType.fromObject(response), responseType, `${config.outDir}${methodId.replaceAll('.', '_')}_return_${responseIdx++}.bin`);
+            messageToFile(response, responseType, `${config.outDir}${methodId.replaceAll('.', '_')}_return_${responseIdx++}.bin`);
         });
         call.on('error', (err) => {
             logger.error(`[invokeBidiStreamingRpc] RPC invoke failed: ${err.message}\n${err.stack}`);
@@ -119,7 +119,7 @@ console.log("Using environment " + env);
         loopMultipleFilesWithSamePrefix(`${config.testcaseDir}${methodId.replaceAll('.', '_')}_param`, '.bin')
                 .forEach((filepath) => {
                     const request = messageFromFile(filepath, requestType);
-                    logger.info(`[invokeBidiStreamingRpc] ${methodId} - Request: ${JSON.stringify(request, null, 2)}`);
+                    logger.info(`[invokeBidiStreamingRpc] ${methodId} - Request:\n${JSON.stringify(request, null, 2)}`);
                     logFieldsOfObject(logger, request, methodId + " - request", requestTypeFieldNames);
                     call.write(request);
                 });
@@ -131,17 +131,17 @@ console.log("Using environment " + env);
         try {
 
             // >>> SERVICE HotpotService
-            let hotpotServiceStub = new protosGrpc.default_hotpot.HotpotService(config.server.host + ':' + config.server.port, grpc.credentials.createInsecure());
+            let hotpotServiceStub = new protosGrpc.map_hotpot.HotpotService(config.server.host + ':' + config.server.port, grpc.credentials.createInsecure());
             logger.info(`[main] Connected to server at ${config.server.host}:${config.server.port}`);
 
             // METHOD unaryPot
-            invokeUnaryRpc((request, headers, callback) => hotpotServiceStub.unaryPot(request, headers, callback), root.lookupType('default_hotpot.BigHotpotOfTerror'), root.lookupType('default_hotpot.BigHotpotOfTerror'), 'default_hotpot.HotpotService.unaryPot', default_hotpot_BigHotpotOfTerror_fields, default_hotpot_BigHotpotOfTerror_fields);
+            invokeUnaryRpc((request, headers, callback) => hotpotServiceStub.unaryPot(request, headers, callback), root.lookupType('map_hotpot.MapPot'), root.lookupType('map_hotpot.MapPotReversed'), 'map_hotpot.HotpotService.unaryPot', map_hotpot_MapPot_fields, map_hotpot_MapPotReversed_fields);
             // METHOD serverStreamingPot
-            invokeServerStreamingRpc((request, headers) => hotpotServiceStub.serverStreamingPot(request, headers), root.lookupType('default_hotpot.BigHotpotOfTerror'), root.lookupType('default_hotpot.BigHotpotOfTerror'), 'default_hotpot.HotpotService.serverStreamingPot', default_hotpot_BigHotpotOfTerror_fields, default_hotpot_BigHotpotOfTerror_fields);
+            invokeServerStreamingRpc((request, headers) => hotpotServiceStub.serverStreamingPot(request, headers), root.lookupType('map_hotpot.MapPot'), root.lookupType('map_hotpot.MapPotReversed'), 'map_hotpot.HotpotService.serverStreamingPot', map_hotpot_MapPot_fields, map_hotpot_MapPotReversed_fields);
             // METHOD clientStreamingPot
-            invokeClientStreamingRpc((headers, callback) => hotpotServiceStub.clientStreamingPot(headers, callback), root.lookupType('default_hotpot.BigHotpotOfTerror'), root.lookupType('default_hotpot.BigHotpotOfTerror'), 'default_hotpot.HotpotService.clientStreamingPot', default_hotpot_BigHotpotOfTerror_fields, default_hotpot_BigHotpotOfTerror_fields);
+            invokeClientStreamingRpc((headers, callback) => hotpotServiceStub.clientStreamingPot(headers, callback), root.lookupType('map_hotpot.MapPot'), root.lookupType('map_hotpot.MapPotReversed'), 'map_hotpot.HotpotService.clientStreamingPot', map_hotpot_MapPot_fields, map_hotpot_MapPotReversed_fields);
             // METHOD bidiStreamingPot
-            invokeBidiStreamingRpc((headers) => hotpotServiceStub.bidiStreamingPot(headers), root.lookupType('default_hotpot.BigHotpotOfTerror'), root.lookupType('default_hotpot.BigHotpotOfTerror'), 'default_hotpot.HotpotService.bidiStreamingPot', default_hotpot_BigHotpotOfTerror_fields, default_hotpot_BigHotpotOfTerror_fields);
+            invokeBidiStreamingRpc((headers) => hotpotServiceStub.bidiStreamingPot(headers), root.lookupType('map_hotpot.MapPot'), root.lookupType('map_hotpot.MapPotReversed'), 'map_hotpot.HotpotService.bidiStreamingPot', map_hotpot_MapPot_fields, map_hotpot_MapPotReversed_fields);
 
             // <<< SERVICE HotpotService
         } catch (e) {

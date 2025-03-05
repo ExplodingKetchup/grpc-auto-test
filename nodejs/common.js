@@ -84,6 +84,47 @@ function loadProtosProtobufjs(dirpath) {
     return root;
 }
 
+function convertMapKeysInObject(obj, messageType) {
+    for (const field in obj) {
+        if (messageType.fields[field].map) {
+            const mapFieldEntry = {};
+            for (const key in obj[field]) {
+                switch (messageType.fields[field].keyType) {    // Afaik, there are 3 keytypes: string, bool, or integer types
+                    case 'string':
+                        mapFieldEntry[key] = obj[field][key];
+                        break;
+                    case 'bool':
+                        if (key === 'true') {
+                            mapFieldEntry['true'] = obj[field][key];
+                        } else {
+                            mapFieldEntry[''] = obj[field][key];
+                        }
+                        break;
+                    default:
+                        if (messageType.fields[field].keyType.endsWith('32')) {
+                            mapFieldEntry[key] = obj[field][key];
+                        } else if (messageType.fields[field].keyType.endsWith('64')) {
+                            // The key is a 8-character ascii string, encoded with little endian (MSB at key[7])
+                            // Convert key to a bigint, and convert bigint to its string form as attribute
+                            let result = 0n;
+                            let isNegative = key.charCodeAt(7) > 127;
+                            for (let i = 0; i < 8; i++) {
+                            const byteValue = BigInt(key.charCodeAt(i));
+                            result = result | (byteValue << (8n * BigInt(i)));
+                            }
+                            if (['int64', 'sint64', 'sfixed64'].includes(messageType.fields[field].keyType) && isNegative) {
+                                result = result - (2n ** 64n);
+                            }
+                            mapFieldEntry[result] = obj[field][key];
+                        }
+                }
+            }
+            obj[field] = mapFieldEntry;
+        }
+    }
+    return obj;
+}
+
 /** 
  * Read and convert message from files (encoded using protobuf) 
  * 
@@ -99,7 +140,8 @@ function messageFromFile(filepath, messageType) {
     try {
         let message = messageType.decode(data);
 
-        return messageType.toObject(message);
+        // return messageType.toObject(message);
+        return convertMapKeysInObject(messageType.toObject(message), messageType);
 
     } catch (e) {
         if (e instanceof protobuf.util.ProtocolError) {
@@ -121,7 +163,9 @@ function messageFromFile(filepath, messageType) {
  * @param messageType
  * @param filename 
  */
-function messageToFile(message, messageType, filepath) {
+function messageToFile(obj, messageType, filepath) {
+    // const message = messageType.fromObject(obj);
+    const message = messageType.fromObject(convertMapKeysInObject(obj, messageType));
     // Make sure the message and messageType matches
     let err = messageType.verify(message);
     // if (err) {

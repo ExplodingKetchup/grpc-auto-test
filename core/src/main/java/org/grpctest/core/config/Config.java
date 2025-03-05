@@ -24,7 +24,7 @@ public class Config {
     private long dockerComposeTimeoutMillis;
 
     /** Max waiting time after successfully launch server + client before force quit */
-    @Value("${core.test.timeout.ms:300000}")
+    @Value("${core.test.timeout.ms:180000}")
     private long testTimeoutMillis;
 
     /** Max time waiting for server to start (after successful docker compose up server) before launching client */

@@ -114,7 +114,7 @@ public class TestCaseGenerator {
                 .returnValueDynMsg(returnList)
                 .exception(rpcException)
                 .build();
-        log.info("[generateRandomTestcase] Added test case {}", testCase);
+//        log.info("[generateRandomTestcase] Added test case {}", testCase);
         return testCase;
     }
 
@@ -136,7 +136,7 @@ public class TestCaseGenerator {
                     if (random.nextBoolean()) continue;
                 }
                 if (field.isRepeated()) {
-                    int repetitions = random.nextInt(8);
+                    int repetitions = random.nextInt(4);
                     for (int i = 0; i < repetitions; i++) {
                         switch (valueMode) {
                             case 0 -> {
@@ -213,7 +213,18 @@ public class TestCaseGenerator {
             case FLOAT -> random.nextFloat();
             case INT -> random.nextInt();
             case LONG -> random.nextLong();
-            case MESSAGE -> generateMessage(rpcModelRegistry.lookupMessage(field.getMessageType().getFullName()), omitSubMsgFields, 1);
+            case MESSAGE -> {
+                RpcMessage rpcMessage = rpcModelRegistry.lookupMessage(field.getMessageType().getFullName());
+                if (Objects.isNull(rpcMessage)) {   // Likely a result of implicit message types (e.g. map entries)
+                    rpcMessage = new RpcMessage(
+                            field.getMessageType().getFullName().substring(0, field.getMessageType().getFullName().lastIndexOf(".")),
+                            StringUtil.getShortenedClassName(field.getMessageType().getFullName()),
+                            field.getMessageType()
+                    );
+                    rpcModelRegistry.addMessageToLookupTable(rpcMessage);
+                }
+                yield generateMessage(rpcMessage, omitSubMsgFields, 1);
+            }
             case STRING -> randomString();
         };
     }

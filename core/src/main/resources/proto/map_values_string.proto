@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+package map_hotpot;
+
+option java_multiple_files = true;
+option java_package = "org.grpctest.java.common.define";
+option java_outer_classname = "MapProto";
+
+message MapPot {
+  map<string, double> string_double_value = 1;
+  map<string, int64> string_int_value = 2;
+  map<string, bool> string_bool_value = 3;
+  map<string, string> string_string_value = 4;
+  map<string, bytes> string_bytes_value = 5;
+  map<string, AnExampleEnum> string_enum_value = 6;
+  map<string, SmallPot> string_message_value = 7;
+}
+
+message MapPotReversed {
+  map<string, SmallPot> string_message_value = 9;
+  map<string, AnExampleEnum> string_enum_value = 10;
+  map<string, bytes> string_bytes_value = 11;
+  map<string, string> string_string_value = 12;
+  map<string, bool> string_bool_value = 13;
+  map<string, int64> string_int_value = 14;
+  map<string, double> string_double_value = 15;
+}
+
+enum AnExampleEnum {
+  AEE_ZERO = 0;
+  AEE_ONE = 1;
+  AEE_TWO = 2;
+  AEE_THREE = 3;
+  AEE_FOUR = 4;
+  AEE_FIVE = 5;
+  AEE_SIX = 6;
+  AEE_SEVEN = 7;
+}
+
+message SmallPot {
+  optional bool bool_value = 1;
+  optional uint32 uint32_value = 2;
+}
+
+service HotpotService {
+  // UNARY
+  rpc UnaryPot(MapPot) returns (MapPotReversed);
+  // SERVER_STREAMING
+  rpc ServerStreamingPot(MapPot) returns (stream MapPotReversed);
+  // CLIENT_STREAMING
+  rpc ClientStreamingPot(stream MapPot) returns (MapPotReversed);
+  // BIDI_STREAMING
+  rpc BidiStreamingPot(stream MapPot) returns (stream MapPotReversed);
+}

@@ -154,7 +154,15 @@ public class RpcModelRegistry {
     public List<String> getAllFieldsAsJavaGetters(String messageId) {
         return messageLookupTable.get(messageId)
                 .getMessageDescriptor().getFields().stream().map(
-                        (fieldDescriptor) -> ("get" + StringUtil.snakeCaseToCamelCase(fieldDescriptor.getName(), true) + (fieldDescriptor.isRepeated() ? "List" : ""))
+                        (fieldDescriptor) -> {
+                            String suffix = "";
+                            if (fieldDescriptor.isMapField()) {
+                                suffix = "Map";
+                            } else if (fieldDescriptor.isRepeated()) {
+                                suffix = "List";
+                            }
+                            return "get" + StringUtil.snakeCaseToCamelCase(fieldDescriptor.getName(), true) + suffix;
+                        }
                 ).toList();
     }
 

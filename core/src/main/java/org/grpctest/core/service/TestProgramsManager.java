@@ -130,6 +130,7 @@ public class TestProgramsManager {
                     TEST_PROGRAM_DEFAULT_POLL_INTERVAL_MS,
                     config.getTestTimeoutMillis()
             );
+            Thread.sleep(5000);
             log.info("[deploy] Deployment finished successfully. Cleaning up...");
 
         } finally {

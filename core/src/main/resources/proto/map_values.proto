@@ -1,0 +1,65 @@
+syntax = "proto3";
+
+package map_hotpot;
+
+option java_multiple_files = true;
+option java_package = "org.grpctest.java.common.define";
+option java_outer_classname = "MapProto";
+
+message MapPot {
+  map<int64, double> int_double_value = 1;
+  map<int64, int64> int_int_value = 2;
+  map<int64, bool> int_bool_value = 3;
+  map<int64, string> int_string_value = 4;
+  map<int64, bytes> int_bytes_value = 5;
+  map<int64, AnExampleEnum> int_enum_value = 6;
+  map<bool, double> bool_double_value = 7;
+  map<bool, bool> bool_bool_value = 9;
+  map<bool, string> bool_string_value = 10;
+  map<bool, bytes> bool_bytes_value = 11;
+  map<bool, AnExampleEnum> bool_enum_value = 12;
+  map<string, double> string_double_value = 13;
+  map<string, string> string_string_value = 16;
+  map<string, bytes> string_bytes_value = 17;
+  map<string, AnExampleEnum> string_enum_value = 18;
+}
+
+message MapPotReversed {
+  map<string, AnExampleEnum> string_enum_value = 1;
+  map<string, bytes> string_bytes_value = 2;
+  map<string, string> string_string_value = 3;
+  map<string, double> string_double_value = 4;
+  map<bool, AnExampleEnum> bool_enum_value = 5;
+  map<bool, bytes> bool_bytes_value = 6;
+  map<bool, string> bool_string_value = 7;
+  map<bool, bool> bool_bool_value = 8;
+  map<bool, double> bool_double_value = 9;
+  map<int64, AnExampleEnum> int_enum_value = 10;
+  map<int64, bytes> int_bytes_value = 11;
+  map<int64, string> int_string_value = 12;
+  map<int64, bool> int_bool_value = 13;
+  map<int64, int64> int_int_value = 14;
+  map<int64, double> int_double_value = 15;
+}
+
+enum AnExampleEnum {
+  AEE_ZERO = 0;
+  AEE_ONE = 1;
+  AEE_TWO = 2;
+  AEE_THREE = 3;
+  AEE_FOUR = 4;
+  AEE_FIVE = 5;
+  AEE_SIX = 6;
+  AEE_SEVEN = 7;
+}
+
+service HotpotService {
+  // UNARY
+  rpc UnaryPot(MapPot) returns (MapPotReversed);
+  // SERVER_STREAMING
+  rpc ServerStreamingPot(MapPot) returns (stream MapPotReversed);
+  // CLIENT_STREAMING
+  rpc ClientStreamingPot(stream MapPot) returns (MapPotReversed);
+  // BIDI_STREAMING
+  rpc BidiStreamingPot(stream MapPot) returns (stream MapPotReversed);
+}

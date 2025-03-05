@@ -10,7 +10,7 @@
 <#macro requestLogging invoker indent=0>
     <#assign tabs = generateTabs(indent)>
     <#if logRequests>
-${tabs}logging.info(f"[${invoker}] {method_id} - Request: {request}")
+${tabs}logging.info(f"[${invoker}] {method_id} - Request:\n{request}")
         <#if logRequestsPrintFields>
 ${tabs}log_fields_of_object(request, f"{method_id} - request", request_type_field_names)
         </#if>
@@ -19,7 +19,7 @@ ${tabs}log_fields_of_object(request, f"{method_id} - request", request_type_fiel
 <#macro responseLogging invoker indent=0>
     <#assign tabs = generateTabs(indent)>
     <#if logResponses>
-${tabs}logging.info(f"[${invoker}] {method_id} - Response: {response}")
+${tabs}logging.info(f"[${invoker}] {method_id} - Response:\n{response}")
         <#if logResponsesPrintFields>
 ${tabs}log_fields_of_object(response, f"{method_id} - response", response_type_field_names)
         </#if>

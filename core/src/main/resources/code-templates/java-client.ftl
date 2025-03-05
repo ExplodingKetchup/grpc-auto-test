@@ -10,7 +10,7 @@
 <#macro requestLogging invoker indent=0>
     <#assign tabs = generateTabs(indent)>
     <#if logRequests>
-${tabs}log.info("[${invoker}] {} - Request: {}", methodId, parameter);
+${tabs}log.info("[${invoker}] {} - Request:\n{}", methodId, parameter);
         <#if logRequestsPrintFields>
 ${tabs}ObjectUtil.logFieldsOfObject(parameter, methodId + " - request", requestTypeFieldNames);
         </#if>
@@ -19,7 +19,7 @@ ${tabs}ObjectUtil.logFieldsOfObject(parameter, methodId + " - request", requestT
 <#macro responseLogging invoker indent=0>
     <#assign tabs = generateTabs(indent)>
     <#if logResponses>
-${tabs}log.info("[${invoker}] {} - Response: {}", methodId, response);
+${tabs}log.info("[${invoker}] {} - Response:\n{}", methodId, response);
         <#if logResponsesPrintFields>
 ${tabs}ObjectUtil.logFieldsOfObject(response, methodId + " - response", responseTypeFieldNames);
         </#if>

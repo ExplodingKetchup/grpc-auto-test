@@ -10,7 +10,7 @@
 <#macro requestLogging method indent=0>
     <#assign tabs = generateTabs(indent)>
     <#if logRequests>
-${tabs}log.info("[${method.name}] Request: {}", request);
+${tabs}log.info("[${method.name}] Request:\n{}", request);
         <#if logRequestsPrintFields>
 ${tabs}ObjectUtil.logFieldsOfObject(request, "${method.id} - request", <#list registry.getAllFieldsAsJavaGetters(method.inType) as fieldname>"${fieldname}"<#sep>, </#list>);
         </#if>
@@ -19,7 +19,7 @@ ${tabs}ObjectUtil.logFieldsOfObject(request, "${method.id} - request", <#list re
 <#macro responseLogging method indent=0>
     <#assign tabs = generateTabs(indent)>
     <#if logResponses>
-${tabs}log.info("[${method.name}] Response: {}", response);
+${tabs}log.info("[${method.name}] Response:\n{}", response);
         <#if logResponsesPrintFields>
 ${tabs}ObjectUtil.logFieldsOfObject(response, "${method.id} - response", <#list registry.getAllFieldsAsJavaGetters(method.outType) as fieldname>"${fieldname}"<#sep>, </#list>);
         </#if>

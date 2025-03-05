@@ -180,8 +180,18 @@ public class DynamicMessageUtilService {
                     }
                     yield (Long) value;
                 }
-                case MESSAGE ->
-                        objectToDynamicMessage(value, rpcModelRegistry.lookupMessage(field.getMessageType().getFullName()));
+                case MESSAGE -> {
+                    RpcMessage rpcMessage = rpcModelRegistry.lookupMessage(field.getMessageType().getFullName());
+                    if (Objects.isNull(rpcMessage)) {   // Likely a result of implicit message types (e.g. map entries)
+                        rpcMessage = new RpcMessage(
+                                field.getMessageType().getFullName().substring(0, field.getMessageType().getFullName().lastIndexOf(".")),
+                                StringUtil.getShortenedClassName(field.getMessageType().getFullName()),
+                                field.getMessageType()
+                        );
+                        rpcModelRegistry.addMessageToLookupTable(rpcMessage);
+                    }
+                    yield objectToDynamicMessage(value, rpcMessage);
+                }
                 case STRING -> (String) value;
                 default -> throw new IllegalArgumentException("Field type not supported");
             };

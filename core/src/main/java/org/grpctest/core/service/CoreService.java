@@ -35,8 +35,6 @@ import java.util.Objects;
 @Slf4j
 public class CoreService implements InitializingBean {
 
-    private static final long STARTUP_TIMESTAMP = System.currentTimeMillis();
-
     private final Config config;
 
     private final GenericFileService genericFileService;

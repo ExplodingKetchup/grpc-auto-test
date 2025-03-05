@@ -10,7 +10,7 @@
 <#macro requestLogging invoker indent=0>
     <#assign tabs = generateTabs(indent)>
     <#if logRequests>
-${tabs}logger.info(`[${invoker}] ${"$"}{methodId} - Request: ${"$"}{JSON.stringify(request, null, 2)}`);
+${tabs}logger.info(`[${invoker}] ${"$"}{methodId} - Request:\n${"$"}{JSON.stringify(request, null, 2)}`);
         <#if logRequestsPrintFields>
 ${tabs}logFieldsOfObject(logger, request, methodId + " - request", requestTypeFieldNames);
         </#if>
@@ -19,7 +19,7 @@ ${tabs}logFieldsOfObject(logger, request, methodId + " - request", requestTypeFi
 <#macro responseLogging invoker indent=0>
     <#assign tabs = generateTabs(indent)>
     <#if logResponses>
-${tabs}logger.info(`[${invoker}] ${"$"}{methodId} - Response: ${"$"}{JSON.stringify(response, null, 2)}`);
+${tabs}logger.info(`[${invoker}] ${"$"}{methodId} - Response:\n${"$"}{JSON.stringify(response, null, 2)}`);
         <#if logResponsesPrintFields>
 ${tabs}logFieldsOfObject(logger, response, methodId + " - response", responseTypeFieldNames);
         </#if>
@@ -75,7 +75,7 @@ console.log("Using environment " + env);
                 errorToFile(err, `${"$"}{config.outDir}${"$"}{methodId.replaceAll(".", "_")}_error.txt`);
             } else {
                 <@responseLogging invoker="invokeUnaryRpc" indent=4/>
-                messageToFile(responseType.fromObject(response), responseType, config.outDir + methodId.replaceAll(".", "_") + "_return_0.bin");
+                messageToFile(response, responseType, config.outDir + methodId.replaceAll(".", "_") + "_return_0.bin");
             }
         }
 
@@ -99,7 +99,7 @@ console.log("Using environment " + env);
         });
         call.on('data', (response) => {
             <@responseLogging invoker="invokeServerStreamingRpc" indent=3/>
-            messageToFile(responseType.fromObject(response), responseType, `${"$"}{config.outDir}${"$"}{methodId.replaceAll('.', '_')}_return_${"$"}{responseIdx++}.bin`);
+            messageToFile(response, responseType, `${"$"}{config.outDir}${"$"}{methodId.replaceAll('.', '_')}_return_${"$"}{responseIdx++}.bin`);
         });
         call.on('error', (err) => {
             logger.error(`[invokeServerStreamingRpc] RPC invoke failed: ${"$"}{err.message}\n${"$"}{err.stack}`);
@@ -117,7 +117,7 @@ console.log("Using environment " + env);
                 errorToFile(err, `${"$"}{config.outDir}${"$"}{methodId.replaceAll(".", "_")}_error.txt`);
             } else {
                 <@responseLogging invoker="invokeClientStreamingRpc" indent=4/>
-                messageToFile(responseType.fromObject(response), responseType, config.outDir + methodId.replaceAll(".", "_") + "_return_0.bin");
+                messageToFile(response, responseType, config.outDir + methodId.replaceAll(".", "_") + "_return_0.bin");
             }
         }
 
@@ -144,7 +144,7 @@ console.log("Using environment " + env);
         });
         call.on('data', (response) => {
             <@responseLogging invoker="invokeBidiStreamingRpc" indent=3/>
-            messageToFile(responseType.fromObject(response), responseType, `${"$"}{config.outDir}${"$"}{methodId.replaceAll('.', '_')}_return_${"$"}{responseIdx++}.bin`);
+            messageToFile(response, responseType, `${"$"}{config.outDir}${"$"}{methodId.replaceAll('.', '_')}_return_${"$"}{responseIdx++}.bin`);
         });
         call.on('error', (err) => {
             logger.error(`[invokeBidiStreamingRpc] RPC invoke failed: ${"$"}{err.message}\n${"$"}{err.stack}`);

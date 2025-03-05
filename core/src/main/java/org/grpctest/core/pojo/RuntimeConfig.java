@@ -33,6 +33,10 @@ public class RuntimeConfig {
     @Builder.Default
     private Boolean enableGeneratedTestcase = false;
 
+    /**
+     * Specify (if testcase generation is enabled) whether to ignore generating values for certain fields
+     * (0 = no omit; 1 = partial omit; 2 = full omit)
+     */
     @Builder.Default
     private int omitFieldsInRandomTestcases = 0;
 

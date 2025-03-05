@@ -35,7 +35,7 @@ ${tabs}send_header_metadata(context)
 <#macro requestLogging indent=0>
     <#assign tabs = generateTabs(indent)>
     <#if logRequests>
-${tabs}logging.info(f"[{method_name}] Request: {request}")
+${tabs}logging.info(f"[{method_name}] Request:\n{request}")
         <#if logRequestsPrintFields>
 ${tabs}log_fields_of_object(request, f"{method_id} - request", request_type_field_names)
         </#if>
@@ -44,7 +44,7 @@ ${tabs}log_fields_of_object(request, f"{method_id} - request", request_type_fiel
 <#macro responseLogging indent=0>
     <#assign tabs = generateTabs(indent)>
     <#if logResponses>
-${tabs}logging.info(f"[{method_name}] Response: {response}")
+${tabs}logging.info(f"[{method_name}] Response:\n{response}")
         <#if logResponsesPrintFields>
 ${tabs}log_fields_of_object(response, f"{method_id} - response", response_type_field_names)
         </#if>

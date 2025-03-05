@@ -18,6 +18,7 @@ import java.util.*;
 @Slf4j
 public class SetupScriptInterpreter {
 
+    private static final String COMMENT_INDICATOR = "#";    // Lines started with # will be ignored
     private static final List<String> SUPPORTED_COMPRESSION_ALGOS = Lists.newArrayList("gzip", "deflate");
 
     private RuntimeConfig runtimeConfig;
@@ -27,7 +28,10 @@ public class SetupScriptInterpreter {
         try (BufferedReader bufferedReader = new BufferedReader(new FileReader(filepath))) {
             String line;
             while ((line = bufferedReader.readLine()) != null) {
-                interpretSingleLine(line);
+                line = line.trim();
+                if (!line.startsWith(COMMENT_INDICATOR)) {
+                    interpretSingleLine(line);
+                }
             }
             return runtimeConfig;
         } catch (FileNotFoundException fnfe) {
@@ -231,7 +235,11 @@ public class SetupScriptInterpreter {
         CLIENT,
         /** TESTCASE (--{random, default}(={0, 1, 2})) (custom_testcase1.json custom_testcase2.json) <br>
          * Note that if custom testcases are specified, "random" and "default" flags will be nullified. <br>
-         * "--random" and "--default" are mutually exclusive. If both are present, will interpret the 1st flag only.
+         * "--random" and "--default" are mutually exclusive. If both are present, will interpret the 1st flag only.<br>
+         * --random: Randomly assign values for fields<br>
+         * --default: Assign default values for fields<br>
+         * Flag value of random / default flag: Specify whether to ignore generating values for certain fields
+         * (0 = no omit; 1 = partial omit; 2 = full omit)
          */
         TESTCASE,
         /** COMPRESSION --request=compression_algo --response=compression_algo <br>
