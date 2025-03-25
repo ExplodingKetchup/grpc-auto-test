@@ -141,8 +141,8 @@ function messageFromFile(filepath, messageType) {
     try {
         let message = messageType.decode(data);
 
-        return messageType.toObject(message);
-        // return convertMapKeysInObject(messageType.toObject(message), messageType);
+//        return messageType.toObject(message);
+         return convertMapKeysInObject(messageType.toObject(message), messageType);
 
     } catch (e) {
         if (e instanceof protobuf.util.ProtocolError) {
@@ -165,8 +165,8 @@ function messageFromFile(filepath, messageType) {
  * @param filename 
  */
 function messageToFile(obj, messageType, filepath) {
-    const message = messageType.fromObject(obj);
-    // const message = messageType.fromObject(convertMapKeysInObject(obj, messageType));
+//    const message = messageType.fromObject(obj);
+     const message = messageType.fromObject(convertMapKeysInObject(obj, messageType));
     // Make sure the message and messageType matches
     let err = messageType.verify(message);
     // if (err) {
