@@ -28,7 +28,6 @@ import static org.grpctest.core.constant.Constants.CUSTOM_TESTS_CLASSPATH;
 @AllArgsConstructor
 public class CustomTestCaseReader {
 
-    private final Config config;
     private final ResourceLoader resourceLoader;
 
     private final TestcaseRegistry testcaseRegistry;
@@ -37,7 +36,7 @@ public class CustomTestCaseReader {
 
     private final DynamicMessageUtilService dynamicMessageUtilService;
 
-    private List<TestCase> loadTestCases(List<String> includedFiles) throws Throwable {
+    private List<TestCase> loadTestCases(List<String> includedFiles) throws IOException {
         List<TestCase> testCases = new ArrayList<>();
         ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver(resourceLoader);
         String classpath = "classpath:" + CUSTOM_TESTS_CLASSPATH + "/*";
@@ -54,13 +53,10 @@ public class CustomTestCaseReader {
         } catch (IOException ioe) {
             log.error("[loadTestCases] Failed to read test cases at {}", classpath, ioe);
             throw ioe;
-        } catch (Throwable t) {
-            log.error("[loadTestCases] An error occurred", t);
-            throw t;
         }
     }
 
-    public void loadTestCasesToRegistry(List<String> includedFiles) throws Throwable {
+    public void loadTestCasesToRegistry(List<String> includedFiles) throws IOException {
         List<TestCase> testCases = loadTestCases(includedFiles);
         for (TestCase testCase : testCases) {
             for (Object param : testCase.getParamValue()) {

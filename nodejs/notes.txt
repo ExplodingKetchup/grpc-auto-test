@@ -21,3 +21,21 @@ NODE_ENV { deploy, test }
 2024-12-07 13:18:47 node-client-container  |   },
 2024-12-07 13:18:47 node-client-container  |   "_person": "person"
 2024-12-07 13:18:47 node-client-container  | }
+
+(Protobuf field definition)
+map<int64, string> map_value = 1;
+
+(On the wire)
+map_value = {
+    key = false -> value = "hello"
+}
+
+(Converted object in Node.js)
+map_value = {
+    "false": "hello"
+}
+
+(On the wire)
+map_value = {
+    key = true -> value = "hello"
+}

@@ -12,7 +12,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.grpctest.core.data.RpcModelRegistry;
 import org.grpctest.core.enums.MetadataType;
 import org.grpctest.core.pojo.RpcMessage;
-import org.grpctest.core.pojo.RpcService;
+import org.grpctest.core.pojo.RpcMethod;
 import org.grpctest.core.pojo.TestCase;
 import org.grpctest.core.util.StringUtil;
 import org.springframework.stereotype.Service;
@@ -48,7 +48,7 @@ public class TestCaseGenerator {
     private final RpcModelRegistry rpcModelRegistry;
 
 
-    public TestCase generateTestcase(RpcService.RpcMethod method, int omitFields, int valueMode, boolean hasException) {
+    public TestCase generateTestcase(RpcMethod method, int omitFields, int valueMode, boolean hasException) {
         int numberOfParams;
         int numberOfReturns;
         TestCase.RpcException rpcException = hasException ? generateRandomException() : null;
@@ -136,7 +136,7 @@ public class TestCaseGenerator {
                     if (random.nextBoolean()) continue;
                 }
                 if (field.isRepeated()) {
-                    int repetitions = random.nextInt(4);
+                    int repetitions = random.nextInt(1, 4);
                     for (int i = 0; i < repetitions; i++) {
                         switch (valueMode) {
                             case 0 -> {

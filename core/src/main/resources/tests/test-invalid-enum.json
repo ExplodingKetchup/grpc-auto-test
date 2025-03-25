@@ -1,0 +1,13 @@
+{
+  "methodId": "enum_hotpot.HotpotService.unaryPot",
+  "paramValue": [
+    {
+      "ice_value": 15
+    }
+  ],
+  "returnValue": [
+    {
+      "ice_value": 16
+    }
+  ]
+}

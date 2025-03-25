@@ -1,5 +1,6 @@
 package org.grpctest.java.server.generated.service;
 
+import com.google.protobuf.ByteString;
 import io.grpc.Metadata;
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
@@ -22,19 +23,36 @@ public class HotpotService extends HotpotServiceGrpc.HotpotServiceImplBase {
     private Config config;
 
     @Override
-    public void unaryPot(MapPot request, StreamObserver<MapPotReversed> responseObserver) {
+    public void unaryPot(BigHotpotOfTerror request, StreamObserver<BigHotpotOfTerror> responseObserver) {
         try {
             log.info("[unaryPot] Request:\n{}", request);
-            ObjectUtil.logFieldsOfObject(request, "map_hotpot.HotpotService.unaryPot - request", "getIntDoubleValueMap", "getIntIntValueMap", "getIntBoolValueMap", "getIntStringValueMap", "getIntBytesValueMap", "getIntEnumValueMap", "getBoolDoubleValueMap", "getBoolBoolValueMap", "getBoolStringValueMap", "getBoolBytesValueMap", "getBoolEnumValueMap", "getStringDoubleValueMap", "getStringStringValueMap", "getStringBytesValueMap", "getStringEnumValueMap");
+            ObjectUtil.logFieldsOfObject(request, "default_hotpot.HotpotService.unaryPot - request", "getDoubleValue", "getFloatValue", "getInt32Value", "getInt64Value", "getUint32Value", "getUint64Value", "getSint32Value", "getSint64Value", "getFixed32Value", "getFixed64Value", "getSfixed32Value", "getSfixed64Value", "getBoolValue", "getStringValue", "getBytesValue", "getEnumValue", "getMessageValue");
 
-            MessageUtil.messageToFile(request, config.getOutDir() + File.separator + "map_hotpot_HotpotService_unaryPot_param_0.bin");
+            MessageUtil.messageToFile(request, config.getOutDir() + File.separator + "default_hotpot_HotpotService_unaryPot_param_0.bin");
 
             FileUtil.loopMultipleFilesWithSamePrefix(
-                    config.getTestcaseDir() + File.separator + "map_hotpot_HotpotService_unaryPot_return.bin",
+                    config.getTestcaseDir() + File.separator + "default_hotpot_HotpotService_unaryPot_return.bin",
                     (filepath) -> {
-                        MapPotReversed response = MessageUtil.messageFromFile(filepath, MapPotReversed.class);
+                        BigHotpotOfTerror response = BigHotpotOfTerror.newBuilder()
+                                .setDoubleValue(0)
+                                .setFloatValue(0)
+                                .setInt32Value(0)
+                                .setInt64Value(0)
+                                .setUint32Value(0)
+                                .setUint64Value(0)
+                                .setSint32Value(0)
+                                .setSint64Value(0)
+                                .setFixed32Value(0)
+                                .setFixed64Value(0)
+                                .setSfixed32Value(0)
+                                .setSfixed64Value(0)
+                                .setBoolValue(false)
+                                .setStringValue("")
+                                .setBytesValue(ByteString.EMPTY)
+                                .setEnumValue(AnExampleEnum.AEE_ZERO)
+                                .build();
                         log.info("[unaryPot] Response:\n{}", response);
-                        ObjectUtil.logFieldsOfObject(response, "map_hotpot.HotpotService.unaryPot - response", "getStringEnumValueMap", "getStringBytesValueMap", "getStringStringValueMap", "getStringDoubleValueMap", "getBoolEnumValueMap", "getBoolBytesValueMap", "getBoolStringValueMap", "getBoolBoolValueMap", "getBoolDoubleValueMap", "getIntEnumValueMap", "getIntBytesValueMap", "getIntStringValueMap", "getIntBoolValueMap", "getIntIntValueMap", "getIntDoubleValueMap");
+                        ObjectUtil.logFieldsOfObject(response, "default_hotpot.HotpotService.unaryPot - response", "getDoubleValue", "getFloatValue", "getInt32Value", "getInt64Value", "getUint32Value", "getUint64Value", "getSint32Value", "getSint64Value", "getFixed32Value", "getFixed64Value", "getSfixed32Value", "getSfixed64Value", "getBoolValue", "getStringValue", "getBytesValue", "getEnumValue", "getMessageValue");
                         responseObserver.onNext(response);
                     }
             );
@@ -43,116 +61,6 @@ public class HotpotService extends HotpotServiceGrpc.HotpotServiceImplBase {
         } catch (Throwable t) {
             log.error("[unaryPot] An error occurred", t);
         }
-    }
-
-    @Override
-    public void serverStreamingPot(MapPot request, StreamObserver<MapPotReversed> responseObserver) {
-        try {
-            log.info("[serverStreamingPot] Request:\n{}", request);
-            ObjectUtil.logFieldsOfObject(request, "map_hotpot.HotpotService.serverStreamingPot - request", "getIntDoubleValueMap", "getIntIntValueMap", "getIntBoolValueMap", "getIntStringValueMap", "getIntBytesValueMap", "getIntEnumValueMap", "getBoolDoubleValueMap", "getBoolBoolValueMap", "getBoolStringValueMap", "getBoolBytesValueMap", "getBoolEnumValueMap", "getStringDoubleValueMap", "getStringStringValueMap", "getStringBytesValueMap", "getStringEnumValueMap");
-
-            MessageUtil.messageToFile(request, config.getOutDir() + File.separator + "map_hotpot_HotpotService_serverStreamingPot_param_0.bin");
-
-            FileUtil.loopMultipleFilesWithSamePrefix(
-                    config.getTestcaseDir() + File.separator + "map_hotpot_HotpotService_serverStreamingPot_return.bin",
-                    (filepath) -> {
-                        MapPotReversed response = MessageUtil.messageFromFile(filepath, MapPotReversed.class);
-                        log.info("[serverStreamingPot] Response:\n{}", response);
-                        ObjectUtil.logFieldsOfObject(response, "map_hotpot.HotpotService.serverStreamingPot - response", "getStringEnumValueMap", "getStringBytesValueMap", "getStringStringValueMap", "getStringDoubleValueMap", "getBoolEnumValueMap", "getBoolBytesValueMap", "getBoolStringValueMap", "getBoolBoolValueMap", "getBoolDoubleValueMap", "getIntEnumValueMap", "getIntBytesValueMap", "getIntStringValueMap", "getIntBoolValueMap", "getIntIntValueMap", "getIntDoubleValueMap");
-                        responseObserver.onNext(response);
-                    }
-            );
-
-            responseObserver.onCompleted();
-        } catch (Throwable t) {
-            log.error("[serverStreamingPot] An error occurred", t);
-        }
-    }
-
-    @Override
-    public StreamObserver<MapPot> clientStreamingPot(StreamObserver<MapPotReversed> responseObserver) {
-        return new StreamObserver<MapPot>() {
-            private int requestIdx = 0;
-            @Override
-            public void onNext(MapPot request) {
-                try {
-                    log.info("[clientStreamingPot] Request:\n{}", request);
-                    ObjectUtil.logFieldsOfObject(request, "map_hotpot.HotpotService.clientStreamingPot - request", "getIntDoubleValueMap", "getIntIntValueMap", "getIntBoolValueMap", "getIntStringValueMap", "getIntBytesValueMap", "getIntEnumValueMap", "getBoolDoubleValueMap", "getBoolBoolValueMap", "getBoolStringValueMap", "getBoolBytesValueMap", "getBoolEnumValueMap", "getStringDoubleValueMap", "getStringStringValueMap", "getStringBytesValueMap", "getStringEnumValueMap");
-                    MessageUtil.messageToFile(request, config.getOutDir() + File.separator + "map_hotpot_HotpotService_clientStreamingPot_param_" + requestIdx + ".bin");
-                    requestIdx++;
-                } catch (Throwable t) {
-                    log.error("[clientStreamingPot] onNext: An exception occurred", t);
-                }
-            }
-
-            @Override
-            public void onError(Throwable throwable) {
-                log.error("[clientStreamingPot] Client throw error", throwable);
-                try {
-                    MessageUtil.grpcExceptionToFile(config.getOutDir() + File.separator + "map_hotpot_HotpotService_clientStreamingPot_error.txt", throwable);
-                } catch (Exception e) {
-                    log.error("[clientStreamingPot] onError: An exception occurred", e);
-                }
-            }
-
-            @Override
-            public void onCompleted() {
-                FileUtil.loopMultipleFilesWithSamePrefix(
-                        config.getTestcaseDir() + File.separator + "map_hotpot_HotpotService_clientStreamingPot_return.bin",
-                        (filepath) -> {
-                            MapPotReversed response = MessageUtil.messageFromFile(filepath, MapPotReversed.class);
-                            log.info("[clientStreamingPot] Response:\n{}", response);
-                            ObjectUtil.logFieldsOfObject(response, "map_hotpot.HotpotService.clientStreamingPot - response", "getStringEnumValueMap", "getStringBytesValueMap", "getStringStringValueMap", "getStringDoubleValueMap", "getBoolEnumValueMap", "getBoolBytesValueMap", "getBoolStringValueMap", "getBoolBoolValueMap", "getBoolDoubleValueMap", "getIntEnumValueMap", "getIntBytesValueMap", "getIntStringValueMap", "getIntBoolValueMap", "getIntIntValueMap", "getIntDoubleValueMap");
-                            responseObserver.onNext(response);
-                        }
-                );
-
-                responseObserver.onCompleted();
-            }
-        };
-    }
-
-    @Override
-    public StreamObserver<MapPot> bidiStreamingPot(StreamObserver<MapPotReversed> responseObserver) {
-        return new StreamObserver<MapPot>() {
-            private int requestIdx = 0;
-            @Override
-            public void onNext(MapPot request) {
-                try {
-                    log.info("[bidiStreamingPot] Request:\n{}", request);
-                    ObjectUtil.logFieldsOfObject(request, "map_hotpot.HotpotService.bidiStreamingPot - request", "getIntDoubleValueMap", "getIntIntValueMap", "getIntBoolValueMap", "getIntStringValueMap", "getIntBytesValueMap", "getIntEnumValueMap", "getBoolDoubleValueMap", "getBoolBoolValueMap", "getBoolStringValueMap", "getBoolBytesValueMap", "getBoolEnumValueMap", "getStringDoubleValueMap", "getStringStringValueMap", "getStringBytesValueMap", "getStringEnumValueMap");
-                    MessageUtil.messageToFile(request, config.getOutDir() + File.separator + "map_hotpot_HotpotService_bidiStreamingPot_param_" + requestIdx + ".bin");
-                    requestIdx++;
-                } catch (Throwable t) {
-                    log.error("[bidiStreamingPot] onNext: An exception occurred", t);
-                }
-            }
-
-            @Override
-            public void onError(Throwable throwable) {
-                log.error("[bidiStreamingPot] Client throw error", throwable);
-                try {
-                    MessageUtil.grpcExceptionToFile(config.getOutDir() + File.separator + "map_hotpot_HotpotService_bidiStreamingPot_error.txt", throwable);
-                } catch (Exception e) {
-                    log.error("[bidiStreamingPot] onError: An exception occurred", e);
-                }
-            }
-
-            @Override
-            public void onCompleted() {
-                FileUtil.loopMultipleFilesWithSamePrefix(
-                        config.getTestcaseDir() + File.separator + "map_hotpot_HotpotService_bidiStreamingPot_return.bin",
-                        (filepath) -> {
-                            MapPotReversed response = MessageUtil.messageFromFile(filepath, MapPotReversed.class);
-                            log.info("[bidiStreamingPot] Response:\n{}", response);
-                            ObjectUtil.logFieldsOfObject(response, "map_hotpot.HotpotService.bidiStreamingPot - response", "getStringEnumValueMap", "getStringBytesValueMap", "getStringStringValueMap", "getStringDoubleValueMap", "getBoolEnumValueMap", "getBoolBytesValueMap", "getBoolStringValueMap", "getBoolBoolValueMap", "getBoolDoubleValueMap", "getIntEnumValueMap", "getIntBytesValueMap", "getIntStringValueMap", "getIntBoolValueMap", "getIntIntValueMap", "getIntDoubleValueMap");
-                            responseObserver.onNext(response);
-                        }
-                );
-
-                responseObserver.onCompleted();
-            }
-        };
     }
 
 }

@@ -96,7 +96,7 @@ public class JavaClient implements InitializingBean {
     </#if>
 
 </#list>
-        for (int i = 0; i < 10000000; i++);
+        Thread.sleep(5000);
     }
 
     private <T, R> void invokeUnaryRpcMethod(Function<T, R> method, T parameter, String methodId, String[] requestTypeFieldNames, String[] responseTypeFieldNames) {

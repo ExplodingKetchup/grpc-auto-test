@@ -6,28 +6,14 @@ import org.grpctest.core.constant.PresetTestPrograms;
 import org.grpctest.core.data.RpcModelRegistry;
 import org.grpctest.core.data.TestcaseRegistry;
 import org.grpctest.core.enums.CleanupMode;
-import org.grpctest.core.enums.Language;
-import org.grpctest.core.enums.ProgramType;
-import org.grpctest.core.pojo.RpcService;
+import org.grpctest.core.pojo.RpcMethod;
 import org.grpctest.core.pojo.RuntimeConfig;
-import org.grpctest.core.service.codegen.JavaCodeGenService;
-import org.grpctest.core.service.codegen.NodejsCodeGenService;
-import org.grpctest.core.service.codegen.PythonCodeGenService;
+import org.grpctest.core.service.codegen.CodeGenService;
 import org.grpctest.core.service.ui.TestSetupUi;
-import org.grpctest.core.util.FileUtil;
-import org.grpctest.core.util.TimeUtil;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -46,11 +32,14 @@ public class CoreService implements InitializingBean {
     @Qualifier("script")
     private final TestSetupUi testSetupUi;
 
-    private final JavaCodeGenService javaCodeGenService;
+    @Qualifier("java")
+    private final CodeGenService javaCodeGenService;
 
-    private final NodejsCodeGenService nodejsCodeGenService;
+    @Qualifier("nodejs")
+    private final CodeGenService nodejsCodeGenService;
 
-    private final PythonCodeGenService pythonCodeGenService;
+    @Qualifier("python")
+    private final CodeGenService pythonCodeGenService;
 
     private final CustomTestCaseReader customTestCaseReader;
 
@@ -75,9 +64,9 @@ public class CoreService implements InitializingBean {
                        MavenInvoker mavenInvoker,
                        ProtobufReader protobufReader,
                        @Qualifier("script") TestSetupUi testSetupUi,
-                       JavaCodeGenService javaCodeGenService,
-                       NodejsCodeGenService nodejsCodeGenService,
-                       PythonCodeGenService pythonCodeGenService,
+                       @Qualifier("java") CodeGenService javaCodeGenService,
+                       @Qualifier("nodejs") CodeGenService nodejsCodeGenService,
+                       @Qualifier("python") CodeGenService pythonCodeGenService,
                        CustomTestCaseReader customTestCaseReader,
                        TestCaseGenerator testCaseGenerator,
                        TestCaseWriter testCaseWriter,
@@ -148,7 +137,7 @@ public class CoreService implements InitializingBean {
             log.info("[Step 4 of 9] Finished loading test cases");
 
             // Remove methods with 0 testcase from registry
-            List<String> methodIdsToRemove = testcaseRegistry.getAllMethodsWithoutTestCases().stream().map(RpcService.RpcMethod::getId).toList();
+            List<String> methodIdsToRemove = testcaseRegistry.getAllMethodsWithoutTestCases().stream().map(RpcMethod::getId).toList();
             for (String methodIdToRemove : methodIdsToRemove) {
                 rpcModelRegistry.removeMethod(methodIdToRemove);
                 testcaseRegistry.deleteEntry(methodIdToRemove);
@@ -156,11 +145,7 @@ public class CoreService implements InitializingBean {
             }
 
             // Also remove services without methods
-            List<String> serviceIdsToRemove = rpcModelRegistry.getAllServicesWithoutMethod().stream().map(RpcService::getId).toList();
-            for (String serviceIdToRemove : serviceIdsToRemove) {
-                rpcModelRegistry.removeService(serviceIdToRemove);
-                log.warn("Service {} contains no method with testcase. Service removed", serviceIdToRemove);
-            }
+            rpcModelRegistry.removeServiceWithoutMethod();
 
             // Sanity check: if no method is available for testing, just end test
             if (rpcModelRegistry.getAllMethods().isEmpty()) {
@@ -196,14 +181,12 @@ public class CoreService implements InitializingBean {
                 testProgramsManager.addServer(runtimeConfig.getServer());
                 for (String support : runtimeConfig.getSupport().keySet()) {
                     Integer position = runtimeConfig.getSupport().get(support);
-                    testProgramsManager.attachSupportingService(
-                            presetTestPrograms.lookupTestProgramByServiceName(support),
-                            position <= 1 ? ProgramType.SERVER : ProgramType.CLIENT,
-                            position % 2 == 0   // I.e. 0 or 2
-                    );
+                    testProgramsManager.attachSupportingService(support, position);
                 }
                 testProgramsManager.deploy();
                 Thread.sleep(5000);     // Wait for stuff to finish before shutting down
+            } else {
+                finalize(false, false);
             }
 
         } catch (Throwable t) {
@@ -215,13 +198,13 @@ public class CoreService implements InitializingBean {
     }
 
     private void generateTestcases(RuntimeConfig runtimeConfig) {
-        for (RpcService.RpcMethod method : testcaseRegistry.getAllMethodsWithoutTestCases()) {
+        for (RpcMethod method : testcaseRegistry.getAllMethodsWithoutTestCases()) {
             testcaseRegistry.addTestCase(testCaseGenerator.generateTestcase(method, runtimeConfig.getOmitFieldsInRandomTestcases(), runtimeConfig.getValueMode(), runtimeConfig.getEnableException()));
         }
     }
 
     private void setServerInConfig(RuntimeConfig runtimeConfig) {
-        String serverName = Language.SERVER_NAME.get(runtimeConfig.getServer());
+        String serverName = presetTestPrograms.lookupServerByLanguage(runtimeConfig.getServer()).getDockerServiceName();
         switch (runtimeConfig.getClient()) {
             case JAVA -> config.setJavaClientServerHost(serverName);
             case NODEJS -> config.setNodejsClientServerHost(serverName);

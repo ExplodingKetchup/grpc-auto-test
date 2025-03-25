@@ -23,7 +23,7 @@ public class SetupScriptInterpreter {
 
     private RuntimeConfig runtimeConfig;
 
-    public RuntimeConfig interpretScript(String filepath) throws IllegalArgumentException, FileNotFoundException, IOException {
+    public RuntimeConfig interpretScript(String filepath) throws IllegalArgumentException, IOException {
         runtimeConfig = new RuntimeConfig();
         try (BufferedReader bufferedReader = new BufferedReader(new FileReader(filepath))) {
             String line;

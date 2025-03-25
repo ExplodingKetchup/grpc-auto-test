@@ -9,6 +9,7 @@ import org.grpctest.core.config.Config;
 import org.grpctest.core.data.RpcModelRegistry;
 import org.grpctest.core.data.TestcaseRegistry;
 import org.grpctest.core.pojo.RpcMessage;
+import org.grpctest.core.pojo.RpcMethod;
 import org.grpctest.core.pojo.RpcService;
 import org.grpctest.core.pojo.RuntimeConfig;
 import org.grpctest.core.util.StringUtil;
@@ -23,8 +24,6 @@ import static org.grpctest.core.constant.Constants.PROTO_DESCRIPTOR_PATH;
 @Slf4j
 @AllArgsConstructor
 public class ProtobufReader {
-
-    private final Config config;
 
     private final TestcaseRegistry testcaseRegistry;
 
@@ -60,7 +59,7 @@ public class ProtobufReader {
                 for (DescriptorProtos.ServiceDescriptorProto service : fileDescriptorProto.getServiceList()) {
                     RpcService rpcService = new RpcService(namespace, service.getName());
                     for (DescriptorProtos.MethodDescriptorProto method : service.getMethodList()) {
-                        RpcService.RpcMethod rpcMethod = RpcService.RpcMethod.builder()
+                        RpcMethod rpcMethod = RpcMethod.builder()
                                 .ownerServiceId(rpcService.getId())
                                 .name(StringUtil.uncapitalizeFirstLetter(method.getName()))
                                 .type(determineMethodType(method))

@@ -19,7 +19,7 @@ public class Config {
     private String outDir;
 
     /** Port that gRPC server runs on */
-    @Value("${server.port}")
+    @Value("${server.port:50051}")
     private int serverPort;
 
 }

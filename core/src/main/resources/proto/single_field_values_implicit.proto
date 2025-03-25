@@ -46,9 +46,9 @@ service HotpotService {
   // UNARY
   rpc UnaryPot(BigHotpotOfTerror) returns (BigHotpotOfTerror);
   // SERVER_STREAMING
-  rpc ServerStreamingPot(BigHotpotOfTerror) returns (stream BigHotpotOfTerror);
-  // CLIENT_STREAMING
-  rpc ClientStreamingPot(stream BigHotpotOfTerror) returns (BigHotpotOfTerror);
-  // BIDI_STREAMING
-  rpc BidiStreamingPot(stream BigHotpotOfTerror) returns (stream BigHotpotOfTerror);
+//  rpc ServerStreamingPot(BigHotpotOfTerror) returns (stream BigHotpotOfTerror);
+//  // CLIENT_STREAMING
+//  rpc ClientStreamingPot(stream BigHotpotOfTerror) returns (BigHotpotOfTerror);
+//  // BIDI_STREAMING
+//  rpc BidiStreamingPot(stream BigHotpotOfTerror) returns (stream BigHotpotOfTerror);
 }

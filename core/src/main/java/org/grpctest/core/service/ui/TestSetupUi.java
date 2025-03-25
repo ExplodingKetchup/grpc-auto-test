@@ -25,6 +25,7 @@ public interface TestSetupUi {
                 .generateFilesOnly(chooseGenerateFilesOnly())
                 .requestCompression(chooseRequestCompression())
                 .responseCompression(chooseResponseCompression())
+                .support(chooseSupport())
                 .build();
     }
 

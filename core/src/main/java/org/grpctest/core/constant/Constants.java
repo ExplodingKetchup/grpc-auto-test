@@ -1,6 +1,5 @@
 package org.grpctest.core.constant;
 
-import org.springframework.beans.factory.annotation.Value;
 
 /** A class containing constants which should be available globally, or are shared by multiple classes */
 public class Constants {

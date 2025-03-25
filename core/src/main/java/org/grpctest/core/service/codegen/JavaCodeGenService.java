@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 
 @Service
-@Qualifier("javaCodeGenService")
+@Qualifier("java")
 @Slf4j
 public class JavaCodeGenService extends BaseCodeGenService {
 

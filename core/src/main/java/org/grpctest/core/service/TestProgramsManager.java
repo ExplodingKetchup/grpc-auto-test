@@ -75,6 +75,19 @@ public class TestProgramsManager {
     }
 
     /**
+     * Delegate of {@link TestProgramsManager#attachSupportingService(TestProgram, ProgramType, boolean)}
+     * @param supportDockerServiceName
+     * @param position when to launch supporting service (0 = before server, 1 = after server, 2 = before client, 3 = after client)
+     */
+    public void attachSupportingService(String supportDockerServiceName, int position) {
+        attachSupportingService(
+                presetTestPrograms.lookupTestProgramByServiceName(supportDockerServiceName),
+                position <= 1 ? ProgramType.SERVER : ProgramType.CLIENT,
+                position % 2 == 0   // I.e. 0 or 2
+        );
+    }
+
+    /**
      * Add supporting service to launch sequence. Note that currently we only support 1 run per
      * deployment per supporting service. Will overwrite added supporting services with the same
      * docker service name and/or docker container name.

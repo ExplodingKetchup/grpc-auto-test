@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package enum_hotpot;
+
+option java_multiple_files = true;
+option java_package = "org.grpctest.java.common.define";
+option java_outer_classname = "DefaultDataProto";
+
+message EnumSundae {
+  optional IceCreamEnum ice_value = 2;
+}
+
+enum IceCreamEnum {
+  ICE_ZERO = 0;
+  ICE_THREE = 3;
+  ICE_FIVE = 5;
+  ICE_EIGHT = 8;
+  ICE_TEN = 10;
+  ICE_TWELVE = 12;
+}
+
+service HotpotService {
+  // UNARY
+  rpc UnaryPot(EnumSundae) returns (EnumSundae);
+}

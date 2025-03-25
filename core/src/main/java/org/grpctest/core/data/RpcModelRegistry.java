@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.grpctest.core.enums.MetadataType;
 import org.grpctest.core.pojo.RpcMessage;
+import org.grpctest.core.pojo.RpcMethod;
 import org.grpctest.core.pojo.RpcService;
 import org.grpctest.core.util.StringUtil;
 import org.springframework.stereotype.Component;
@@ -29,7 +30,7 @@ public class RpcModelRegistry {
     private final Map<String, RpcService> serviceLookupTable = new HashMap<>();
 
     /** RpcMethod.id : RpcMethod */
-    private final Map<String, RpcService.RpcMethod> methodLookupTable = new HashMap<>();
+    private final Map<String, RpcMethod> methodLookupTable = new HashMap<>();
 
     /** RpcMessage.id : RpcMessage */
     private final Map<String, RpcMessage> messageLookupTable = new HashMap<>();
@@ -80,44 +81,52 @@ public class RpcModelRegistry {
         serviceLookupTable.remove(serviceId);
     }
 
+    public void removeServiceWithoutMethod() {
+        List<String> serviceIdsToRemove = getAllServicesWithoutMethod().stream().map(RpcService::getId).toList();
+        for (String serviceIdToRemove : serviceIdsToRemove) {
+            removeService(serviceIdToRemove);
+            log.warn("[removeServiceWithoutMethod] Service {} contains no method with testcase. Service removed", serviceIdToRemove);
+        }
+    }
+
     // methodLookupTable
 
-    public void addMethodToLookupTable(RpcService.RpcMethod method) {
+    public void addMethodToLookupTable(RpcMethod method) {
         methodLookupTable.putIfAbsent(method.getId(), method);
     }
 
-    public RpcService.RpcMethod lookupMethod(String methodId) {
+    public RpcMethod lookupMethod(String methodId) {
         return methodLookupTable.get(methodId);
     }
 
-    public RpcService.RpcMethod lookupMethod(String namespace, String serviceName, String methodName) {
+    public RpcMethod lookupMethod(String namespace, String serviceName, String methodName) {
         return methodLookupTable.get(StringUtil.getMethodId(namespace, serviceName, methodName));
     }
 
-    public List<RpcService.RpcMethod> getAllMethods() {
+    public List<RpcMethod> getAllMethods() {
         return methodLookupTable.values().stream().toList();
     }
 
     public void removeMethod(String methodId) {
-        RpcService.RpcMethod methodToRemove = lookupMethod(methodId);
+        RpcMethod methodToRemove = lookupMethod(methodId);
         lookupService(methodToRemove.getOwnerServiceId()).getMethods().removeIf(internalMethodId -> StringUtils.equals(methodId, internalMethodId));
         methodLookupTable.remove(methodId);
     }
 
     // serviceLookupTable + methodLookupTable
 
-    public List<RpcService.RpcMethod> getAllMethods(RpcService service) {
+    public List<RpcMethod> getAllMethods(RpcService service) {
         // Name of all methods in the service
         return service.getMethods().stream()
                 .map(this::lookupMethod)
                 .toList();
     }
 
-    public List<RpcService.RpcMethod> getAllMethods(String serviceId) {
+    public List<RpcMethod> getAllMethods(String serviceId) {
         return getAllMethods(lookupService(serviceId));
     }
 
-    public RpcService getOwnerService(RpcService.RpcMethod method) {
+    public RpcService getOwnerService(RpcMethod method) {
         return lookupService(method.getOwnerServiceId());
     }
 

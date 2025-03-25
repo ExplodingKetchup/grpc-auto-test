@@ -1,9 +1,8 @@
 package org.grpctest.core.data;
 
 import lombok.extern.slf4j.Slf4j;
-import org.grpctest.core.pojo.RpcService;
+import org.grpctest.core.pojo.RpcMethod;
 import org.grpctest.core.pojo.TestCase;
-import org.grpctest.core.service.TestCaseWriter;
 import org.grpctest.core.util.CollectionUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -30,12 +29,12 @@ public class TestcaseRegistry {
 
     // methodTestCaseMap
 
-    public void addMethod(RpcService.RpcMethod method) {
+    public void addMethod(RpcMethod method) {
         methodTestCaseMap.putIfAbsent(method.getId(), new ArrayList<>());
     }
 
     public void addTestCase(TestCase testCase) {
-        RpcService.RpcMethod targetMethod = rpcModelRegistry.lookupMethod(testCase.getMethodId());
+        RpcMethod targetMethod = rpcModelRegistry.lookupMethod(testCase.getMethodId());
         if (Objects.nonNull(targetMethod)) {
             if (!methodTestCaseMap.containsKey(targetMethod.getId())) {
                 addMethod(targetMethod);
@@ -50,7 +49,7 @@ public class TestcaseRegistry {
         methodTestCaseMap.remove(methodId);
     }
 
-    public void deleteEntry(RpcService.RpcMethod method) {
+    public void deleteEntry(RpcMethod method) {
         deleteEntry(method.getId());
     }
 
@@ -60,7 +59,7 @@ public class TestcaseRegistry {
         }
     }
 
-    public List<RpcService.RpcMethod> getAllMethodsWithoutTestCases() {
+    public List<RpcMethod> getAllMethodsWithoutTestCases() {
         return methodTestCaseMap.keySet().stream()
                 .filter(methodId -> methodTestCaseMap.get(methodId).isEmpty())
                 .map(methodId -> rpcModelRegistry.lookupMethod(methodId))
@@ -71,7 +70,7 @@ public class TestcaseRegistry {
         return methodTestCaseMap.get(methodId);
     }
 
-    public List<TestCase> getMethodTestCases(RpcService.RpcMethod method) {
+    public List<TestCase> getMethodTestCases(RpcMethod method) {
         return getMethodTestCases(method.getId());
     }
 
@@ -84,11 +83,11 @@ public class TestcaseRegistry {
         return getMethodTestCases(methodId).get(0).getException();
     }
 
-    public TestCase.RpcException getExceptionForMethod(RpcService.RpcMethod rpcMethod) {
+    public TestCase.RpcException getExceptionForMethod(RpcMethod rpcMethod) {
         return getExceptionForMethod(rpcMethod.getId());
     }
 
-    private TestCase preprocessTestcase(TestCase testCase, RpcService.RpcMethod rpcMethod) {
+    private TestCase preprocessTestcase(TestCase testCase, RpcMethod rpcMethod) {
         switch (rpcMethod.getType()) {
             case UNARY -> {
                 testCase.setReturnValueDynMsg(
@@ -118,7 +117,7 @@ public class TestcaseRegistry {
         if (rpcModelRegistry.haveServerToClientMetadata()) {
             result.add(OUT_DIR_CLIENT + File.separator + "received_metadata.txt");
         }
-        for (RpcService.RpcMethod rpcMethod : rpcModelRegistry.getAllMethods()) {
+        for (RpcMethod rpcMethod : rpcModelRegistry.getAllMethods()) {
             result.addAll(getExpectedClientOutputFiles(rpcMethod.getId()));
         }
         return result;
@@ -155,7 +154,7 @@ public class TestcaseRegistry {
         if (rpcModelRegistry.haveClientToServerMetadata()) {
             result.add(OUT_DIR_SERVER + File.separator + "received_metadata.txt");
         }
-        for (RpcService.RpcMethod rpcMethod : rpcModelRegistry.getAllMethods()) {
+        for (RpcMethod rpcMethod : rpcModelRegistry.getAllMethods()) {
             result.addAll(getExpectedClientOutputFiles(rpcMethod.getId()));
         }
         return result;

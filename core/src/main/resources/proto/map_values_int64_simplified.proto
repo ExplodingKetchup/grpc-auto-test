@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package map_hotpot;
+
+option java_multiple_files = true;
+option java_package = "org.grpctest.java.common.define";
+option java_outer_classname = "MapProto";
+
+message MapPot {
+  map<int64, double> int_double_value = 1;
+  map<int64, int64> int_int_value = 2;
+  map<int64, bool> int_bool_value = 3;
+  map<int64, string> int_string_value = 4;
+}
+
+service HotpotService {
+  // UNARY
+  rpc UnaryPot(MapPot) returns (MapPot);
+}

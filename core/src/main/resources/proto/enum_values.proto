@@ -1,0 +1,55 @@
+syntax = "proto3";
+
+package enum_hotpot;
+
+option java_multiple_files = true;
+option java_package = "org.grpctest.java.common.define";
+option java_outer_classname = "DefaultDataProto";
+
+message BigEnumStew {
+  optional IceCreamEnum ice_value = 2;
+  repeated AnExampleEnum aee_value = 4;
+  optional EnumSoup soup_value = 6;
+}
+
+message EnumSoup {
+  optional AnExampleEnum aee_value = 1;
+  optional SandwichEnum se_value = 2;
+  optional IceCreamEnum ice_value = 4;
+}
+
+enum AnExampleEnum {
+  AEE_ZERO = 0;
+  AEE_ONE = 1;
+  AEE_TWO = 2;
+  AEE_THREE = 3;
+  AEE_FOUR = 4;
+  AEE_FIVE = 5;
+  AEE_SIX = 6;
+  AEE_SEVEN = 7;
+}
+
+enum IceCreamEnum {
+  ICE_ZERO = 0;
+  ICE_THREE = 3;
+  ICE_FIVE = 5;
+  ICE_EIGHT = 8;
+  ICE_TEN = 10;
+}
+
+enum SandwichEnum {
+  SE_ZERO = 0;
+  SE_ONE = 1;
+  SE_TWENTY = 20;
+}
+
+service HotpotService {
+  // UNARY
+  rpc UnaryPot(BigEnumStew) returns (BigEnumStew);
+  // SERVER_STREAMING
+  rpc ServerStreamingPot(BigEnumStew) returns (stream BigEnumStew);
+  // CLIENT_STREAMING
+  rpc ClientStreamingPot(stream BigEnumStew) returns (BigEnumStew);
+  // BIDI_STREAMING
+  rpc BidiStreamingPot(stream BigEnumStew) returns (stream BigEnumStew);
+}

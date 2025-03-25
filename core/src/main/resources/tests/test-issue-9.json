@@ -1,0 +1,43 @@
+{
+  "methodId": "map_hotpot.HotpotService.unaryPot",
+  "paramValue": [
+    {
+      "bool_double_value": [{
+        "key": false,
+        "value": 3.14
+      }],
+      "bool_int_value": [{
+        "key": false,
+        "value": 109
+      }],
+      "bool_bool_value": [{
+        "key": false,
+        "value": false
+      }],
+      "bool_string_value": [{
+        "key": false,
+        "value": "I sleep"
+      }]
+    }
+  ],
+  "returnValue": [
+    {
+      "bool_double_value": [{
+        "key": false,
+        "value": 6.28
+      }],
+      "bool_int_value": [{
+        "key": false,
+        "value": 218
+      }],
+      "bool_bool_value": [{
+        "key": false,
+        "value": false
+      }],
+      "bool_string_value": [{
+        "key": false,
+        "value": "I nap"
+      }]
+    }
+  ]
+}

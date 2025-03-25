@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+// This proto file served as a minimal service definition for demonstrating exception handling
+package exception_hotpot;
+
+option java_multiple_files = true;
+option java_package = "org.grpctest.java.common.define";
+option java_outer_classname = "ExceptionHotpotProto";
+
+message Request {
+  optional int32 int32_value = 1;
+}
+
+message Response {
+  optional string string_value = 1;
+}
+
+service HotpotService {
+  // UNARY
+  rpc UnaryPot(Request) returns (Response);
+//  // SERVER_STREAMING
+//  rpc ServerStreamingPot(Request) returns (stream Response);
+//  // CLIENT_STREAMING
+//  rpc ClientStreamingPot(stream Request) returns (Response);
+//  // BIDI_STREAMING
+//  rpc BidiStreamingPot(stream Request) returns (stream Response);
+}

@@ -110,16 +110,15 @@ console.log("Using environment " + env);
 
 <#-- Send headers, then responses / exceptions -->
     <#if method.type == "UNARY">
-        <#if testcaseRegistry.getExceptionForMethod(method)??>
-            <@nodejsParseException method=method indent=3 />
-            callback(rpcException);
-        <#else>
             const response = messageFromFile(
                 config.testcaseDir + "${method_id}_return_0.bin",
                 responseMessageType
             );
             <@responseLogging method=method indent=3/>
             callback(null, response);
+        <#if testcaseRegistry.getExceptionForMethod(method)??>
+            <@nodejsParseException method=method indent=3 />
+            callback(rpcException);
         </#if>
     <#elseif method.type == "SERVER_STREAMING">
             loopMultipleFilesWithSamePrefix(config.testcaseDir + '${method_id}_return', '.bin')
@@ -136,16 +135,15 @@ console.log("Using environment " + env);
         </#if>
     <#elseif method.type == "CLIENT_STREAMING">
             call.on('end', () => {
+                const response = messageFromFile(
+                    config.testcaseDir + "${method_id}_return_0.bin",
+                    responseMessageType
+                );
+                <@responseLogging method=method indent=4/>
+                callback(null, response);
         <#if testcaseRegistry.getExceptionForMethod(method)??>
                 <@nodejsParseException method=method indent=4 />
                 callback(rpcException);
-        <#else>
-               const response = messageFromFile(
-                   config.testcaseDir + "${method_id}_return_0.bin",
-                   responseMessageType
-               );
-               <@responseLogging method=method indent=4/>
-               callback(null, response);
         </#if>
             });
     <#elseif method.type == "BIDI_STREAMING">

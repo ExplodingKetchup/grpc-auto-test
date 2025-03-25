@@ -17,7 +17,7 @@ public class Config {
 
     // Service discovery
 
-    @Value("${server.host}")
+    @Value("${server.host:localhost}")
     private String serviceHost;
 
     @Value("${server.port:50051}")

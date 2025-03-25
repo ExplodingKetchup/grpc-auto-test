@@ -29,8 +29,11 @@ public class JavaClient implements InitializingBean {
 
     private final HotpotServiceGrpc.HotpotServiceStub hotpotServiceAsyncStub;
 
-    private final String[] map_hotpot_MapPot_fields = new String[]{"getIntDoubleValueMap", "getIntIntValueMap", "getIntBoolValueMap", "getIntStringValueMap", "getIntBytesValueMap", "getIntEnumValueMap", "getBoolDoubleValueMap", "getBoolBoolValueMap", "getBoolStringValueMap", "getBoolBytesValueMap", "getBoolEnumValueMap", "getStringDoubleValueMap", "getStringStringValueMap", "getStringBytesValueMap", "getStringEnumValueMap"};
-    private final String[] map_hotpot_MapPotReversed_fields = new String[]{"getStringEnumValueMap", "getStringBytesValueMap", "getStringStringValueMap", "getStringDoubleValueMap", "getBoolEnumValueMap", "getBoolBytesValueMap", "getBoolStringValueMap", "getBoolBoolValueMap", "getBoolDoubleValueMap", "getIntEnumValueMap", "getIntBytesValueMap", "getIntStringValueMap", "getIntBoolValueMap", "getIntIntValueMap", "getIntDoubleValueMap"};
+    private final String[] map_hotpot_MapPot_fields = new String[]{"getBoolDoubleValueMap", "getBoolIntValueMap", "getBoolBoolValueMap", "getBoolStringValueMap"};
+    private final String[] map_hotpot_MapPot_BoolIntValueEntry_fields = new String[]{"getKey", "getValue"};
+    private final String[] map_hotpot_MapPot_BoolBoolValueEntry_fields = new String[]{"getKey", "getValue"};
+    private final String[] map_hotpot_MapPot_BoolDoubleValueEntry_fields = new String[]{"getKey", "getValue"};
+    private final String[] map_hotpot_MapPot_BoolStringValueEntry_fields = new String[]{"getKey", "getValue"};
 
     public JavaClient(Config config, ClientInterceptor clientInterceptor) {
         this.config = config;
@@ -48,20 +51,11 @@ public class JavaClient implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        // Invoke test case: map_hotpot.HotpotService.bidiStreamingPot
-        invokeBidiStreamingRpcMethod(hotpotServiceAsyncStub::bidiStreamingPot, MessageUtil.messageListFromMultipleFiles(config.getTestcaseDir() + File.separator + "map_hotpot_HotpotService_bidiStreamingPot_param.bin", MapPot.class), "map_hotpot.HotpotService.bidiStreamingPot", map_hotpot_MapPot_fields, map_hotpot_MapPotReversed_fields);
-
-        // Invoke test case: map_hotpot.HotpotService.serverStreamingPot
-        invokeServerStreamingRpcMethod(hotpotServiceBlockingStub::serverStreamingPot, MessageUtil.messageFromFile(config.getTestcaseDir() + File.separator + "map_hotpot_HotpotService_serverStreamingPot_param_0.bin", MapPot.class), "map_hotpot.HotpotService.serverStreamingPot", map_hotpot_MapPot_fields, map_hotpot_MapPotReversed_fields);
-
-        // Invoke test case: map_hotpot.HotpotService.clientStreamingPot
-        invokeClientStreamingRpcMethod(hotpotServiceAsyncStub::clientStreamingPot, MessageUtil.messageListFromMultipleFiles(config.getTestcaseDir() + File.separator + "map_hotpot_HotpotService_clientStreamingPot_param.bin", MapPot.class), "map_hotpot.HotpotService.clientStreamingPot", map_hotpot_MapPot_fields, map_hotpot_MapPotReversed_fields);
-
         // Invoke test case: map_hotpot.HotpotService.unaryPot
-        // invokeUnaryRpcMethod(hotpotServiceBlockingStub::unaryPot, MessageUtil.messageFromFile(config.getTestcaseDir() + File.separator + "map_hotpot_HotpotService_unaryPot_param_0.bin", MapPot.class), "map_hotpot.HotpotService.unaryPot", map_hotpot_MapPot_fields, map_hotpot_MapPotReversed_fields);
-        invokeUnaryRpcMethodAsync(hotpotServiceAsyncStub::unaryPot, MessageUtil.messageFromFile(config.getTestcaseDir() + File.separator + "map_hotpot_HotpotService_unaryPot_param_0.bin", MapPot.class), "map_hotpot.HotpotService.unaryPot", map_hotpot_MapPot_fields, map_hotpot_MapPotReversed_fields);
+        // invokeUnaryRpcMethod(hotpotServiceBlockingStub::unaryPot, MessageUtil.messageFromFile(config.getTestcaseDir() + File.separator + "map_hotpot_HotpotService_unaryPot_param_0.bin", MapPot.class), "map_hotpot.HotpotService.unaryPot", map_hotpot_MapPot_fields, map_hotpot_MapPot_fields);
+        invokeUnaryRpcMethodAsync(hotpotServiceAsyncStub::unaryPot, MessageUtil.messageFromFile(config.getTestcaseDir() + File.separator + "map_hotpot_HotpotService_unaryPot_param_0.bin", MapPot.class), "map_hotpot.HotpotService.unaryPot", map_hotpot_MapPot_fields, map_hotpot_MapPot_fields);
 
-        for (int i = 0; i < 10000000; i++);
+        Thread.sleep(5000);
     }
 
     private <T, R> void invokeUnaryRpcMethod(Function<T, R> method, T parameter, String methodId, String[] requestTypeFieldNames, String[] responseTypeFieldNames) {

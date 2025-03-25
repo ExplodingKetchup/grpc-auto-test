@@ -33,7 +33,6 @@ public class GenericFileService {
     private static final String PROTO_TARGET_NODEJS = "nodejs/proto";
     private static final String PROTO_TARGET_PYTHON = "python/proto";
 
-    private final Config config;
     private final ResourceLoader resourceLoader;
 
     public void copyProtos(RuntimeConfig runtimeConfig) throws Throwable {

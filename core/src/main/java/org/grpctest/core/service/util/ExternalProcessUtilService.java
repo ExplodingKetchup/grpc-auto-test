@@ -22,8 +22,6 @@ import static org.grpctest.core.constant.Constants.LOG_DIR;
 @AllArgsConstructor
 public class ExternalProcessUtilService {
 
-    private final Config config;
-
     /**
      * Launch a shell process to execute command {@code cmd} at {@code workingDir},
      * also generates a log file for the process at log/{@code logFilePrefix}_yyMMdd_HHmmss.log

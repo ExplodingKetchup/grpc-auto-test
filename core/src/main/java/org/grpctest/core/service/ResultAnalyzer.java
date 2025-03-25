@@ -11,7 +11,7 @@ import org.grpctest.core.config.Config;
 import org.grpctest.core.data.RpcModelRegistry;
 import org.grpctest.core.data.TestcaseRegistry;
 import org.grpctest.core.enums.MetadataType;
-import org.grpctest.core.pojo.RpcService;
+import org.grpctest.core.pojo.RpcMethod;
 import org.grpctest.core.pojo.RuntimeConfig;
 import org.grpctest.core.pojo.TestCase;
 import org.grpctest.core.service.util.DynamicMessageUtilService;
@@ -51,7 +51,6 @@ public class ResultAnalyzer {
     private static final String OUTPUT_TITLE = "OUTPUT ANALYZER RESULTS" + H1_UNDERLINE;
 
     private final String outputFileName = generateFileName();
-    private final Config config;
 
     private final RpcModelRegistry rpcModelRegistry;
 
@@ -62,7 +61,7 @@ public class ResultAnalyzer {
     public void processAllMethods(RuntimeConfig runtimeConfig) throws Throwable {
         processSetupScript(runtimeConfig);
         processMetadata(runtimeConfig);
-        for (RpcService.RpcMethod method : rpcModelRegistry.getAllMethods()) {
+        for (RpcMethod method : rpcModelRegistry.getAllMethods()) {
             processOneMethod(method);
         }
     }
@@ -116,7 +115,7 @@ public class ResultAnalyzer {
         }
     }
 
-    private void processOneMethod(RpcService.RpcMethod method) throws Throwable {
+    private void processOneMethod(RpcMethod method) throws Throwable {
         TestCase testCase = testcaseRegistry.getMethodTestCases(method).get(0);
         List<Pair<byte[], DynamicMessage>> expectedParams = testCase
                 .getParamValueDynMsg()
@@ -254,6 +253,8 @@ public class ResultAnalyzer {
     private boolean compareException(TestCase.RpcException actual, TestCase.RpcException expected) {
         if (Objects.isNull(actual) && Objects.isNull(expected)) {
             return true;
+        } else if (Objects.isNull(actual) || Objects.isNull(expected)) {
+            return false;
         }
         if (!expected.getStatusCode().equals(actual.getStatusCode())) {
             return false;
@@ -379,9 +380,7 @@ public class ResultAnalyzer {
         sb.append("*** Response comparison (Raw): ").append(rawResponseComparison).append("\n\n");
         sb.append("*** Response comparison (Parsed): ").append(parsedResponseComparison).append("\n\n");
 
-        if (Objects.nonNull(actualException) && Objects.nonNull(expectedException)) {
-            sb.append(formatRpcException(actualException, expectedException, exceptionComparison)).append("\n");
-        }
+        sb.append(formatRpcException(actualException, expectedException, exceptionComparison)).append("\n");
 
         sb.append("Remarks: ").append(remarks).append("\n\n");
 
@@ -437,19 +436,25 @@ public class ResultAnalyzer {
         sb.append("----------------------------------\n\n");
 
         sb.append("Actual:\n\n");
-
-        sb.append(actual.getStatusCode().name()).append("\n");
-        sb.append(actual.getDescription()).append("\n");
-        for (Map.Entry<String, Pair<MetadataType, String>> trailerEntry : actual.getTrailingMetadata().entrySet()) {
-            sb.append(trailerEntry.getKey()).append(":").append(trailerEntry.getValue().getRight()).append("\n");
+        if (Objects.nonNull(actual)) {
+            sb.append(actual.getStatusCode().name()).append("\n");
+            sb.append(actual.getDescription()).append("\n");
+            for (Map.Entry<String, Pair<MetadataType, String>> trailerEntry : actual.getTrailingMetadata().entrySet()) {
+                sb.append(trailerEntry.getKey()).append(":").append(trailerEntry.getValue().getRight()).append("\n");
+            }
+        } else {
+            sb.append("NONE\n");
         }
 
         sb.append("\nExpected:\n\n");
-
-        sb.append(expected.getStatusCode().name()).append("\n");
-        sb.append(expected.getDescription()).append("\n");
-        for (Map.Entry<String, Pair<MetadataType, String>> trailerEntry : expected.getTrailingMetadata().entrySet()) {
-            sb.append(trailerEntry.getKey()).append(":").append(trailerEntry.getValue().getRight()).append("\n");
+        if (Objects.nonNull(expected)) {
+            sb.append(expected.getStatusCode().name()).append("\n");
+            sb.append(expected.getDescription()).append("\n");
+            for (Map.Entry<String, Pair<MetadataType, String>> trailerEntry : expected.getTrailingMetadata().entrySet()) {
+                sb.append(trailerEntry.getKey()).append(":").append(trailerEntry.getValue().getRight()).append("\n");
+            }
+        } else {
+            sb.append("NONE\n");
         }
 
         sb.append("\n*** COMPARISON: ").append(comparison).append("\n");

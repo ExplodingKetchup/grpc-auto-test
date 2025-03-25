@@ -8,8 +8,8 @@ from config_utils import load_config
 from file_utils import list_files_with_same_prefix
 from log_utils import configure_logger, get_log_file_for_this_instance, log_fields_of_object
 from message_utils import message_to_file, message_from_file, format_metadata_as_string, metadata_to_file
-from map_values_pb2 import *
-from map_values_pb2_grpc import *
+from map_values_int64_simplified_pb2 import *
+from map_values_int64_simplified_pb2_grpc import *
 
 
 # Constants
@@ -21,8 +21,11 @@ _COMPRESSION_ALGOS = {
 BIN_METADATA_SUFFIX = "-bin"
 OUTBOUND_HEADERS = (
 )
-map_hotpot_MapPot_fields = ["int_double_value", "int_int_value", "int_bool_value", "int_string_value", "int_bytes_value", "int_enum_value", "bool_double_value", "bool_bool_value", "bool_string_value", "bool_bytes_value", "bool_enum_value", "string_double_value", "string_string_value", "string_bytes_value", "string_enum_value"]
-map_hotpot_MapPotReversed_fields = ["string_enum_value", "string_bytes_value", "string_string_value", "string_double_value", "bool_enum_value", "bool_bytes_value", "bool_string_value", "bool_bool_value", "bool_double_value", "int_enum_value", "int_bytes_value", "int_string_value", "int_bool_value", "int_int_value", "int_double_value"]
+map_hotpot_MapPot_fields = ["int_double_value", "int_int_value", "int_bool_value", "int_string_value"]
+map_hotpot_MapPot_IntDoubleValueEntry_fields = ["key", "value"]
+map_hotpot_MapPot_IntStringValueEntry_fields = ["key", "value"]
+map_hotpot_MapPot_IntBoolValueEntry_fields = ["key", "value"]
+map_hotpot_MapPot_IntIntValueEntry_fields = ["key", "value"]
 
 
 # Configs
@@ -90,32 +93,10 @@ class HotpotServiceServicer(HotpotServiceServicer):
 
     def UnaryPot(self, request, context):
         method_id = "map_hotpot.HotpotService.unaryPot"
-        response_class = MapPotReversed
+        response_class = MapPot
 
         handle_single_request(request, method_id, map_hotpot_MapPot_fields)
-        return get_single_response(method_id, response_class, map_hotpot_MapPotReversed_fields)
-
-    def ServerStreamingPot(self, request, context):
-        method_id = "map_hotpot.HotpotService.serverStreamingPot"
-        response_class = MapPotReversed
-
-        handle_single_request(request, method_id, map_hotpot_MapPot_fields)
-        for response in get_streaming_response(method_id, response_class, map_hotpot_MapPotReversed_fields):
-            yield response
-
-    def ClientStreamingPot(self, request_iterator, context):
-        method_id = "map_hotpot.HotpotService.clientStreamingPot"
-        response_class = MapPotReversed
-
-        handle_streaming_request(request_iterator, method_id, map_hotpot_MapPot_fields)
-        return get_single_response(method_id, response_class, map_hotpot_MapPotReversed_fields)
-
-    def BidiStreamingPot(self, request_iterator, context):
-        method_id = "map_hotpot.HotpotService.bidiStreamingPot"
-        response_class = MapPotReversed
-        handle_streaming_request(request_iterator, method_id, map_hotpot_MapPot_fields)
-        for response in get_streaming_response(method_id, response_class, map_hotpot_MapPotReversed_fields):
-            yield response
+        return get_single_response(method_id, response_class, map_hotpot_MapPot_fields)
 
 
 

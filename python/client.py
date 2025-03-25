@@ -11,8 +11,8 @@ from file_utils import list_files_with_same_prefix
 from log_utils import configure_logger, get_log_file_for_this_instance, log_fields_of_object
 from message_utils import message_from_file, message_to_file, format_grpc_error_as_string, grpc_error_to_file, \
     metadata_to_file, format_metadata_as_string
-from map_values_pb2 import *
-from map_values_pb2_grpc import *
+from map_values_int64_simplified_pb2 import *
+from map_values_int64_simplified_pb2_grpc import *
 
 
 # Constants
@@ -25,8 +25,11 @@ BIN_METADATA_SUFFIX = "-bin"
 OUTBOUND_HEADERS = (
 )
 
-map_hotpot_MapPot_fields = ["int_double_value", "int_int_value", "int_bool_value", "int_string_value", "int_bytes_value", "int_enum_value", "bool_double_value", "bool_bool_value", "bool_string_value", "bool_bytes_value", "bool_enum_value", "string_double_value", "string_string_value", "string_bytes_value", "string_enum_value"]
-map_hotpot_MapPotReversed_fields = ["string_enum_value", "string_bytes_value", "string_string_value", "string_double_value", "bool_enum_value", "bool_bytes_value", "bool_string_value", "bool_bool_value", "bool_double_value", "int_enum_value", "int_bytes_value", "int_string_value", "int_bool_value", "int_int_value", "int_double_value"]
+map_hotpot_MapPot_fields = ["int_double_value", "int_int_value", "int_bool_value", "int_string_value"]
+map_hotpot_MapPot_IntDoubleValueEntry_fields = ["key", "value"]
+map_hotpot_MapPot_IntStringValueEntry_fields = ["key", "value"]
+map_hotpot_MapPot_IntBoolValueEntry_fields = ["key", "value"]
+map_hotpot_MapPot_IntIntValueEntry_fields = ["key", "value"]
 
 # Configs
 configs = load_config(is_server=False)
@@ -171,40 +174,7 @@ def main():
                      ),
                      method_id="map_hotpot.HotpotService.unaryPot",
                      request_type_field_names=map_hotpot_MapPot_fields,
-                     response_type_field_names=map_hotpot_MapPotReversed_fields)
-
-    # METHOD map_hotpot.HotpotService.serverStreamingPot
-    invoke_server_streaming_rpc(method=HotpotService_stub.ServerStreamingPot,
-                                request=read_request_from_file(
-                                    method_id="map_hotpot.HotpotService.serverStreamingPot",
-                                    request_class=MapPot,
-                                    read_multiple=False
-                                ),
-                                method_id="map_hotpot.HotpotService.serverStreamingPot",
-                                request_type_field_names=map_hotpot_MapPot_fields,
-                                response_type_field_names=map_hotpot_MapPotReversed_fields)
-
-    # METHOD map_hotpot.HotpotService.clientStreamingPot
-    invoke_client_streaming_rpc(method=HotpotService_stub.ClientStreamingPot,
-                                request_iterator=read_request_from_file(
-                                    method_id="map_hotpot.HotpotService.clientStreamingPot",
-                                    request_class=MapPot,
-                                    read_multiple=True
-                                ),
-                                method_id="map_hotpot.HotpotService.clientStreamingPot",
-                                request_type_field_names=map_hotpot_MapPot_fields,
-                                response_type_field_names=map_hotpot_MapPotReversed_fields)
-
-    # METHOD map_hotpot.HotpotService.bidiStreamingPot
-    invoke_bidi_streaming_rpc(method=HotpotService_stub.BidiStreamingPot,
-                              request_iterator=read_request_from_file(
-                                  method_id="map_hotpot.HotpotService.bidiStreamingPot",
-                                  request_class=MapPot,
-                                  read_multiple=True
-                              ),
-                              method_id="map_hotpot.HotpotService.bidiStreamingPot",
-                              request_type_field_names=map_hotpot_MapPot_fields,
-                              response_type_field_names=map_hotpot_MapPotReversed_fields)
+                     response_type_field_names=map_hotpot_MapPot_fields)
 
     channel.close()
 

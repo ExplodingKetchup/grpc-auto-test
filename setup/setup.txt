@@ -1,4 +1,6 @@
 CLIENT PYTHON
 SERVER NODEJS
-TESTCASE --random=2
-INCLUDE_PROTO map_values.proto
+TESTCASE --random
+INCLUDE_PROTO map_values_int64_simplified.proto
+SUPPORT tcpdump --position=1
+GENERATE_FILES_ONLY

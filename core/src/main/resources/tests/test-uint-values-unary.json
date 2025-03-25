@@ -1,0 +1,19 @@
+{
+  "methodId": "numbered_hotpot.HotpotService.unaryPot",
+  "paramValue": [
+    {
+      "uint32_value": "MAX",
+      "uint64_value": "MAX",
+      "fixed32_value": "MAX",
+      "fixed64_value": "MAX"
+    }
+  ],
+  "returnValue": [
+    {
+      "uint32_value": "MAX",
+      "uint64_value": "MAX",
+      "fixed32_value": "MAX",
+      "fixed64_value": "MAX"
+    }
+  ]
+}
