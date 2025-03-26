@@ -11,8 +11,8 @@ from file_utils import list_files_with_same_prefix
 from log_utils import configure_logger, get_log_file_for_this_instance, log_fields_of_object
 from message_utils import message_from_file, message_to_file, format_grpc_error_as_string, grpc_error_to_file, \
     metadata_to_file, format_metadata_as_string
-from map_values_int64_simplified_pb2 import *
-from map_values_int64_simplified_pb2_grpc import *
+from single_field_values_pb2 import *
+from single_field_values_pb2_grpc import *
 
 
 # Constants
@@ -25,11 +25,8 @@ BIN_METADATA_SUFFIX = "-bin"
 OUTBOUND_HEADERS = (
 )
 
-map_hotpot_MapPot_fields = ["int_double_value", "int_int_value", "int_bool_value", "int_string_value"]
-map_hotpot_MapPot_IntDoubleValueEntry_fields = ["key", "value"]
-map_hotpot_MapPot_IntStringValueEntry_fields = ["key", "value"]
-map_hotpot_MapPot_IntBoolValueEntry_fields = ["key", "value"]
-map_hotpot_MapPot_IntIntValueEntry_fields = ["key", "value"]
+default_hotpot_SmallHotpotOfRickeridoo_fields = ["small_uint32_value", "small_string_value"]
+default_hotpot_BigHotpotOfTerror_fields = ["double_value", "float_value", "int32_value", "int64_value", "uint32_value", "uint64_value", "sint32_value", "sint64_value", "fixed32_value", "fixed64_value", "sfixed32_value", "sfixed64_value", "bool_value", "string_value", "bytes_value", "enum_value", "message_value"]
 
 # Configs
 configs = load_config(is_server=False)
@@ -165,16 +162,49 @@ def main():
     # >>> SERVICE HotpotService
     HotpotService_stub = HotpotServiceStub(channel)
 
-    # METHOD map_hotpot.HotpotService.unaryPot
+    # METHOD default_hotpot.HotpotService.unaryPot
     invoke_unary_rpc(method=HotpotService_stub.UnaryPot,
                      request=read_request_from_file(
-                         method_id="map_hotpot.HotpotService.unaryPot",
-                         request_class=MapPot,
+                         method_id="default_hotpot.HotpotService.unaryPot",
+                         request_class=BigHotpotOfTerror,
                          read_multiple=False
                      ),
-                     method_id="map_hotpot.HotpotService.unaryPot",
-                     request_type_field_names=map_hotpot_MapPot_fields,
-                     response_type_field_names=map_hotpot_MapPot_fields)
+                     method_id="default_hotpot.HotpotService.unaryPot",
+                     request_type_field_names=default_hotpot_BigHotpotOfTerror_fields,
+                     response_type_field_names=default_hotpot_BigHotpotOfTerror_fields)
+
+    # METHOD default_hotpot.HotpotService.serverStreamingPot
+    invoke_server_streaming_rpc(method=HotpotService_stub.ServerStreamingPot,
+                                request=read_request_from_file(
+                                    method_id="default_hotpot.HotpotService.serverStreamingPot",
+                                    request_class=BigHotpotOfTerror,
+                                    read_multiple=False
+                                ),
+                                method_id="default_hotpot.HotpotService.serverStreamingPot",
+                                request_type_field_names=default_hotpot_BigHotpotOfTerror_fields,
+                                response_type_field_names=default_hotpot_BigHotpotOfTerror_fields)
+
+    # METHOD default_hotpot.HotpotService.clientStreamingPot
+    invoke_client_streaming_rpc(method=HotpotService_stub.ClientStreamingPot,
+                                request_iterator=read_request_from_file(
+                                    method_id="default_hotpot.HotpotService.clientStreamingPot",
+                                    request_class=BigHotpotOfTerror,
+                                    read_multiple=True
+                                ),
+                                method_id="default_hotpot.HotpotService.clientStreamingPot",
+                                request_type_field_names=default_hotpot_BigHotpotOfTerror_fields,
+                                response_type_field_names=default_hotpot_BigHotpotOfTerror_fields)
+
+    # METHOD default_hotpot.HotpotService.bidiStreamingPot
+    invoke_bidi_streaming_rpc(method=HotpotService_stub.BidiStreamingPot,
+                              request_iterator=read_request_from_file(
+                                  method_id="default_hotpot.HotpotService.bidiStreamingPot",
+                                  request_class=BigHotpotOfTerror,
+                                  read_multiple=True
+                              ),
+                              method_id="default_hotpot.HotpotService.bidiStreamingPot",
+                              request_type_field_names=default_hotpot_BigHotpotOfTerror_fields,
+                              response_type_field_names=default_hotpot_BigHotpotOfTerror_fields)
 
     channel.close()
 

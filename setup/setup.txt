@@ -1,6 +1,5 @@
 CLIENT PYTHON
 SERVER NODEJS
 TESTCASE --random
-INCLUDE_PROTO map_values_int64_simplified.proto
+INCLUDE_PROTO single_field_values.proto
 SUPPORT tcpdump --position=1
-GENERATE_FILES_ONLY

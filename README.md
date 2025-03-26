@@ -84,12 +84,13 @@ Note that the date/time here are in UTC timezone
 - `grpc-auto-test/out/analyzer`: Contains analyzer files (analyzer files are named `analyzer_out_yyMMdd_HHmmss.txt`)
 - `grpc-auto-test/out/client`: Contains output files from client.
 - `grpc-auto-test/out/server`: Contains output files from server.
+- `grpc-auto-test/out/support`: Contains output of supporting service tcpdump (packets.pcap).
 
 ### grpc-auto-test/setup
 Contains the setup script (see 'Setup script').
 
 ### grpc-auto-test/test-cases
-Contains test messages (encoded to binary form using Protobuf). Test programs will read from this place to form messages to send to the other party.
+Contains input files (encoded to binary form using Protobuf). Test programs will read from this place to form messages to send to the other party.
 
 ### grpc-auto-test/compose.yaml
 Docker compose file specifying all services for test programs, plus mounts and networks between those services.
@@ -97,17 +98,8 @@ Docker compose file specifying all services for test programs, plus mounts and n
 ### configs.xlsx
 Records all available configs.
 
-### DEVNOTES
-Notes regarding grpc-auto-test.
-
-### NOTES
-Temporary notes for me. You may ignore this file.
-
 ### tests.xlsx
 Records all conducted tests and their results, including any inconsistencies found (see 'Active issues' inside the file).
-
-### TODO
-Future directions for development and testing.
 
 ## Running the Application
 
@@ -160,6 +152,7 @@ TESTCASE [value_flag] [<custom_testcase.json>...]
 [ MOCK_EXCEPTION ]
 [ INCLUDE_PROTO [<proto_definition.proto>...]
 [ GENERATE_FILES_ONLY ]
+[ SUPPORT <service_name> <support_position_flag> ]
 ```
 
 Where:<br>
@@ -173,6 +166,9 @@ Flags are in the form `--key:value`.<br>
 - `header_flag`:
   - `key` = `client-server` or `server-client`
   - `value` = `STRING` or `BIN`
+- `support_position_flag`
+  - `key` = `position`
+  - `value` = { `0` | `1` | `2` | `3` }
 
 `CLIENT`: Specify language for client test program.
 `SERVER`: Specify language for server test program.
@@ -186,11 +182,19 @@ You can also specify custom test cases here. See 'Custom test cases' for the syn
 `METADATA`: Send test headers (randomly generated) with each call. In a run, the set of headers is identical between
 each call. `client-server` refers to client-to-server headers, and `server-client` refers to server-to-client ones.
 `header_flag` value refers to the data type of the headers (ASCII string or binary).<br>
-`MOCK_EXCEPTION`: Server will raise gRPC exceptions in the calls.
+`MOCK_EXCEPTION`: Server will raise gRPC exceptions in the calls.<br>
 `INCLUDE_PROTO`: Specify which .proto files should be included for service and message definition. If not specify, will
-include everything found in CoreService's `resources/proto`.
+include everything found in CoreService's `resources/proto`.<br>
 `GENERATE_FILES_ONLY`: Only generates testcases, testcase binaries, and test program code. Will not build and launch test
-programs, and do not analyze results.
+programs, and do not analyze results.<br>
+`SUPPORT`: Specify a support service to be used and the launch position of the support. The value of the support_position_flag dictated when the support should be launched.<br>
+- 0 means “launch support before launching server”.
+- 1 means “launch support after launching server”.
+- 2 means “launch support before launching client”.
+- 3 means “launch support after launching client”.
+
+Currently, the only support available was “tcpdump”, and its position value must be set to 1.
+
 
 ## proto files definition
 We have not tested with proto2 protobuf syntax, only proto3.
@@ -269,11 +273,3 @@ See tests.xlsx for details.
 - Not tested on Windows yet
 - The app is not portable yet: the working directory when launching CoreService must be grpc-auto-test home directory
 
-## Future developments
-- RPC call with compression
-- RPC call with authentication
-- Test other options of protobuf message definition (e.g. Map type, packed repeated fields)
-- Test with proto2 syntax
-- Containerize CoreService
-
-(See TODO for more, although the ones listed here have the highest priority)
